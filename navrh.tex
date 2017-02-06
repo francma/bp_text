@@ -1,0 +1,132 @@
+\chap Návrh architektury systému
+
+Systém CI pod sebou bude spravovat několik Runnerů, každý Runner v~sobě bude spouštět jednotlivé exekutory.
+Komunikace bude probíhat přes API.
+Jakákoliv funkcionalita by měla být zprvu naimlementovaná jako API endpoint a až pak zavedena do systému.
+
+\sec Části systému
+
+\secc Informační rozhraní
+
+Webové rozhraní. Napsané ve Flasku a nějaké hipster frontend JS knihovně.
+
+\secc Řidič
+
+Zajišťuje komunikaci s~uživatelem, informačním rozhraním a Runnery na pevně daném protokolu.
+Řidič by měl být podle vytížení Runnerů (API endpoint na Runneru) a požadovaných služeb rozhodnout, kterému Runneru práci předá.
+
+\secc Runner
+
+Zadaný API vstup rozparsuj pro potřeby Exekutoru a nech ho provést dané příkazy.
+Runner by měl spravovat pouze jeden typ exekutoru (UNIX like).
+Runner by měl běžet na samostatném stroji, aby neubíral systémové prostředky ostatním.
+Runner v~sobě většinou bude spouštět více instancí Exekutoru.
+
+\seccc Exekutor
+
+Konečný vykonavatel příkazů. Řidič by neměl o~existenci exekutorů vědět a komunikovat pouze s~Runnery.
+Exekutorem je například VirtualBox, Docker a jiné.
+Samotná exekutor by měl být co nejméně modifikovaný.
+Nechceme například aby VirtualBox exekutor přijímal pouze image, které mají nainstalovaný nějaký obsáhlý set závislostí.
+
+\secc Cache
+
+Jelikož by cache měla být sdílená mezi Runnery, pak musí fungovat jako samostatná jednotka.
+Runner by měl komunikovat přímo s~cache, aby se minimalizovat počet účastníků v~přenosu často velkých souborů.
+Prvnotní komunikace bude vázána se systémem (výměna adres).
+Je opravdu nutné separovat Cache jako service?
+
+\sec Komunikace systému
+
+Nutno využít IP stacku, protože subsystémy nemusí být na stejném stroji.
+
+\secc Plain JSON
+
+Super. Splňuje požadavek na minimálnost systému.
+Nevýhodou je nepodpora streamingu (spam requestů je nevyhovující), kterou lze zachránit WebSockety.
+Máme plnou kontrolu nad protokolem.
+Většina zpráv bude na způsob volání vzdálené procedury a získání výsledku, proto REST nebudude brán ani v~úvahu
+
+\secc Výšší protokoly
+
+Optimalizace velikosti zprávy a různé rychlostní.
+Bez nějakého parseru do toho nevydíme, neumožní nám to si hrát se servry prostým CURL a podobnými.
+Často binární forma.
+Nemusíme znovu vynalézat kolo.
+
+\seccc GRPC
+
+První popíšeme strukturu zpráv v~interním jazyce a poté vygenerujeme standalone python aplikaci, kterou dále měníme.
+
+\seccc GraphQL
+
+\seccc Protocol Buffers
+
+Google. Knihovny pro Python i pro JS.
+
+\sec Komuninakce s~běhovým prostředím
+
+Cílem je vytvořit rozhraní s~VM, které přijme zadaný příkaz nebo jejich sadu a rozhraní schopno streamovat výstup z~příkazů.
+Rozhraní by mělo udržovat stály stav (proměnné shellu, ...).
+
+\secc Virtualbox
+
+\seccc COM port pro čtení/zápis
+
+Pomocí VirtualBox administračního rozhraní vytvoříme COM port, který nasměrujeme do souboru/socketu.
+Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a necháme aplikaci na rodičovském stroji číst výstupy.
+Spojení je oboustranné, takže je možné předávat příkazy i dovnitř stroje, které je ale nutné parsovat a předávat systému další aplikací běžící uvnitř VM.
+Tento způsob předpokládá už přihlášeného uživatele.
+
+\seccc SSH spojení
+
+SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky.
+Přihlašování uživatelů do VM bez hesla lze docílit uložením jejich veřejných klíčů do souboru {\it known\_hosts}.
+Soubor {\it known\_hosts} je uložen v~domovském adresáři uživatele a bude nutno zajistit jeho modifikaci buďto přes dodatečné připojení VDI obrazu disku VM nebo předpřípravou systému.
+
+\seccc Vzdálený terminál přes COM port
+
+Podobné SSH spojení.
+Nutná editace konfigurace VM systému, aby daný COM port viděl jako terminálový.
+Přihlašování uživatele a spuštění příkazů za pomoci přímého vpisu/čtení ze socketu.
+
+\secc Docker
+
+\sec Perzistence dat
+
+\secc Souborový systém
+
+Výhodné v~jednoduchosti implementace.
+Komplikované prohledávání bez neexistujících indexů.
+Limitováno použitým souborovým systémem -- velké množství souborů bude velmi zpomalovat přístupy.
+
+\secc Souborový systém + in-memory cache
+
+Přístupy přímo na disk nahradíme přístupy do rychlé in-memory cache.
+
+\secc In-memory + disk dump
+
+Redis dumps nebo log streaming (připis do logu každých x).
+
+\secc Databáze
+
+Optimalizace na úrovni zvolené databáze.
+Velké soubory typu logů ukládat na disku a z~databáze na ně pouze odkazovat.
+
+\sec Fronta
+
+\secc RabbitMQ
+
+Implementace distribuovaných prioritních front ve stylu producenta a konzumenta. 
+Knihovna pro Python.
+
+\secc Redis
+
+TODO
+
+\secc Celery
+
+Nadstavba nad RabbitMQ, Redis a jiných. 
+Implementace v~Pythonu.
+
+\secc Redis

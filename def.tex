@@ -1,0 +1,80 @@
+\chyph
+\input opmac
+\input opmac-bib
+\fontfam[Linux Libertine]
+\typosize[12/18]
+
+\def\maketitle{
+	{
+		\nopagenumbers
+		{
+			\typoscale[1400/1600]\caps\rm
+			\hbox to \hsize {
+				\vbox {
+					\hbox{\university}
+					\hbox{\faculty}
+					\hbox{\department}
+					\vskip 2.8pt % corecture for blank space under the LOGO
+				}
+				\hfill
+				\vbox {
+					\picheight=73.3pt \inspic img/LogoCVUT-BW.pdf
+				}
+			}
+		}
+
+		\vfill
+		{\noindent\typoscale[1300/1450] Bakalářská práce}
+		\bigskip\bigskip\bigskip
+		{\noindent\typoscale[2000/2200] \title}
+		\bigskip
+
+		{\noindent\typoscale[1400/1600]\it \author}
+
+		\vfill
+		{
+			{\noindent Vedoucí: \supervisor}
+			\bigskip
+			{\noindent\today}
+		}
+		\vfil
+		\break
+	}
+	\pageno=1
+}
+
+\def\makekeywords{
+	{
+		\nopagenumbers
+		\null
+		\vfill
+		{\noindent\bf Klíčová slova:}
+		
+		\noindent\keywords
+		\vfil
+		\break
+	}
+	\pageno=1
+}
+
+\def\today{\number\day. \number\month. \number\year}
+
+\newcount\lnum
+\def\thelnum{\thechapnum.\the\lnum}
+\sdef{mt:l:en}{Listing} \sdef{mt:l:cs}{Výpis} \sdef{mt:l:sk}{Výpis}
+\def\chaphook#1\relax{{\globaldefs=1 \chapnums}}
+\def\chapnums{\secnum=0 \seccnum=0 \tnum=0 \fnum=0 \dnum=0 \lnum=0 }
+
+\newcount\secccnum
+
+\eoldef\seccc#1{%
+   \ifx\prevseccnum\theseccnum \global\advance\secccnum by1
+   \else \global\let\prevseccnum=\theseccnum \global\secccnum=1
+   \fi
+   \edef\thesecccnum{\theseccnum.\the\secccnum}%
+   \printseccc{#1}%
+}
+\def\printseccc#1{\norempenalty-100 \medskip
+   {\bf \noindent \thesecccnum\quad #1\nbpar}%
+   \nobreak \smallskip \firstnoindent
+}
