@@ -1,0 +1,30 @@
+dist: trusty
+sudo: required
+language: generic
+
+branches:
+  only: master
+
+before_install:
+  - sudo add-apt-repository -y ppa:jonathonf/texlive-2016
+  - sudo apt-get -y update
+  - sudo apt-get -y install texlive-lang-czechslovak
+  - sudo apt-get -y install texlive-generic-extra # librarian
+  - sudo apt-get -y install texlive-fonts-recommended 
+  - sudo apt-get -y install ttf-linux-libertine
+
+script:
+  - xetex -fmt=pdfcsplain text.tex
+  - xetex -fmt=pdfcsplain text.tex
+  - xetex -fmt=pdfcsplain text.tex
+
+deploy:
+  name: "text"
+  provider: releases
+  api_key: "${GH_TOKEN}"
+  file: "text.pdf"
+  skip_cleanup: true
+  overwrite: true
+  on:
+    branch: master
+    tags: true
