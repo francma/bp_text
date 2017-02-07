@@ -1,10 +1,10 @@
 \chap Gitlab CI
 
-\sec Konfigurace
+\sec Uživatelské použití
 
 Konfigurace projektů je řešena pomocí souboru {\tt.gitlab-ci.yml}, který je umístěn přímo v~kořenovém adresáři repozitáři projektu.
 
-\sec Průběh integrace
+\secc Průběh integrace
 
 Proces integrace je rozdělen na fáze ({\it stages}), úkoly ({\it jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
@@ -41,7 +41,6 @@ job1:
 Každý úkol je složen z~několika příkazů.
 Pokud jeden z~příkazů skončí chybovým návratovým kódem, pak je ukončeno provádění úkolu.
 
-
 Mezi speciální úkoly patří {\tt before\_script} a {\tt after\_script}.
 Tyto úkoly jsou provedeny vždy před nebo po každým uživatelsky definovaným úkolem.
 
@@ -67,18 +66,76 @@ Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace {\
 * {\tt always} -- vykonej vždy
 \enditems
 
+\sec Architektura
 
-\sec Běhová prostředí
+\centerline {\picwidth=\hsize \inspic img/gitlab_architecture_diagram.png }
+\label[my-pic]
+\nobreak
+\caption/f Gitlab Architektura
 
-CI systém spolupracuje s~několika běhovými servery ({\it Runners}), které se starají o~samotné vykonání definovaných příkazů (sestavení).
-Běhové servery využívají exekutory.
+% https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/development/architecture.md
 
-% https://docs.gitlab.com/ee/ci/runners/README.html
+\secc NGINX a Gitlab Pages
+
+Frontend aplikace. Úloha NGINX jako reverzní proxy z hlediska cachování je předávána spíše na Gitlab Workhorse.
+Stará je o šifrování venkovního spojení pomocí HTTPs.
+
+\secc Gitlab Workhorse
+
+Prvotním úkolem bylo podržet dlouhotrvající HTTP spojení vytvořeném GIT clonem přes HTTP a ne SSH.
+Důvodem pro to bylo, že Unicorn tyto spojení po vyprchání času ukončoval a zdálo se technologicky jednodušší implementovat další vrstvu, která obslouží tyto požadavky, než měnit existující modul.
+Po přidání možnosti stažení ZIP souboru s repozitářem a vytváření tzv. artefaktů během buildu se zrodil stejná problém jako s GITem přes HTTP a byl také vyřešen stejným způsobem.
+Při dalším vývoji se zdálo moc pracné stále udržovat NGINX server, aby nějaké typy požadavků směroval na Unicorn a jiné na Workhorse, tak se začly všechny požadavky směrovat přes Workhorse.
+Workhorse nyní funguje jako chytřejší proxy poskytující statické soubory, GIT přes HTTP a směruje požadavky dále do Gitlab infrastruktury.
+
+% https://gitlab.com/gitlab-org/gitlab-workhorse
+% https://about.gitlab.com/2016/04/12/a-brief-history-of-gitlab-workhorse/
+
+\secc Unicorn
+
+Ruby HTTP server.
+
+% nejspis hlavni server FIXME
+
+\secc Gitlab shell
+
+Shell obsahující set příkazů pracující na originálním GITem.
+Po připojení na server přes SSH je možné konfigorovat repozitáře přímo přes shell příkazy.
+Řada oprávnění je kontrolována přímo přes GIT hooky, takže není nutné využívat Gitlab Shell.
+Pokud se jedná o komplexnější akci, vyžadující komplexnější kontrolu oprávnění, pak je nutné využít Gitlab Shellu.
+
+% https://gitlab.com/gitlab-org/gitlab-shell/tree/master
+
+\secc Gitaly
+
+Každý GIT příkaz zpracovávaný Gitlabem nakonec skončí v Gitaly.
+Cíl Gitaly je urychlit GIT příkazy decentralizováním uložiště a použitím cache.
+V současné době se uvažuje nad využitím projektu Git Ketch.
+Git Ketch replikuje uložiště mezi několik serverů, u kterých není pevně určené rozdělení na hlavní a sekundární.
+Hlavní server je vybrán podle hlasování na základě aktuálnosti dat mezi servery.
+
+% https://gitlab.com/gitlab-org/gitaly/tree/master
+% https://www.infoq.com/news/2016/02/google-kick-starts-git-ketch
+
+\secc Uložiště
+
+PostreSQL persistentní. Cache a data broker redis.
+
+\secc Komunikace
+
+GRPC.
+
+% https://gitlab.com/gitlab-org/gitaly/tree/master
+
 
 \secc Gitlab CI multi-runner
 
+CI systém spolupracuje s~několika běhovými servery ({\it Runners}), které se starají o~samotné vykonání definovaných příkazů (sestavení).
+Běhové servery využívají exekutory.
 Implementuje několik exekutorů.
 Volba běhováho serveru je definována na úrovni konfigurace projektu a je omezena globálním nastavením Gitlab CI.
+
+% https://docs.gitlab.com/ee/ci/runners/README.html
 
 \seccc Shell
 
@@ -120,7 +177,7 @@ Virtualní stroje jsou klonovány pro udržení čistého prostředí pro sestav
 
 Podobné jako Shell exekutor, jen je využito SSH spojení.
 
-\sec Cachování
+\secc Cachování
 
 Ve výchozím stavu je cache sdílena mezi {\it branch} a {\it job}.
 Toto chování lze upravit nastavením klíče, který bude identifikovat danou cache.
