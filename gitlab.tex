@@ -119,11 +119,13 @@ Hlavní server je vybrán podle hlasování na základě aktuálnosti dat mezi s
 
 \secc Uložiště
 
-PostreSQL persistentní. Cache a data broker redis.
+PostreSQL persistentní.
+Cache a data broker Redis.
 
 \secc Komunikace
 
-GRPC.
+GRPC uvnitř Gitlab systému.
+
 
 % https://gitlab.com/gitlab-org/gitaly/tree/master
 
@@ -136,13 +138,14 @@ Implementuje několik exekutorů.
 Volba běhováho serveru je definována na úrovni konfigurace projektu a je omezena globálním nastavením Gitlab CI.
 
 % https://docs.gitlab.com/ee/ci/runners/README.html
+% http://docs.gitlab.com/ce/api/ci/builds.html
 
-\seccc Shell
+\seccc Shell exekutor
 
 Příkazy provádí pod stejným uživatelem jako samotný běhový server.
 Příkazy přeneseny jako soubor.
 
-\seccc Docker
+\seccc Docker exekutor
 
 Docker je kontejnerová technologie.
 Kontejnery jsou sestavovány z~Docker obrazů definující sadu dostupného softwaru.
@@ -173,7 +176,7 @@ Virtualní stroje jsou klonovány pro udržení čistého prostředí pro sestav
 
 % https://docs.gitlab.com/runner/executors/README.html
 
-\seccc SSH
+\seccc SSH exekutor
 
 Podobné jako Shell exekutor, jen je využito SSH spojení.
 
@@ -209,7 +212,5 @@ Toto API implementuje samotný Amazon, tak i nějaké self-hosted projekty.
 % https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/merge_requests/88
 % https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html
 % https://github.com/minio/minio/
-
-\sec Perzistence dat
 
 

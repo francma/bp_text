@@ -38,31 +38,66 @@ Je opravdu nutné separovat Cache jako service?
 
 \sec Komunikace systému
 
-Nutno využít IP stacku, protože subsystémy nemusí být na stejném stroji.
+Záleží jestli se bude jednat o vnitrosystémovou komunikaci nebo komunikaci systém -- uživatel.
+Vnitřní komunikace může používat nějaký \uv{složitější} protokol.
 
-\secc Plain JSON
+\secc Websocket
 
-Super. Splňuje požadavek na minimálnost systému.
+Technologie podporující streaming do prohlížečů.
+
+\secc JSON over HTTP
+
+Minimální, fungující v prohlížečích.
+Vhodné jako technologie pro public API.
 Nevýhodou je nepodpora streamingu (spam requestů je nevyhovující), kterou lze zachránit WebSockety.
-Máme plnou kontrolu nad protokolem.
-Většina zpráv bude na způsob volání vzdálené procedury a získání výsledku, proto REST nebudude brán ani v~úvahu
 
-\secc Výšší protokoly
+\secc GRPC
 
-Optimalizace velikosti zprávy a různé rychlostní.
-Bez nějakého parseru do toho nevydíme, neumožní nám to si hrát se servry prostým CURL a podobnými.
-Často binární forma.
-Nemusíme znovu vynalézat kolo.
+Pracuje nad JSON, XML, Protobuffers.
+Podpora streamingu.
+Optimalizace zpráv.
+GRPC neprotlačíme do prohlížeče (jedině po překladu na Websocket), vhodné pouze pro vnitrosystémovou komunikaci.
 
-\seccc GRPC
+% http://www.grpc.io/docs/tutorials/basic/python.html
 
-První popíšeme strukturu zpráv v~interním jazyce a poté vygenerujeme standalone python aplikaci, kterou dále měníme.
+\secc GraphQL
 
-\seccc GraphQL
+\uv{Chytřejší} REST.
+Oproti RESTu není orientovaný na zdroje (Uživatelé, články) ale umí pracovat s vazbami (něco jako SQL).
+Na jeden dotaz možné získat více různých výsledků.
+Facebook.
 
-\seccc Protocol Buffers
+\begtt
+{
+ user(id: 1) {
+   age
+   friends {
+     name
+   }
+ }
+}
+\endtt
+\nobreak \label[graphql-minimal-example]
+\caption/l Ukázka GraphQL -- vrať věk uživatele s ID = 1 a jména jeho přátel.
+\smallskip
 
-Google. Knihovny pro Python i pro JS.
+\sec Fronta
+
+Implementace distribuovaných prioritních front ve stylu producenta a konzumenta.
+Použití: máme více Runnerů a chceme jim na základě jejich vytížení přiřazovat úkoly.
+
+\secc RabbitMQ
+
+TODO
+
+\secc Redis
+
+TODO
+
+\secc Celery
+
+Používá RabbitMQ, Redis a další jako message broker. 
+Primární implementace v Pythonu.
 
 \sec Komuninakce s~běhovým prostředím
 
@@ -92,6 +127,17 @@ Přihlašování uživatele a spuštění příkazů za pomoci přímého vpisu/
 
 \secc Docker
 
+Příkazy lze předávat do kontenejneru přímo z hostujícího stroje.
+Výpis výsledku je přímo na stdout, který lze přesměrovat do roury a z té dál do CI systému.
+
+\begtt
+docker start ecstatic_perlman
+docker exec -i ecstatic_perlman bash -c 'ls -al' 
+\endtt
+\nobreak \label[docker-minimal-example]
+\caption/l Ukázka Docker exekutoru
+\smallskip
+
 \sec Perzistence dat
 
 \secc Souborový systém
@@ -102,7 +148,7 @@ Limitováno použitým souborovým systémem -- velké množství souborů bude 
 
 \secc Souborový systém + in-memory cache
 
-Přístupy přímo na disk nahradíme přístupy do rychlé in-memory cache.
+Časté přístupy přímo na disk nahradíme přístupy do rychlé in-memory cache.
 
 \secc In-memory + disk dump
 
@@ -113,20 +159,3 @@ Redis dumps nebo log streaming (připis do logu každých x).
 Optimalizace na úrovni zvolené databáze.
 Velké soubory typu logů ukládat na disku a z~databáze na ně pouze odkazovat.
 
-\sec Fronta
-
-\secc RabbitMQ
-
-Implementace distribuovaných prioritních front ve stylu producenta a konzumenta. 
-Knihovna pro Python.
-
-\secc Redis
-
-TODO
-
-\secc Celery
-
-Nadstavba nad RabbitMQ, Redis a jiných. 
-Implementace v~Pythonu.
-
-\secc Redis
