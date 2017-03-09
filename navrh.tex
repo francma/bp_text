@@ -37,20 +37,77 @@ Runner by měl komunikovat přímo s~cache, aby se minimalizovat počet účastn
 Prvnotní komunikace bude vázána se systémem (výměna adres).
 Je opravdu nutné separovat Cache jako service?
 
-\sec Komunikace systému
+\sec Komunikace s prohlížečem v realném čase
 
-Záleží jestli se bude jednat o vnitrosystémovou komunikaci nebo komunikaci systém -- uživatel.
-Vnitřní komunikace může používat nějaký \uv{složitější} protokol.
+Vypisování stavu buildu v realném čase (tzv. \uv{streaming log}) a dalších inforamcích (stav buildů, runnerů) bez nutnosti obnovení okna prohlížeče.
+
+\secc Short-polling
+
+Spam requestů v určitém intervalu.
+Náročné na prostředky z hlediska počtu requestů.
+
+\begtt
+00:00:00 C -> Is it ready? 
+00:00:01 S -> No, wait.
+00:00:01 C -> Is it ready?
+00:00:02 S -> No, wait.
+00:00:02 C -> Is it ready? 
+00:00:03 S -> Yes, here it is.
+00:00:03 C -> Is it ready?
+\endtt
+
+\secc Long-polling
+
+Necháváme otevřené spojení dokud nemáme odpověď.
+Náročné na prostředky.
+Například u Apache serveru nám každý požadavek vytvoří čekající vlákno.
+Snadné vyčerpání limitu otevřených spojení.
+Dlouho trvající spojení jsou ze strany serveru, tak i klienta nebo mezicesty (proxy) ukončována.
+
+\begtt
+12:00 00:00:00 C -> Is it ready? 
+12:00 00:00:15 S -> Yes, here it is.
+12:00 00:00:15 C -> Is it ready?
+\endtt
+
+\secc Server-Sent Events
+
+Jednostranné spojení ve směru od serveru ke klientovi.
+
+\begtt
+12:00 00:00:00 C -> Send me everything you have!
+12:00 00:00:15 S -> Yes, here it is.
+12:00 00:00:16 S -> Yes, here it is.
+\endtt
+
+\noindent
+Založeno na HTTP se snadnou implemetací.
+Webový prohlížeč se při uzavření spojení návratovým kódem 200 pokusí znovu připojit.
+Oproti long-pollingu není nutné stále otevírat nová spojení.
+
+\begtt
+Content-Type: text/event-stream
+Cache-Control: no-cache
+
+id: <id zpravy>
+data: <data>
+
+id: <id zpravy>
+data: <data>
+\endtt
 
 \secc Websocket
 
-Technologie podporující streaming do prohlížečů.
+Oboustranné spojení mezi klientem a serverem.
+Prvnotní komunikace přes HTTP s následným upgradem na WebSocket spojení.
+Webové servery nemají většinou podporu WebSocketů přímo v sobě a tak je potřeba sáhnout po kniho
 
-\secc JSON over HTTP
+\secc Závěr
 
-Minimální, fungující v prohlížečích.
-Vhodné jako technologie pro public API.
-Nevýhodou je nepodpora streamingu (spam requestů je nevyhovující), kterou lze zachránit WebSockety.
+Jako nejvýhodnější se jeví technologie SSE, protože nevyžaduje žádné další knihovny a má dobrou podporu mezi prohlížeči.
+Oboustranná komunikace není vyžadována.
+
+\sec Vnitrosystémová komunikace
 
 \secc GRPC
 
@@ -58,6 +115,8 @@ Pracuje nad JSON, XML, Protobuffers.
 Podpora streamingu.
 Optimalizace zpráv.
 GRPC neprotlačíme do prohlížeče (jedině po překladu na Websocket), vhodné pouze pro vnitrosystémovou komunikaci.
+
+\secc HTTP
 
 % http://www.grpc.io/docs/tutorials/basic/python.html
 
@@ -220,6 +279,7 @@ Vhodné jako rychlá cache nebo systém pro správu zámků.
 Snadná filtrace mezi daty.
 Optimalizace v režii databázového stroje.
 Persistetní z návrhu.
+Existence ORM -- abstrakce jeeej!!!
 
 \secc Závěr
 
