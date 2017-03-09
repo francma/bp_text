@@ -8,7 +8,8 @@ Jakákoliv funkcionalita by měla být zprvu naimlementovaná jako API endpoint 
 
 \secc Informační rozhraní
 
-Webové rozhraní. Napsané ve Flasku a nějaké hipster frontend JS knihovně.
+Webové rozhraní.
+Napsané ve Flasku a nějaké hipster frontend JS knihovně.
 
 \secc Řidič
 
@@ -59,27 +60,6 @@ Optimalizace zpráv.
 GRPC neprotlačíme do prohlížeče (jedině po překladu na Websocket), vhodné pouze pro vnitrosystémovou komunikaci.
 
 % http://www.grpc.io/docs/tutorials/basic/python.html
-
-\secc GraphQL
-
-\uv{Chytřejší} REST.
-Oproti RESTu není orientovaný na zdroje (Uživatelé, články) ale umí pracovat s vazbami (něco jako SQL).
-Na jeden dotaz možné získat více různých výsledků.
-Facebook.
-
-\begtt
-{
- user(id: 1) {
-   age
-   friends {
-     name
-   }
- }
-}
-\endtt
-\nobreak \label[graphql-minimal-example]
-\caption/l Ukázka GraphQL -- vrať věk uživatele s ID = 1 a jména jeho přátel.
-\smallskip
 
 \sec Fronta
 
@@ -140,22 +120,116 @@ docker exec -i ecstatic_perlman bash -c 'ls -al'
 
 \sec Perzistence dat
 
+Co je třeba ukládat?
+
+\begitems
+* Uživatelé a jejich nastavení
+* Výsledky buildů včetně jejich logů
+* Nastavení běhového prostředí
+\enditems
+
+\noindent Nad čím je třeba rychle vyhledávat?
+\begitems
+* Spojení commitu/větve s buildem
+* ...
+\enditems
+
+\noindent
+Data by měla být i jednoduše seřaditelná podle různých kritérií.
+
 \secc Souborový systém
 
-Výhodné v~jednoduchosti implementace.
-Komplikované prohledávání bez neexistujících indexů.
-Limitováno použitým souborovým systémem -- velké množství souborů bude velmi zpomalovat přístupy.
+Obyčejná datová struktura, která nepotřebuje žádné závislosti třetí strany.
+Filtrace lze dosáhnout třízením souborů do složek a vytvářením symbolických linků.
+Řazení souborů buď podle data vytvoření nebo jeho názvu (použijeme datum jako prefix souboru).
 
-\secc Souborový systém + in-memory cache
+Limit tohoto řešení nastává při potřebě složité indexace nebo řazení.
+Bylo by nutné udržovat složitou strukturu indexů u které by nekonzistence znamenala velké problémy.
+Čtení a zápis ze souborového systému je o dost dražší než z operační paměti, takže pro dosažení rychlosti bychom museli zavést cache, které by pracovala s operační pamětí.
+Při ukládání velkého počtu souborů do jedné složky bychom začali narážet na limitace použitého souborového systému a docházelo by k velké výkonostní degradaci.
 
-Časté přístupy přímo na disk nahradíme přístupy do rychlé in-memory cache.
+\seccc Příklad použití
 
-\secc In-memory + disk dump
+Mějme systém, který má několik uživatelů.
+Každý uživatel má svoje vlastní nastavení a spravuje několik buildů, které jsou vázány na commit a větev.
 
-Redis dumps nebo log streaming (připis do logu každých x).
+Uživatelská nastavení uložíme do souboru ve složce {\tt /user/<userId>}. Soubor bude pod názvem, identifikujícím jednoznačně uživatele (například číselný index). 
+
+Buildy uložíme podobně jako uživatelé do složky {\tt /build/<buildId>}.
+Tady narazíme na problém v provázání buildu s uživatelem.
+První možností je uložit informace o vlastníkovi přímo do souboru a při filtraci projít a rozparsovat všechny soubory ve složce.
+Tato operace bude velice náročná a bude se vykonávat velmi často.
+Druhá možnost je vytvořit další složku, například {\tt /userBuilds/<userId>/<buildId>}, kde soubor {\tt <buildId>} bude linkem do složky {\tt /build}.
+Pokud bude potřeba filtrovat podle dalších kritérií, tak vytvoříme další složky se symlinky.
+Nabízí se také možnost ukládat buildy přímo do složky identifikované uživatelským identifikátorem {\tt /build/<userId>/<buildId>}, ale předpokládá se nutnost filtrace buildů podle více kritérií (například podle commitu).
+
+\seccc Závěr
+
+Výsledné řešení by bylo příliš náročné na správu a pomalé.
+Naopak je vhodné pro ukládání velkých souborů, ve kterých není třeba žádné indexace nebo k nim není přistupováno příliš často.
+Ukládat lze takto například textové výstupy z buildů nebo například uživatelská nastavení (obyčejný config file je velmi snadné editovat).
+
+\secc Redis
+
+Klíč-hodnota struktura uložená v operační paměti omezená na následující datové typy:
+
+\begitems
+* řetězce
+* seznamy
+* sady
+* seřazené sady
+* hashe (asociativní pole)
+\enditems
+
+\noindent
+Asociativní pole lze zanořovat do sebe a tím vytvářet struktury.
+Funguje na principu klient-server.
+Podpora replikace mezi několik strojů.
+
+\begtt
+> HMSET user:1 name John surname Doe idk 900
+OK
+> HGETALL user:1
+1) "name"
+2) "John"
+3) "surname"
+4) "Doe"
+5) "idk"
+6) "900"
+> HGET user:1 name
+"John"
+\endtt
+\nobreak \label[redis-basic-user]
+\caption/l Uložení struktorovaných dat
+\smallskip
+
+\seccc Příklad použití
+
+Podobné jako u ukládání na souborový systém, jen jsme omezeni velikostí operační paměti.
+Složitější filraci možné zaručit použitím \uv{cizích klíčů}, které ale musíme sami udržovat.
+Data z operační paměti bude nutné replikovat na souborový systém v podobě průběžných logů nebo vypsaním stavu paměti každých x minut na pevný disk.
+Oba způsoby jsou přímo implementované v Redisu.
+
+\seccc Závěr
+
+Podobné jako řešení za pomoci pouze souborového systému, jen jsme získali rychlost ukládáním přímo do operační paměti z čehož nám vznikají další limitace.
+Vhodné jako rychlá cache nebo systém pro správu zámků.
 
 \secc Databáze
 
-Optimalizace na úrovni zvolené databáze.
-Velké soubory typu logů ukládat na disku a z~databáze na ně pouze odkazovat.
+Snadná filtrace mezi daty.
+Optimalizace v režii databázového stroje.
+Persistetní z návrhu.
 
+\secc Závěr
+
+Logy uložíme do souborů, strukturovaná data v databázi a cache v Redisu.
+
+\sec Zabíjení buildů
+
+Build nevyprodukoval žádný výstup za x minut nebo nedoběhl za y minut.
+
+\sec Kde poběží CI?
+
+virtualenv?
+konrejner?
