@@ -1,0 +1,38 @@
+\sec Komuninakce s~běhovým prostředím
+
+Cílem je vytvořit rozhraní s~VM, které přijme zadaný příkaz nebo jejich sadu a rozhraní schopno streamovat výstup z~příkazů.
+Rozhraní by mělo udržovat stály stav (proměnné shellu, ...).
+
+\secc Virtualbox
+
+\seccc COM port pro čtení/zápis
+
+Pomocí VirtualBox administračního rozhraní vytvoříme COM port, který nasměrujeme do souboru/socketu.
+Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a necháme aplikaci na rodičovském stroji číst výstupy.
+Spojení je oboustranné, takže je možné předávat příkazy i dovnitř stroje, které je ale nutné parsovat a předávat systému další aplikací běžící uvnitř VM.
+Tento způsob předpokládá už přihlášeného uživatele.
+
+\seccc SSH spojení
+
+SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky.
+Přihlašování uživatelů do VM bez hesla lze docílit uložením jejich veřejných klíčů do souboru {\it known\_hosts}.
+Soubor {\it known\_hosts} je uložen v~domovském adresáři uživatele a bude nutno zajistit jeho modifikaci buďto přes dodatečné připojení VDI obrazu disku VM nebo předpřípravou systému.
+
+\seccc Vzdálený terminál přes COM port
+
+Podobné SSH spojení.
+Nutná editace konfigurace VM systému, aby daný COM port viděl jako terminálový.
+Přihlašování uživatele a spuštění příkazů za pomoci přímého vpisu/čtení ze socketu.
+
+\secc Docker
+
+Příkazy lze předávat do kontenejneru přímo z hostujícího stroje.
+Výpis výsledku je přímo na stdout, který lze přesměrovat do roury a z té dál do CI systému.
+
+\begtt
+docker start ecstatic_perlman
+docker exec -i ecstatic_perlman bash -c 'ls -al' 
+\endtt
+\nobreak \label[docker-minimal-example]
+\caption/l Ukázka Docker exekutoru
+\smallskip

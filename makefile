@@ -1,8 +1,10 @@
 FILE=text
 
-$(FILE).pdf: *.tex
+$(FILE).pdf: *.tex text/navrh/*.tex
 	vlna $(FILE).tex
-	arara $(FILE).tex
+	xetex -fmt=pdfcsplain $(FILE).tex
+	# xetex -fmt=pdfcsplain $(FILE).tex
+	# xetex -fmt=pdfcsplain $(FILE).tex
 
 clean:
 	find .  -maxdepth 1 -type f -regex '\(.*\.pdf\|.*\.pdf_tex\|.*\.aux\|.*\.log\|.*\.nav\|.*\.out\|.*\.snm\|.*\.toc\|.*\.ref\|.*\.te\~\|.*\.lbr\)' -delete

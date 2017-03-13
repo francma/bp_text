@@ -1,0 +1,64 @@
+\sec Ukládání dat systému
+
+Co je třeba ukládat?
+
+\begitems
+* Uživatelé a jejich nastavení
+* Výsledky buildů včetně jejich logů
+* Vazby mezi CI a SCM
+\enditems
+
+\noindent
+Data by měla být i jednoduše seřaditelná podle různých kritérií.
+
+\secc Souborový systém
+
+Nejjednodušší persistentní datové uložiště, které lze strukturovat pomocí adresářů a symlinků.
+Jednotlivé soubory pak uložíme v nějakém strojově zpracovatelném formátu, například JSON nebo XML.
+Z hlediska složité filtrace a řazení nevhodné pro data nad kterými chceme provádět tyto operace.
+
+\medskip\noindent
+{\bf Vhodné pro:}
+\begitems
+* logy
+* binární data
+* velké soubory
+* konfigurační soubory
+\enditems
+
+\secc In-memory datová struktura (Redis)
+
+Klíč-hodnota struktura uložená v operační paměti podporující následující datové typy:
+
+\begitems
+* řetězce
+* seznamy
+* sady
+* seřazené sady
+* hashe (asociativní pole)
+\enditems
+
+\noindent
+Asociativní pole lze zanořovat do sebe a tím vytvářet struktury.
+Funguje na principu klient-server a je tedy snadné sdílet data mezi více systémy, které běží například na různých strojích.
+Operační pamět není persistentním uložištěm a tak je třeba data ukládat také na pevný disk.
+To se dělá pomocí průběžných zápisových logů nebo dumpem celé struktury do souboru.
+Oba způsoby jsou přímou součástí Redisu.
+
+\medskip\noindent
+{\bf Vhodné pro:}
+\begitems
+* dočasná data ke kterým potřebujeme rychlý přístup
+* fronty
+* zámky
+\enditems
+
+\secc Databáze
+
+\medskip\noindent
+{\bf Vhodné pro:}
+\begitems
+* filtrovaná data
+* řazená data
+* data se složitějšími vazbami
+\enditems
