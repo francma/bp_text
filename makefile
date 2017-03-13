@@ -1,6 +1,6 @@
-FILE=text
+FILE=main
 
-$(FILE).pdf: *.tex text/navrh/*.tex
+$(FILE).pdf: *.tex tex/navrh/*.tex
 	vlna $(FILE).tex
 	xetex -fmt=pdfcsplain $(FILE).tex
 	# xetex -fmt=pdfcsplain $(FILE).tex
