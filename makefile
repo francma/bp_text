@@ -1,7 +1,8 @@
 FILE=main
+FILES:= $(shell find . -name '*.tex')
 
-$(FILE).pdf: *.tex tex/navrh/*.tex
-	vlna $(FILE).tex
+$(FILE).pdf: $(FILES)
+	for file in $$(find . -name '*.tex'); do vlna $$file; done;
 	xetex -fmt=pdfcsplain $(FILE).tex
 	# xetex -fmt=pdfcsplain $(FILE).tex
 	# xetex -fmt=pdfcsplain $(FILE).tex

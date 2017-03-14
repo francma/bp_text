@@ -77,14 +77,14 @@ Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace {\
 
 \secc NGINX a Gitlab Pages
 
-Frontend aplikace. Úloha NGINX jako reverzní proxy z hlediska cachování je předávána spíše na Gitlab Workhorse.
-Stará je o šifrování venkovního spojení pomocí HTTPs.
+Frontend aplikace. Úloha NGINX jako reverzní proxy z~hlediska cachování je předávána spíše na Gitlab Workhorse.
+Stará je o~šifrování venkovního spojení pomocí HTTPs.
 
 \secc Gitlab Workhorse
 
 Prvotním úkolem bylo podržet dlouhotrvající HTTP spojení vytvořeném GIT clonem přes HTTP a ne SSH.
 Důvodem pro to bylo, že Unicorn tyto spojení po vyprchání času ukončoval a zdálo se technologicky jednodušší implementovat další vrstvu, která obslouží tyto požadavky, než měnit existující modul.
-Po přidání možnosti stažení ZIP souboru s repozitářem a vytváření tzv. artefaktů během buildu se zrodil stejná problém jako s GITem přes HTTP a byl také vyřešen stejným způsobem.
+Po přidání možnosti stažení ZIP souboru s~repozitářem a vytváření tzv. artefaktů během buildu se zrodil stejná problém jako s~GITem přes HTTP a byl také vyřešen stejným způsobem.
 Při dalším vývoji se zdálo moc pracné stále udržovat NGINX server, aby nějaké typy požadavků směroval na Unicorn a jiné na Workhorse, tak se začly všechny požadavky směrovat přes Workhorse.
 Workhorse nyní funguje jako chytřejší proxy poskytující statické soubory, GIT přes HTTP a směruje požadavky dále do Gitlab infrastruktury.
 
@@ -102,16 +102,16 @@ Ruby HTTP server.
 Shell obsahující set příkazů pracující na originálním GITem.
 Po připojení na server přes SSH je možné konfigorovat repozitáře přímo přes shell příkazy.
 Řada oprávnění je kontrolována přímo přes GIT hooky, takže není nutné využívat Gitlab Shell.
-Pokud se jedná o komplexnější akci, vyžadující komplexnější kontrolu oprávnění, pak je nutné využít Gitlab Shellu.
+Pokud se jedná o~komplexnější akci, vyžadující komplexnější kontrolu oprávnění, pak je nutné využít Gitlab Shellu.
 
 % https://gitlab.com/gitlab-org/gitlab-shell/tree/master
 
 \secc Gitaly
 
-Každý GIT příkaz zpracovávaný Gitlabem nakonec skončí v Gitaly.
+Každý GIT příkaz zpracovávaný Gitlabem nakonec skončí v~Gitaly.
 Cíl Gitaly je urychlit GIT příkazy decentralizováním uložiště a použitím cache.
-V současné době se uvažuje nad využitím projektu Git Ketch.
-Git Ketch replikuje uložiště mezi několik serverů, u kterých není pevně určené rozdělení na hlavní a sekundární.
+V~současné době se uvažuje nad využitím projektu Git Ketch.
+Git Ketch replikuje uložiště mezi několik serverů, u~kterých není pevně určené rozdělení na hlavní a sekundární.
 Hlavní server je vybrán podle hlasování na základě aktuálnosti dat mezi servery.
 
 % https://gitlab.com/gitlab-org/gitaly/tree/master

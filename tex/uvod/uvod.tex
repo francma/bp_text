@@ -1,0 +1,29 @@
+\chap Úvod
+
+Programování a procesy s~ním spojené prochází neustálým vývojem, který tuto disciplínu stále mění. 
+Přidáváním vyšších vrstev abstrakce se vzdalujeme od stroje samotného a přecházíme k~simulaci fungování reálného světa, čímž se stává vývoj softwaru neustále rychlejším a dynamičtějším. 
+
+
+Jsou to také nově vznikající vývojové techniky, které urychlují vývoj softwaru.
+Jednou z~nich je i technika kontinuální integrace (zkráceně CI). Tato technika spočívá v~časté integraci kódu mezi vývojáři ve společném repozitáři a následným testováním. Mezi testy patří:
+
+\begitems
+* Integrační a jednotkové testy kontrolující funkčnost programu
+* Testy kontrolující jednotný styl kódu v~projektu
+* Syntaktické testy
+\enditems
+
+Kontinuální integrace je úzce spjatá s~verzovacím systémem, který spravuje repozitář projektu. Samotný systém, realizující kontinuální intgraci, lze definovat jako množinu softwaru, realizující následující úkony:
+
+\begitems
+* Naslouchat a reagovat na změny v~repozitáři projektu
+* Připravit běhové prostředí vhodné pro testovací proces
+* Stáhnout zdrojové soubory projektu z~repozitáře
+* Sestavit stážený projekt včetně jeho závislostí
+* Spustit testovaní dle zadání projektu
+* Informovat vývojáře a přidružené systémy o~výsledku testování
+\enditems
+
+\input tex/uvod/struktura
+\input tex/uvod/behova_prostredi
+\input tex/uvod/scm

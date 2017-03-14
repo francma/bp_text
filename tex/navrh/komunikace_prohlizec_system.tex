@@ -2,13 +2,13 @@
 
 Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení celé webové stránky.
 Server tedy posílá pouze žádané informace a ne celou webovou stránku.
-Jedná se například o stavy buildů nebo výpis výstupu aktuálně běžícího buildu (tzv. \uv{streaming logu}).
-Klientem je v této komunikaci webový prohlížeč a serverem CI systém.
+Jedná se například o~stavy buildů nebo výpis výstupu aktuálně běžícího buildu (tzv. \uv{streaming logu}).
+Klientem je v~této komunikaci webový prohlížeč a serverem CI systém.
 
 \secc Short-polling
 
-Spočívá v opakovaném dotazování ze směru klienta (webového prohlížeče) směrem k serveru (CI systém) v určitém časovém intervalu.
-Nevýhoda tkvý v plýtvání systémových prostředků z důvodu velkého počtu dotazů.
+Spočívá v~opakovaném dotazování ze směru klienta (webového prohlížeče) směrem k~serveru (CI systém) v~určitém časovém intervalu.
+Nevýhoda tkvý v~plýtvání systémových prostředků z~důvodu velkého počtu dotazů.
 Výhodou je velmi jednoduchá implementace.
 
 \begtt
@@ -21,8 +21,8 @@ Výhodou je velmi jednoduchá implementace.
 \endtt
 
 \noindent
-K uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu {\tt XMLHttpRequest}.
-Ze strany serveru se jedná o klasický HTTP GET požadavek.
+K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu {\tt XMLHttpRequest}.
+Ze strany serveru se jedná o~klasický HTTP GET požadavek.
 
 \secc Long-polling
 
@@ -37,7 +37,7 @@ Na straně serveru je nutné si pohlídat maximální počet aktivních spojení
 \endtt
 
 \noindent
-Implementace témeř totožná s Short-pollingem.
+Implementace témeř totožná s~Short-pollingem.
 Rozdílem je přidání čekací smyčky na straně serveru.
 
 \secc Server-Sent Events
@@ -68,7 +68,7 @@ data: <data>
 \endtt
 
 \noindent
-O příjem komunikace na straně klienta se stará JavaScript třída {\tt EventSource}.
+O~příjem komunikace na straně klienta se stará JavaScript třída {\tt EventSource}.
 
 \secc Websocket
 
@@ -80,5 +80,5 @@ Implementace na straně webového prohlížeče implementována pomocí JavaScri
 \secc Závěr
 
 Nejsilnějším nástrojem jsou zajisté WebSockety.
-Nicméně naše použití nepotřebuje plnou oboustrannou komunikaci a z hlediska implementace jsou WebSockety tou nejsložitější cestou.
+Nicméně naše použití nepotřebuje plnou oboustrannou komunikaci a z~hlediska implementace jsou WebSockety tou nejsložitější cestou.
 Nejvýhodnějším řešením je technologie SSE, nepotřebuje žádné další externí závislosti a implemetace na serverové straně je velmi jednoduchá.
