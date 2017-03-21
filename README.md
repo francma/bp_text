@@ -7,9 +7,13 @@ Průběh zpracování
 | Kapitola         | Stav |
 |------------------|------|
 | uvod             | 1%   |
-| behova_prostredi | 1%   |
-| scm              | 1%   |
-| struktura        | 1%   |
+
+## Běhová prostředí
+
+| Kapitola               | Stav |
+|------------------------|------|
+| virtualizace           | 1%   |
+| virtualizace pomocí OS | 60%  |
 
 ## GitlabCI
 
