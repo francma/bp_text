@@ -8,7 +8,8 @@ $(FILE).pdf: $(FILES)
 	# xetex -fmt=pdfcsplain $(FILE).tex
 
 clean:
-	find .  -maxdepth 1 -type f -regex '\(.*\.pdf\|.*\.pdf_tex\|.*\.aux\|.*\.log\|.*\.nav\|.*\.out\|.*\.snm\|.*\.toc\|.*\.ref\|.*\.te\~\|.*\.lbr\)' -delete
+	find tex -type f -regex '\(.*\.pdf\|.*\.pdf_tex\|.*\.aux\|.*\.log\|.*\.nav\|.*\.out\|.*\.snm\|.*\.toc\|.*\.ref\|.*\.te\~\|.*\.lbr\)' -delete
+	find . -maxdepth 1 -type f -regex '\(.*\.pdf\|.*\.pdf_tex\|.*\.aux\|.*\.log\|.*\.nav\|.*\.out\|.*\.snm\|.*\.toc\|.*\.ref\|.*\.te\~\|.*\.lbr\)' -delete
 
 refresh: $(FILE).pdf
 	pkill -SIGHUP mupdf
