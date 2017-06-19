@@ -1,20 +1,41 @@
-\input def
-\input const
+% arara: xelatex: { shell: yes }
 
-\maketitle
-\makekeywords
+\documentclass[thesis=B,czech]{FITthesisXE}
+\usepackage{graphicx}
+\usepackage{dirtree}
+\usepackage{xevlna}
+\usepackage{minted}
+\usepackage[export]{adjustbox}
+
+\newcommand{\tg}{\mathop{\mathrm{tg}}}
+\newcommand{\cotg}{\mathop{\mathrm{cotg}}}
+\newcommand{\uv}[1]{\quotedblbase #1\textquotedblleft}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
+\department{Katedra \ldots (DOPLŇTE)}
+\title{Doplňte název práce}
+\authorGN{Doplňte Vaše křestní jméno/jména}
+\authorFN{Doplňte Vaše příjmení}
+\authorWithDegrees{Doplňte Vaše jméno a tituly}
+\author{Jan Nový}
+\supervisor{Doplňte jméno vedoucího práce}
+\acknowledgements{Doplňte, máte-li komu a za co děkovat. V~opačném případě úplně odstraňte tento příkaz.}
+\abstractCS{V~několika větách shrňte obsah a přínos této práce v~češtině. Po přečtení abstraktu by se čtenář měl mít čtenář dost informací pro rozhodnutí, zda chce Vaši práci číst.}
+\abstractEN{Sem doplňte ekvivalent abstraktu Vaší práce v~angličtině.}
+\placeForDeclarationOfAuthenticity{V~Praze}
+\declarationOfAuthenticityOption{4}
+\keywordsCS{Nahraďte seznamem klíčových slov v češtině oddělených čárkou.}
+\keywordsEN{Nahraďte seznamem klíčových slov v angličtině oddělených čárkou.}
+\assignment{assignment.pdf}
+
+\begin{document}
 
 \input tex/uvod/uvod
-\input tex/behove/behove
-\input tex/gitlab/gitlab
-\input tex/travis/travis
-\input tex/buildbot/buildbot
-\input tex/navrh/navrh
+\input tex/behove/_
+\input tex/gitlab/_
+% \input tex/travis/travis
+% \input tex/buildbot/buildbot
+\input tex/navrh/_
 
-\vfill\null\break
-\sec Zdroje
-
-\usebib/s (iso690) bib
-
-\bye
+\end{document}
 

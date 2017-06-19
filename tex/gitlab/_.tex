@@ -1,50 +1,52 @@
-\chap Gitlab CI
+\chapter{Gitlab CI}
 
-\sec Uživatelské použití
+\section{Uživatelské použití}
 
-Konfigurace projektů je řešena pomocí souboru {\tt.gitlab-ci.yml}, který je umístěn přímo v~kořenovém adresáři repozitáři projektu.
+Konfigurace projektů je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři repozitáři projektu.
 
-\secc Průběh integrace
+\section{Průběh integrace}
 
-Proces integrace je rozdělen na fáze ({\it stages}), úkoly ({\it jobs}) a příkazy.
+Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
 Pokud jedna z~fází selže, tak celý proces integrace končí chybou.
 
-\begtt
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
 stages:
   - test
   - build
   - deploy
-\endtt
-\nobreak \label[gitlab:l:stages]
-\caption/l Ukázka definice fází
-\smallskip
+\end{minted}
 
-\noindent
 Jednotlivé fáze se skládají z~několika úkolů.
 Ůkoly jsou spouštěny nezávisle na sobě a tím pádem je lze paralelizovat.
 Selhání jednoho z~úkolů vede k~neuspěchu celé fáze.
 Úkoly jsou vždy provedeny všechny, nezávisle na výsledku ostatních v~rámci fáze.
 
-\begtt
+
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
 job1:
   stage: test
   script:
     - cmd 1
     - cmd 2
-\endtt
-\nobreak \label[main]
-\caption/l Definice úkolu s~názvem job1 v~rámci fáze test 
-\smallskip
+\end{minted}
 
-\noindent
 Každý úkol je složen z~několika příkazů.
 Pokud jeden z~příkazů skončí chybovým návratovým kódem, pak je ukončeno provádění úkolu.
 
-Mezi speciální úkoly patří {\tt before\_script} a {\tt after\_script}.
+Mezi speciální úkoly patří \verb|before\_script| a \verb|after\_script|.
 Tyto úkoly jsou provedeny vždy před nebo po každým uživatelsky definovaným úkolem.
 
-\begtt
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
 before_script:
   - cmd 1
   - cmd 2
@@ -52,35 +54,31 @@ before_script:
 after_script:
   - cmd 1
   - cmd 2
-\endtt
-\nobreak \label[main]
-\caption/l dasd
-\smallskip
+\end{minted}
 
-\noindent
-Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace {\tt when}
+Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace \verb|when|.
 
-\begitems
-* {\tt on\_success} -- vykonej pouze pokud předchozí fáze skončila úspěchem (výchozí) 
-* {\tt on\_failure} -- vykonej pouze pokud předchozí fáze skončila neúspěchem
-* {\tt always} -- vykonej vždy
-\enditems
+\begin{itemize}
+  \item \verb|on\_success| -- vykonej pouze pokud předchozí fáze skončila úspěchem (výchozí) 
+  \item \verb|on\_failure| -- vykonej pouze pokud předchozí fáze skončila neúspěchem
+  \item \verb|always| -- vykonej vždy
+\end{itemize}
 
-\sec Architektura
+\section{Architektura}
 
-\centerline {\picwidth=\hsize \inspic img/gitlab_architecture_diagram.png }
-\label[my-pic]
-\nobreak
-\caption/f Gitlab Architektura
+% \centerline {\picwidth=\hsize \inspic img/gitlab_architecture_diagram.png }
+% \label[my-pic]
+% \nobreak
+% \caption/f Gitlab Architektura
 
 % https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/development/architecture.md
 
-\secc NGINX a Gitlab Pages
+\subsection{NGINX a Gitlab Pages}
 
 Frontend aplikace. Úloha NGINX jako reverzní proxy z~hlediska cachování je předávána spíše na Gitlab Workhorse.
 Stará je o~šifrování venkovního spojení pomocí HTTPs.
 
-\secc Gitlab Workhorse
+\subsection{Gitlab Workhorse}
 
 Prvotním úkolem bylo podržet dlouhotrvající HTTP spojení vytvořeném GIT clonem přes HTTP a ne SSH.
 Důvodem pro to bylo, že Unicorn tyto spojení po vyprchání času ukončoval a zdálo se technologicky jednodušší implementovat další vrstvu, která obslouží tyto požadavky, než měnit existující modul.
@@ -91,13 +89,13 @@ Workhorse nyní funguje jako chytřejší proxy poskytující statické soubory,
 % https://gitlab.com/gitlab-org/gitlab-workhorse
 % https://about.gitlab.com/2016/04/12/a-brief-history-of-gitlab-workhorse/
 
-\secc Unicorn
+\subsection{Unicorn}
 
 Ruby HTTP server.
 
 % nejspis hlavni server FIXME
 
-\secc Gitlab shell
+\subsection{Gitlab shell}
 
 Shell obsahující set příkazů pracující na originálním GITem.
 Po připojení na server přes SSH je možné konfigorovat repozitáře přímo přes shell příkazy.
@@ -106,7 +104,7 @@ Pokud se jedná o~komplexnější akci, vyžadující komplexnější kontrolu o
 
 % https://gitlab.com/gitlab-org/gitlab-shell/tree/master
 
-\secc Gitaly
+\subsection{Gitaly}
 
 Každý GIT příkaz zpracovávaný Gitlabem nakonec skončí v~Gitaly.
 Cíl Gitaly je urychlit GIT příkazy decentralizováním uložiště a použitím cache.
@@ -117,12 +115,12 @@ Hlavní server je vybrán podle hlasování na základě aktuálnosti dat mezi s
 % https://gitlab.com/gitlab-org/gitaly/tree/master
 % https://www.infoq.com/news/2016/02/google-kick-starts-git-ketch
 
-\secc Uložiště
+\subsection{Uložiště}
 
 PostreSQL persistentní.
 Cache a data broker Redis.
 
-\secc Komunikace
+\subsection{Komunikace}
 
 GRPC uvnitř Gitlab systému.
 
@@ -130,9 +128,9 @@ GRPC uvnitř Gitlab systému.
 % https://gitlab.com/gitlab-org/gitaly/tree/master
 
 
-\secc Gitlab CI multi-runner
+\subsection{Gitlab CI multi-runner}
 
-CI systém spolupracuje s~několika běhovými servery ({\it Runners}), které se starají o~samotné vykonání definovaných příkazů (sestavení).
+CI systém spolupracuje s~několika běhovými servery (\textit{Runners}), které se starají o~samotné vykonání definovaných příkazů (sestavení).
 Běhové servery využívají exekutory.
 Implementuje několik exekutorů.
 Volba běhováho serveru je definována na úrovni konfigurace projektu a je omezena globálním nastavením Gitlab CI.
@@ -140,21 +138,24 @@ Volba běhováho serveru je definována na úrovni konfigurace projektu a je ome
 % https://docs.gitlab.com/ee/ci/runners/README.html
 % http://docs.gitlab.com/ce/api/ci/builds.html
 
-\seccc Shell exekutor
+\subsubsection{Shell exekutor}
 
 Příkazy provádí pod stejným uživatelem jako samotný běhový server.
 Příkazy přeneseny jako soubor.
 
-\seccc Docker exekutor
+\subsubsection{Docker exekutor}
 
 Docker je kontejnerová technologie.
 Kontejnery jsou sestavovány z~Docker obrazů definující sadu dostupného softwaru.
 Pro jednotlivá sestavení je vytvořena nová instance Docker kontejneru.
-Volba obrazu pro sestavení a pro jednotlivé joby je definována klíčovým slovem {\tt image}.
+Volba obrazu pro sestavení a pro jednotlivé joby je definována klíčovým slovem \verb|image|.
 Sestavení lze obohatit o~tzv. služby, kterými můžeme každému buildu dát k~dispozici přístup k~další Docker instanci, která bude dostupná pod zadanou hostname.
 Služby lze opět konfigurovat na úrovni sestavení, tak na úrovni jobu.
 
-\begtt
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
 image: ruby:2.2
 
 services:
@@ -163,12 +164,9 @@ services:
 test:
   script:
   - bundle exec rake spec
-\endtt
-\nobreak \label[main]
-\caption/l Ukázka konfigurace obrazů
-\smallskip
+\end{minted}
 
-\seccc VirtualBox a Parallels
+\subsubsection{VirtualBox a Parallels}
 
 Virtualizační technologie.
 Virtualní stroj musí podporovat Bash kompatibilní shell a být dostupný přes SSH spojení.
@@ -176,35 +174,33 @@ Virtualní stroje jsou klonovány pro udržení čistého prostředí pro sestav
 
 % https://docs.gitlab.com/runner/executors/README.html
 
-\seccc SSH exekutor
+\subsubsection{SSH exekutor}
 
 Podobné jako Shell exekutor, jen je využito SSH spojení.
 
-\secc Cachování
+\subsection{Cachování}
 
-Ve výchozím stavu je cache sdílena mezi {\it branch} a {\it job}.
+Ve výchozím stavu je cache sdílena mezi \textit{branch} a \textit{job}.
 Toto chování lze upravit nastavením klíče, který bude identifikovat danou cache.
 Při tvorbě klíče lze využít předdefinované CI proměnné. 
 Soubory a složky určené k~cachování uvedeme jako výčet v~konfiguraci projektu.
 Cesta k~souboru je uvedená jako relativní ke kořeni projektu, cachování souborů mimo projekt není touto cestou možné. 
 Cache lze také omezit pouze na soubory a složky, které nejsou verzovany GITem.
-\cite[gitlab:cache]
 
-\begtt
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
 cache:
   key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
   untracked: true
   paths:
     - binaries/
     - .config
-\endtt
-\nobreak \label[main]
-\caption/l Ukázka konfigurace cache
-\smallskip
+\end{minted}
  
-\noindent
 Cache je ve výchozím nastavení ukládána přímo na běhovém serveru.
-Pokud fáze běží na jiných běhových serverech, tak se cache nesdílí.
+Pokud fáze běží na různých běhových serverech, tak se cache nesdílí.
 Alternativně můžeme použít sdílené cachování na S3 kompatibilních serverech.
 S3 je REST API, které bylo původně vytvořeno jako část Amazon services.
 Toto API implementuje samotný Amazon, tak i nějaké self-hosted projekty.

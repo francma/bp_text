@@ -1,0 +1,54 @@
+\sec Paralelizace
+
+Jak to dělají jiní.
+
+\secc Nette (Travis CI)
+
+% https://github.com/nette/application/blob/master/.travis.yml
+\begtt
+before_script
+php & php
+after_script | after_failure
+\endtt
+
+\secc Flask (Travis CI)
+
+% https://github.com/pallets/flask/blob/master/.travis.yml
+
+... má tohle cenu?
+
+\secc Návrh
+
+\begtt
+
+stages:
+	- test
+	- deploy
+	- ...
+
+before_script:
+	- cmd
+
+after_script:
+	- cmd
+
+job1:
+	stage: test
+	matrix:
+		tags:
+			- Windows, Python3
+			- Linux, Python3
+		env:
+			- DEPS=latest, all=sdad
+			- DEPS=none, all=sdad
+		exclude:
+			- 
+	script:
+		first:
+			- cmd
+		second:
+			- cmd
+			- cmd
+
+
+\endtt
