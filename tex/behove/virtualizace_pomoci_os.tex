@@ -1,4 +1,4 @@
-\sec Virtualizace na úrovni operačního systému
+\section{Virtualizace na úrovni operačního systému}
 
 % http://www.linfo.org/kernel_space.html
 Systémová paměť moderních operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
@@ -18,21 +18,20 @@ Dalším opatřením může být spuštění nové instance operačního systém
 Únikem z~kontejneru se pak útočník dostane pouze do virtualizovaného operačního systému bez možnosti ovlivnit hostitele.
 
 {
-\smallskip\noindent
 Mezi technologie pro tvorbu kontejnerů patří:
 
-\begitems
-* Jails (BSD)
-* Namespaces a Cgroups (Linux)
-* OpenVZ
-* Windows kontejnery
-* Multiplaformní Docker
-\enditems
+\begin{itemize}
+	\item Jails (BSD)
+	\item Namespaces a Cgroups (Linux)
+	\item OpenVZ
+	\item Windows kontejnery
+	\item Multiplaformní Docker
+\end{itemize}
 }
 
-\secc Linux
+\subsection{Linux}
 
-\seccc Namespaces
+\subsubsection{Namespaces}
 
 Nástroj Linux kernelu sloužící k~vytvoření izolovaných skupin procesů.
 Každý proces má svůj namespace, který mu vymezuje viditelnost pouze na prostředky daného namespace nebo jeho podřezených.
@@ -40,28 +39,34 @@ Při startu systému existuje nejméně jeden namespace.
 Namespaci tvoří hiearchickou stromovou strukturu.
 Existuje několik druhů namespaců.
 
-\smallskip\noindent{\bf PID}\break\noindent
+PID
+
 Proces vidí procesy pouze ze své PID namespace a namespaců podřízených.
 
-\smallskip\noindent{\bf NET}\break\noindent
+NET
+
 Síťové rozhraní náleží právě do jednoho namespacu a není sdíleno s~namespaci podřízenými.
 Každé síťové rozhraní má svoje IP adresy, routovací tabulky, firewall a další síťové prostředky. 
 
-\smallskip\noindent{\bf MNT}\break\noindent
+MNT
+
 Kontrolujeme jaké mount pointy budou viditelné.
 Vytvořením nového MNT namespacu přeneseme všechny mount pointy rodiče.
 Změny v~aktuálním namespacu neovlivňují rodičovský namespace. 
 
-\smallskip\noindent{\bf IPC}\break\noindent
+IPC
+
 Meziprocesová komunikace.
 Linux kernel ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi namespacy.
 
 % FIXME? PostreSQL pokud má stejné UID, pak přistupuje do stejné paměti a koliduje??
 
-\smallskip\noindent{\bf UTS}\break\noindent
+UTS
+
 Dovoluje systému vystupovat pod více hostnames.
 
-\smallskip\noindent{\bf user}\break\noindent
+user
+
 Umožňuje libovolně mapovat uživatelská ID z~kontejneru na ID uživatelů z~hostitele.
 Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru se jedná pouze o~obyčejného uživatele (bez práv roota).
 
@@ -69,22 +74,22 @@ Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru 
 
 O~vytvoření namespacu se stará systémové volání FORK.
 
-\seccc Control groups (cgroups)
+\subsubsection{Control groups (cgroups)}
 
 Nástroj Linux kernelu umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim.
 Typy prostředků jsou:
-\begitems
-* CPU čas
-* Operační paměť
-* Disková paměť % FIXME tohle je divny nazev
-* Síťový provoz
-* Provoz na disku
-\enditems
+\begin{itemize}
+	\item CPU čas
+	\item Operační paměť
+	\item Disková paměť % FIXME tohle je divny nazev
+	\item Síťový provoz
+	\item Provoz na disku
+\end{itemize}
 
 Mezi další vlastnosti Control Groups patří možnost zmrazit skupinu procesů v~určitém stavu a následně je znovu odmrazit. % FIXME mam tohle vubec rozebirat
 
 
-\seccc Copy on write
+\subsubsection{Copy on write}
 
 Technika optimalizace sprvávy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
 Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
@@ -94,10 +99,10 @@ Za cenu menší režie můžeme takto ušetřit mnoho paměti.
 
 Použití v~Linuxu při volání FORK nebo v~různých filesystémech.
 
-\secc BSD jails
+\subsection{BSD jails}
 
 % https://www.freebsd.org/doc/handbook/jails.html
 
-\secc Docker
+\subsection{Docker}
 
-\secc Windows kontejnery
+\subsection{Windows kontejnery}
