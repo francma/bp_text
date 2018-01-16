@@ -33,3 +33,5 @@ deploy:
   file: "$RELEASE_FILE"
   skip_cleanup: true
   overwrite: true
+  on:
+    branch: master
