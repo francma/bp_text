@@ -18,17 +18,19 @@ arch:
     - pygmentize
 
   script:
+    - RELEASE_FILE=$(date +"bp_francma_%Y/%m/%d-%H:%M_$TRAVIS_COMMIT.pdf")
+    - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex 
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
-    - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
+    - mv main.pdf "$RELEASE_FILE"
 
 before_deploy:
-  - export RELEASE_FILE=$(date +"bp_francma_%Y/%m/%d-%H:%M_$TRAVIS_COMMIT")
+  - export RELEASE_FILE=$(ls bp_francma*.pdf)
 
 deploy:
   name: "text"
   provider: releases
   api_key: "${GH_TOKEN}"
-  file: "$RELEASE_FILE.pdf"
+  file: "$RELEASE_FILE"
   skip_cleanup: true
   overwrite: true
