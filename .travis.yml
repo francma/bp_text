@@ -18,11 +18,10 @@ arch:
     - pygmentize
 
   script:
-    - RELEASE_FILE=$(date +"bp_francma_%Y/%m/%d-%H:%M_$TRAVIS_COMMIT.pdf")
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex 
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
-    - mv main.pdf "$RELEASE_FILE"
+    - mv main.pdf $(date +"bp_francma_%Y/%m/%d-%H:%M_$TRAVIS_COMMIT.pdf")
 
 before_deploy:
   - export RELEASE_FILE=$(ls bp_francma*.pdf)
