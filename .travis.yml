@@ -32,5 +32,3 @@ deploy:
   file: "$RELEASE_FILE.pdf"
   skip_cleanup: true
   overwrite: true
-  on:
-    tags: true
