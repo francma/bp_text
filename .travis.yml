@@ -22,11 +22,14 @@ arch:
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
 
+before_deploy:
+  - export RELEASE_FILE=$(date +"bp_francma_%Y/%m/%d-%H:%M_$TRAVIS_COMMIT")
+
 deploy:
   name: "text"
   provider: releases
   api_key: "${GH_TOKEN}"
-  file: "main.pdf"
+  file: "$RELEASE_FILE.pdf"
   skip_cleanup: true
   overwrite: true
   on:

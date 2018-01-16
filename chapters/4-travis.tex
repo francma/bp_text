@@ -1,0 +1,144 @@
+\chapter{Travis CI}
+
+Travis CI je open source služba kontinuální integrace spjatá s verzovací hostovací službou Github.
+Travis je naprogramován v Ruby.
+
+
+\section{Architektura}
+
+Systém je rozdělen na několk částí, které mezi sebou komunikující přes distribuovanou frontu RabbitMQ.
+Datové uložiště je realizováno v SQL databázi PostreSQL.
+Pro potřeby cachování je využiván Redis.
+
+\paragraph{Travis Core}
+
+Stará o většinu logiky pro Travis CI.
+Obsahuje model aplikace a služby, které jsou sdíleny se zbytkem systému.
+
+\paragraph{Travis API}
+
+Rozhraní překladající HTTP požadavky na volání jádra Travis Core.
+
+\paragraph{Travis Hub}
+
+Shromažďuje údálosti a komunikuje s aplikacemi mimo vnitřní systém.
+
+\paragraph{Travis Listener}
+
+Naslouchá notifikacím z Githubu a informuje o nich zbytek systému přes distribuovanou frontu.
+
+\paragraph{Travis Build}
+
+Překládá uživatelskou konfiguraci integrace na koncový skript, který bude vykonán Travis Workerem.
+
+\paragraph{Travis Worker}
+
+Zodpovědný za spouštění skriptů integrace a tvorbou čistého prostředí pro jejich běh.
+Úzce spolupracuje s Travis Loggerem, který ukládá výstup skriptu integrace.
+
+\paragraph{Travis Web}
+
+Obstaravá webové rozhraní pro koncového uživatele.
+
+\paragraph{Travis Tasks}
+
+Stará se o komunikace mezi Travis Hubem a zbytkem vnitřního systému.
+
+\section{Průběh integrace}
+
+Podobně jako u Gitlab CI je konfigurace řešena souborem \verb|.travis.yml|, který je umístěn přímo v~kořenovém adresáři repozitáře projektu.
+
+Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
+Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
+Selhání fáze znamená zastavení provádění všech následujícíh fází.
+
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
+stages:
+  - test
+  - build
+  - deploy
+\end{minted}
+
+Úkol náleží právě do jedné fáze a jeho přiřazení se provede v konfiguraci následovně.
+
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
+stages:
+  - test
+jobs:
+  include:
+    - stage: test
+      script: pytest
+\end{minted}
+
+Každý úkol je spoštěn ve svém vlastním běhovém prostředí.
+
+Další možností definice úkolů je přes tzv. Build Matrix.
+
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
+language: python
+python:
+  - '3.5'
+  - '3.4'
+  - '2.7'
+env:
+  - TOXENV=first
+  - TOXENV=second
+script:
+  - tox
+\end{minted}
+
+Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu.
+Oba zmíněné přistupy konfigurace lze kombinovat.
+
+
+\subsection{Běhová prostředí}
+
+Travis CI podporuje několik běhových prostředí vyjmenovaných v následující tabulce.
+
+\begin{table}[h]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{l|llll}
+               & Superuživatel & Technologie & Konfigurace  \\ \hline
+Ubuntu Precise & Ano & Virtulní stroj & \verb|sudo: required| &  \\ 
+& & & \verb|dist: precise| &  \\ \hline
+Ubuntu Trusty & Ano & Virtulní stroj & \verb|sudo: required|  &  \\
+& & & \verb|dist: trusty| &  \\ \hline
+Ubuntu Trusty & Ne & Kontejner & \verb|sudo: false|  &  \\
+& & & \verb|dist: trusty| &  \\ \hline
+OS X & Ano & Virtuální stroj & \verb|os: osx|  &  \\
+\end{tabular}
+\end{table}
+
+Výhodou kontejnerového prostředí je jeho rychlejší start.
+
+
+\begin{listing}[ht]
+\begin{minted}[
+    frame=single,
+    linenos
+  ]{yaml}
+sudo: required
+dist: trusty
+script:
+  - sudo apt add ...
+  - pytest
+\end{minted}
+\caption{Example from external file}
+\label{listing:3}
+\end{listing}
+
+
+
+
+% https://github.com/travis-ci/travis-core

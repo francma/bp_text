@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{dirtree}
 \usepackage{xevlna}
+\usepackage{caption}
 \usepackage{minted}
 \usepackage[export]{adjustbox}
 
@@ -12,30 +13,35 @@
 \newcommand{\uv}[1]{\quotedblbase #1\textquotedblleft}
 \renewcommand{\thefootnote}{\arabic{footnote}}
 
-\department{Katedra \ldots (DOPLŇTE)}
-\title{Doplňte název práce}
-\authorGN{Doplňte Vaše křestní jméno/jména}
-\authorFN{Doplňte Vaše příjmení}
-\authorWithDegrees{Doplňte Vaše jméno a tituly}
-\author{Jan Nový}
-\supervisor{Doplňte jméno vedoucího práce}
-\acknowledgements{Doplňte, máte-li komu a za co děkovat. V~opačném případě úplně odstraňte tento příkaz.}
-\abstractCS{V~několika větách shrňte obsah a přínos této práce v~češtině. Po přečtení abstraktu by se čtenář měl mít čtenář dost informací pro rozhodnutí, zda chce Vaši práci číst.}
-\abstractEN{Sem doplňte ekvivalent abstraktu Vaší práce v~angličtině.}
+\bibliography{library.bib}
+
+
+\department{Katedra počítačových systémů}
+\title{Minimalistický CI systém}
+\authorGN{Martin}
+\authorFN{Franc}
+\authorWithDegrees{Martin Franc}
+\author{Martin Franc}
+\supervisor{Jakub Jirůtka}
+% \acknowledgements{Doplňte, máte-li komu a za co děkovat. V~opačném případě úplně odstraňte tento příkaz.}
+\abstractEN{\input{abstract_en.tex}}
+\abstractCS{\input{abstract_cs.tex}}
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{4}
 \keywordsCS{Nahraďte seznamem klíčových slov v češtině oddělených čárkou.}
 \keywordsEN{Nahraďte seznamem klíčových slov v angličtině oddělených čárkou.}
 \assignment{assignment.pdf}
 
+
 \begin{document}
 
-\input tex/uvod/uvod
-\input tex/behove/_
-\input tex/gitlab/_
-% \input tex/travis/travis
-% \input tex/buildbot/buildbot
-\input tex/navrh/_
+\input chapters/0-uvod.tex
+\input chapters/1-behove.tex
+% \input chapters/2-scm.tex
+\input chapters/3-gitlab.tex
+\input chapters/4-travis.tex
+% \input chapters/5-buildbot.tex
+\input chapters/6-piper.tex
+% \input chapters/7-zaver.tex
 
 \end{document}
-

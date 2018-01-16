@@ -1,0 +1,178 @@
+\chapter{Běhová prostředí}
+
+Prostředí pro integraci by mělo být:
+
+\begin{itemize}
+	\item Stejné na začátku každé integrace
+	\item Odolné vůči vnějším vlivům prostředí
+	\item Izolované proti neoprávněným zásahům do vnějšího systému
+\end{itemize}
+
+Těchto požadavků lze dosáhnout virtualizovaním prostředí pomocí virtualizace.
+Virtualizace je technika při které se jeden fyzický prostředek transformuje na několik virtuálních prostředků.
+Fyzický prostředek slouží jako hostitel pro virtuální prostředky.
+
+% https://edux.fit.cvut.cz/oppa/BI-ADU/prednasky/BIADU_P11_Virt.pdf
+
+\section{Plná virtualizace}
+
+% Obrazek hypervizor / os / virtualni stroje
+
+Virtualizace je technika při které se jeden fyzický prostředek transformuje na několik virtuálních prostředků.
+Fyzický prostředek slouží jako hostitel pro virtuální prostředky.
+
+% https://edux.fit.cvut.cz/oppa/BI-ADU/prednasky/BIADU_P11_Virt.pdf
+
+Výsledkem plné virtualizace je virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
+Prostředníke mezi virtuálním strojem a hostitelským systémem se nazývá hypervizor.
+
+Mezi úkoly hypervizoru patří:
+\begin{itemize}
+	\item Stejné na počátku každé integrace
+	\item Odolné vůči vnějším vlivům prostředí
+	\item Izolované proti neoprávněným zásahům do vnějšího systému
+\end{itemize}
+
+Virtualizační programy: VirtualBox, QEMU
+
+\subsection{Softwarová virtualizace}
+
+
+
+Softwarová virtualizace funguje na principu úpravy instrukcí virtualizovaného stroje.
+Je nutné přepsat privilegované instrukce na neprivilegované a upravit přístupy do paměti.
+
+
+\subsection{Hardwarové asistovaná virtualizace}
+
+Hardwarové asistovaná virtualizace funguje na principu simulace hardwaru za podpory specializovaných instrukcí procesoru.
+Na tomto simulovaném hardwaru je pak možné spustit další instanci operačního systému, která bude kompletně odstíněna od svého hostitele.
+Nevýhodou tohoto řešení je nutnost alokace systémových prostředků na běh dalšího operačního systému i samotnou simulaci hardwaru.
+
+\section{Virtualizace na úrovni operačního systému}
+
+% http://www.linfo.org/kernel_space.html
+Systémová paměť moderních operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
+Prostor jádra je přímo využíván pro běh jádra operačního systému a jeho služeb.
+V~uživatelském prostoru běží procesy spuštěné uživatelem bez přístupu do prostoru jádra.
+Uživatelské procesy komunikují s~prostorem jádra pouze skrz systémové metody.
+Na x86 procesorech se k~rozdělení paměti používá chráněný režim, ve kterém lze stránky virtuální paměti rozdělit podle privilegovanosti.
+
+Virtualizace na úrovni operačního systému je virtualizační technika, která dovoluje koexistenci několika oddělených uživatelských režimů, které fungují nad stejným prostorem jádra.
+Izolovanému uživatelskému prostoru se často označuje jako tzv. \uv{kontejner}.
+
+Výhodou je menší režie oproti plné virtualizaci, protože už není nutné spouštět celou novou instanci operačního systému.
+Oproti plné virtualizaci je naopak nutné zajistit, aby se jednotlivé uživatelské režimy nemohly neoprávněně ovlivňovat.
+Toto je netriviální úloha a proto je vhodné zavést některá bezpečností opatření.
+Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem (ne-root, ne-administrátor), takže případní \uv{únik} z~kontejneru nezpůsobí velkou nebo žádnou škodu.
+Dalším opatřením může být spuštění nové instance operačního systému pomocí plné virtualizace, která bude využívána pro běh kontejnerů.
+Únikem z~kontejneru se pak útočník dostane pouze do virtualizovaného operačního systému bez možnosti ovlivnit hostitele.
+
+{
+Mezi technologie pro tvorbu kontejnerů patří:
+
+\begin{itemize}
+	\item Jmenné prostory a kontrolní skupiny (Linux)
+	\item Jails (BSD)
+	\item Hyper-V
+\end{itemize}
+}
+
+\subsection{Nástroje operačního systému Linux}
+
+Linux kernel sám o sobě nenabízí přímé kontejnerové řešení, ale pouze sadu nástrojů, pomocí kterých je kontejner vytvořen.
+Jedná se o jmenné prostory a kontrolní skupiny.
+Nad těmito nástroji je postaveno například kontejnerové řešení LXC nebo Docker.
+
+\subsubsection{Jmenné prostory (namespaces)}
+
+Nástroj Linux kernelu sloužící k~vytvoření izolovaných skupin procesů.
+Každý proces má svůj jmenný prostor, který mu vymezuje viditelnost pouze na vlastní prostředky a prostředky podřízených jmenných prostorů.
+Při startu systému existuje nejméně jeden namespace.
+Jmenné prostory tvoří hierarchickou stromovou strukturu.
+Existuje několik druhů jmenných prostorů.
+
+\paragraph{PID}
+
+Proces vidí procesy pouze ze svého a podřízených PID jmenných prostorů.
+
+\paragraph{NET}
+
+Síťové rozhraní náleží právě do jednoho jmenného prostoru a není sdíleno s~podřízenými jmennými prostory.
+Každé síťové rozhraní má svoje IP adresy, routovací tabulky, firewall a další síťové prostředky. 
+
+\paragraph{MNT}
+
+Kontrolujeme jaké mount pointy budou viditelné.
+Vytvořením nového MNT namespacu přeneseme všechny mount pointy rodiče.
+Změny v~aktuálním namespacu neovlivňují rodičovský namespace. 
+
+
+\paragraph{IPC}
+
+Meziprocesová komunikace.
+Linux kernel ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi jmennými prostory.
+
+% FIXME? PostreSQL pokud má stejné UID, pak přistupuje do stejné paměti a koliduje??
+
+\paragraph{UTS}
+
+Dovoluje systému vystupovat pod více hostitelskými jmény (hostnames).
+
+\paragraph{user}
+
+Umožňuje libovolně mapovat uživatelská ID z~kontejneru na ID uživatelů z~hostitele.
+Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru se jedná pouze o~obyčejného uživatele (bez práv roota).
+
+% https://www.youtube.com/watch?v=sK5i-N34im8
+
+O~vytvoření jmenného prostoru se stará systémové volání FORK.
+
+\subsubsection{Kontrolní skupiny (cgroups)}
+
+Nástroj Linux kernelu umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim.
+Typy prostředků jsou:
+\begin{itemize}
+	\item CPU čas
+	\item Operační paměť
+	\item Disková paměť % FIXME tohle je divny nazev
+	\item Síťový provoz
+	\item Provoz na disku
+\end{itemize}
+
+Mezi další vlastnosti kontrolních skupin patří možnost zmrazit skupinu procesů v~určitém stavu a následně je znovu odmrazit. % FIXME mam tohle vubec rozebirat
+
+
+\subsubsection{Copy on write}
+
+Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
+Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
+Za cenu vyšší režie můžeme takto ušetřit mnoho paměti.
+
+% https://books.google.cz/books?id=9yIEji1UheIC&lpg=PA295&dq="copy+on+write"&pg=PA295&redir_esc=y#v=onepage&q="copy%20on%20write"&f=false
+
+Použití v~Linuxu v systémovém volání FORK nebo v~různých filesystémech (ZFS).
+
+\subsection{BSD jails}
+
+Kontejnerová technologie nacházející v operačních systémech typu BSD (FreeBSD, DragonflyBSD, \ldots).
+Na rozdíl od Linuxových kontejnerů, kde jsme si museli poskládat konečný kontejner z jednotlivých nástrojů, nám BSD nabízí přímo sadu systémových volání (\verb|jail_*|).
+
+Kontejner nám zajištujě izolaci:
+\begin{itemize}
+	\item Proces vidí procesy ze svého kontejneru
+	\item Modifikace síťového nastavení zevnitř kontejneru není povolena (pevná IP adresa, routovací tabulky)
+	\item Kontejner nemá přímý přístup k síťovému socketu (ICMP protokol nebude fungovat)
+	\item Kontejner je vymezen pouze na adresářovou strukturu, ve které byl založen
+\end{itemize}
+
+Kontejneru lze také omezovat systémové prostředky (RAM, disk, síť, \ldots)
+
+% https://www.freebsd.org/doc/handbook/jails.html
+
+
+\subsection{Hyper-V}
+
+Proprietární technologie firmy Microsoft.
+Dostupné pouze na některých verzích Windows (profesionální verze, dražší oproti klasickým verzím).
+Kontejnerové řešení Docker je schopné využít tuto technologii a fungovat nad ní jako frontend.
