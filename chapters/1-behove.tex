@@ -1,16 +1,19 @@
 \chapter{Běhová prostředí}
 
-Prostředí pro integraci by mělo být:
+Běhovým prostředím je myšleno prostředí, ve kterém je prováděny integrační testy.
+Toto prostředí by mělo být:
 
 \begin{itemize}
-	\item Stejné na začátku každé integrace
+	\item Uvedeno do počátečního stavu na začátku každé integrace
 	\item Odolné vůči vnějším vlivům prostředí
 	\item Izolované proti neoprávněným zásahům do vnějšího systému
 \end{itemize}
 
-Těchto požadavků lze dosáhnout virtualizovaním prostředí pomocí virtualizace.
+Těchto požadavků lze dosáhnout vytvořením virtualizovaním prostředí, které nám zajistí izolaci integrace.
 Virtualizace je technika při které se jeden fyzický prostředek transformuje na několik virtuálních prostředků.
 Fyzický prostředek slouží jako hostitel pro virtuální prostředky.
+
+Virtualizační prostředí uvedeme do počátečního stavu jednoduše jeho znovuvytvořením.
 
 % https://edux.fit.cvut.cz/oppa/BI-ADU/prednasky/BIADU_P11_Virt.pdf
 
@@ -18,30 +21,17 @@ Fyzický prostředek slouží jako hostitel pro virtuální prostředky.
 
 % Obrazek hypervizor / os / virtualni stroje
 
-Virtualizace je technika při které se jeden fyzický prostředek transformuje na několik virtuálních prostředků.
-Fyzický prostředek slouží jako hostitel pro virtuální prostředky.
-
-% https://edux.fit.cvut.cz/oppa/BI-ADU/prednasky/BIADU_P11_Virt.pdf
-
 Výsledkem plné virtualizace je virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
-Prostředníke mezi virtuálním strojem a hostitelským systémem se nazývá hypervizor.
+Prostředníkem mezi virtuálním strojem a hostitelským systémem se nazývá hypervizor.
 
-Mezi úkoly hypervizoru patří:
-\begin{itemize}
-	\item Stejné na počátku každé integrace
-	\item Odolné vůči vnějším vlivům prostředí
-	\item Izolované proti neoprávněným zásahům do vnějšího systému
-\end{itemize}
+\svgfigure{graphs/hypervizor.pdf}{hello}
 
 Virtualizační programy: VirtualBox, QEMU
 
 \subsection{Softwarová virtualizace}
 
-
-
 Softwarová virtualizace funguje na principu úpravy instrukcí virtualizovaného stroje.
 Je nutné přepsat privilegované instrukce na neprivilegované a upravit přístupy do paměti.
-
 
 \subsection{Hardwarové asistovaná virtualizace}
 

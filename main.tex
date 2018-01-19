@@ -15,6 +15,48 @@
 
 \bibliography{library.bib}
 
+\newcommand{\importsvg}[1]{
+    \def\svgwidth{\columnwidth}
+    \import{media/svg/}{#1.pdf_tex}
+}
+
+% usage: \imagefigure{filename}{description}
+\newcommand{\imagefigurefull}[3]{
+    \begin{figure}[htbp]
+    \centering
+        \includegraphics[width=#3\linewidth]{media/#1}
+        \caption{#2 \label{pic:#1}}
+    \end{figure}
+}
+
+\newcommand{\imagefigurelarge}[2]{
+    \imagefigurefull{#1}{#2}{.99}
+}
+
+\newcommand{\imagefigure}[2]{
+    \imagefigurefull{#1}{#2}{.6}
+}
+
+\newcommand{\screenshotfigure}[2]{
+    \imagefigurefull{#1}{#2}{.4}
+}
+
+\newcommand{\idkijustwanttwotofitonapagefigure}[2]{
+    \imagefigurefull{#1}{#2}{.83}
+}
+
+\newcommand{\svgfigure}[2]{
+    \begin{figure}[htbp]
+    \centering
+        \importsvg{#1}
+        \caption{#2 \label{pic:#1}}
+    \end{figure}
+}
+
+\makeglossaries
+\input{glossary.tex}
+\glsaddall	% add even unused acronyms
+
 
 \department{Katedra počítačových systémů}
 \title{Minimalistický CI systém}
@@ -24,8 +66,8 @@
 \author{Martin Franc}
 \supervisor{Jakub Jirůtka}
 % \acknowledgements{Doplňte, máte-li komu a za co děkovat. V~opačném případě úplně odstraňte tento příkaz.}
-\abstractEN{\input{abstract_en.tex}}
-\abstractCS{\input{abstract_cs.tex}}
+\abstractEN{\input abstract_en.tex}
+\abstractCS{\input abstract_cs.tex}
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{4}
 \keywordsCS{Nahraďte seznamem klíčových slov v češtině oddělených čárkou.}
@@ -43,5 +85,14 @@
 % \input chapters/5-buildbot.tex
 \input chapters/6-piper.tex
 % \input chapters/7-zaver.tex
+
+\printbibliography[]
+
+\appendix
+
+\chapter{Seznam zkratek}
+\printglossary[type=\acronymtype,style=acronyms]
+
+\input{medium.tex}
 
 \end{document}
