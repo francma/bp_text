@@ -21,10 +21,10 @@ arch:
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex 
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
     - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
-    - mv main.pdf $(date +"bp_francma_%Y-%m-%d_%H:%M_$TRAVIS_COMMIT.pdf")
+    - mv main.pdf $(date +"BT_Franc_Martin_%Y-%m-%d_%H:%M_$TRAVIS_COMMIT.pdf")
 
 before_deploy:
-  - export RELEASE_FILE=$(ls bp_francma*.pdf)
+  - export RELEASE_FILE=$(ls BT_Franc_Martin_*.pdf)
 
 deploy:
   name: "text"

@@ -51,6 +51,8 @@ Podobně jako u Gitlab CI je konfigurace řešena souborem \verb|.travis.yml|, k
 Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
 Selhání fáze znamená zastavení provádění všech následujícíh fází.
+Selhání příkazu znamená selhnáné fáze, aktuálně vykonávaná fáze doběhne dokonce.
+Pokud bychom chtěli, aby se po selhnání příkazu fáze ukončila, pak je nutné zadefinovat proměnnou shellu na začátku skriptů (\verb|set -eo pipefail|)
 
 \begin{minted}[
     frame=single,

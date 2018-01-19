@@ -15,11 +15,6 @@
 
 \bibliography{library.bib}
 
-\newcommand{\importsvg}[1]{
-    \def\svgwidth{\columnwidth}
-    \import{media/svg/}{#1.pdf_tex}
-}
-
 % usage: \imagefigure{filename}{description}
 \newcommand{\imagefigurefull}[3]{
     \begin{figure}[htbp]
@@ -35,22 +30,6 @@
 
 \newcommand{\imagefigure}[2]{
     \imagefigurefull{#1}{#2}{.6}
-}
-
-\newcommand{\screenshotfigure}[2]{
-    \imagefigurefull{#1}{#2}{.4}
-}
-
-\newcommand{\idkijustwanttwotofitonapagefigure}[2]{
-    \imagefigurefull{#1}{#2}{.83}
-}
-
-\newcommand{\svgfigure}[2]{
-    \begin{figure}[htbp]
-    \centering
-        \importsvg{#1}
-        \caption{#2 \label{pic:#1}}
-    \end{figure}
 }
 
 \makeglossaries
