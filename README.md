@@ -1,43 +1,18 @@
-# Text k bakalářské práci [![Build Status](https://travis-ci.org/francma/bp_text.svg?branch=master)](https://travis-ci.org/francma/bp_text)
+# Text bakalařská práce "Minimalistický CI systém"
 
-Průběh zpracování
+[![Build Status](https://travis-ci.org/francma/bp_text.svg?branch=master)](https://travis-ci.org/francma/bp_text)
 
-## Úvod
 
-| Kapitola         | Stav |
-|------------------|------|
-| uvod             | 1%   |
+Spusťte `make run` k sestavení nebo si stáhněte poslední verzi z [Releases](https://github.com/francma/bp_text/releases)
 
-## Běhová prostředí
+## Požadavky
 
-| Kapitola               | Stav |
-|------------------------|------|
-| virtualizace           | 1%   |
-| virtualizace pomocí OS | 60%  |
-
-## GitlabCI
-
-| Kapitola         | Stav |
-|------------------|------|
-| ....             | 1%   |
-
-## BuildBot
-
-| Kapitola         | Stav |
-|------------------|------|
-| ....             | 1%   |
-
-## TravisCI
-
-| Kapitola         | Stav |
-|------------------|------|
-| ....             | 1%   |
-
-## Návrh
-
-| Kapitola                    | Stav |
-|-----------------------------|------|
-| komunikace_prohlizec_system | 99%  |
-| komunikace_system           | 5%   |
-| komunikace_system_behove    | 5%   |
-| persistence_dat             | 50%  |
+* python
+* texlive-core
+* texlive-latexextra
+* texlive-genericextra
+* biber
+* ttf-linux-libertine
+* texlive-bibtexextra
+* ttf-dejavu
+* pygmentize
