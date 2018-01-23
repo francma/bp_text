@@ -1,52 +1,58 @@
 \chapter{Běhová prostředí}
 
-Běhovým prostředím je myšleno prostředí, ve kterém je prováděny integrační testy.
-Toto prostředí by mělo být:
+Proces integrace je potřeba spustit v běhovém prostředí, které jsme pro tento účel připravili.
+Z bezpečnostních hledisek by mělo být toto běhové prostředí:
 
 \begin{itemize}
-	\item Uvedeno do počátečního stavu na začátku každé integrace.
 	\item Odolné vůči vnějším vlivům prostředí.
 	\item Izolované proti neoprávněným zásahům do vnějšího systému.
+	\item Limitované na zdroje.
 \end{itemize}
 
+Nechceme například, aby byl záškodník schopen za pomoci integrace kompromitovat nesouvisející části systému nebo použíl proces integrace pro útok na externí systémy.
+
+Dalším požadavkem je, že integrace se stejnými vstupními daty by měla vždy vracet stejné výsledky.
+Ač se zdá toto pravidlo jasné, tak jeho zaručení nemusí být úplně přímočaré.
+Pokud například všechny integrace provádíme ve stejném běhovém prostředí a během jedné integrace se poškodí systém, tak všechny další integrace budou selhávat.
+
 Těchto požadavků lze dosáhnout vytvořením virtualizovaním prostředí, které nám zajistí izolaci integrace.
-Virtualizace je technika při které se jeden fyzický prostředek transformuje na několik virtuálních prostředků.
-Fyzický prostředek slouží jako hostitel pro virtuální prostředky.
-
-Virtualizační prostředí uvedeme do počátečního stavu jednoduše jeho znovuvytvořením.
-
-% https://edux.fit.cvut.cz/oppa/BI-ADU/prednasky/BIADU_P11_Virt.pdf
+Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, aplikací jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, emulace, QoS a dalších \cite{virt_intro}.
 
 \section{Plná virtualizace}
 
-% Obrazek hypervizor / os / virtualni stroje
-
 Výsledkem plné virtualizace je virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
-Prostředníkem mezi virtuálním strojem a hostitelským systémem se nazývá hypervizor.
+Takto provozovaná instance OS se nazývá host a systém, pod kterým host běží, hostitel.
 
 \imagefigurelarge{hypervizor.pdf}{Hypervizor typu 1 (vpravo) proti typu 2 (vlevo)}
 
-Virtualizační programy: VirtualBox, QEMU
+Prostředníkem mezi hostem a hostitelem je hypervizor.
+Hypervizor je software nebo firmware, který dovoluje virtualizovat systémové prostředky.
+Existují 2 typy hypervizorů (obrázek \ref{pic:hypervizor.pdf}).
+Hypervizor typu 1 běží přímo nad hardwarem zatímco hypervizor typu 2 běží nad hostitelským OS, který řeší služby potřebné k virtualizaci samotné jako například přístup ke vstupu/výstupu, správa paměti a další.
+\cite{hypervisor_def}
 
-\subsection{Softwarová virtualizace}
-
-Softwarová virtualizace funguje na principu úpravy instrukcí virtualizovaného stroje.
-Je nutné přepsat privilegované instrukce na neprivilegované a upravit přístupy do paměti.
+Mezi hypervizory patří PowerVM , VMware \cite{vmware}, ESX Server \cite{esx_server}, Xen \cite{xen}, KVM \cite{kvm}, z/VM \cite{z_vm} a další.
 
 \subsection{Hardwarové asistovaná virtualizace}
 
-Hardwarové asistovaná virtualizace funguje na principu simulace hardwaru za podpory specializovaných instrukcí procesoru.
-Na tomto simulovaném hardwaru je pak možné spustit další instanci operačního systému, která bude kompletně odstíněna od svého hostitele.
-Nevýhodou tohoto řešení je nutnost alokace systémových prostředků na běh dalšího operačního systému i samotnou simulaci hardwaru.
+Jedná se o virtualizaci, která je podpořena procesorem hostitelského systému.
+Na CPU architektuře x86 se jedná o technologie VT-x (intel) \cite{vt_d} a AMD-V (AMD) \cite{amd_v}.
+Princip spočívá v rozšíření instrukční sady CPU o další instrukce, které dovolují procesoru přepínat mezi více kontexty.
+Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuálního prostředí.
+
+\section{Paravirtualizace}
+
+% http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html
 
 \section{Virtualizace na úrovni operačního systému}
 
-% http://www.linfo.org/kernel_space.html
 Systémová paměť moderních operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
 Prostor jádra je přímo využíván pro běh jádra operačního systému a jeho služeb.
 V~uživatelském prostoru běží procesy spuštěné uživatelem bez přístupu do prostoru jádra.
 Uživatelské procesy komunikují s~prostorem jádra pouze skrz systémové metody.
-Na x86 procesorech se k~rozdělení paměti používá chráněný režim, ve kterém lze stránky virtuální paměti rozdělit podle privilegovanosti.
+\cite{kernel_space}
+
+% Na x86 procesorech se k~rozdělení paměti používá chráněný režim, ve kterém lze stránky virtuální paměti rozdělit podle privilegovanosti.
 
 Virtualizace na úrovni operačního systému je virtualizační technika, která dovoluje koexistenci několika oddělených uživatelských režimů, které fungují nad stejným prostorem jádra.
 Izolovanému uživatelskému prostoru se často označuje jako tzv. \uv{kontejner}.
@@ -62,9 +68,8 @@ Dalším opatřením může být spuštění nové instance operačního systém
 Mezi technologie pro tvorbu kontejnerů patří:
 
 \begin{itemize}
-	\item Jmenné prostory a kontrolní skupiny (Linux)
-	\item Jails (BSD)
-	\item Hyper-V
+	\item Jmenné prostory a kontrolní skupiny (Linux),
+	\item jails (BSD).
 \end{itemize}
 }
 
@@ -85,38 +90,43 @@ Existuje několik druhů jmenných prostorů.
 \paragraph{PID}
 
 Proces vidí procesy pouze ze svého a podřízených PID jmenných prostorů.
+\cite{pid_namespaces}
 
 \paragraph{NET}
 
 Síťové rozhraní náleží právě do jednoho jmenného prostoru a není sdíleno s~podřízenými jmennými prostory.
 Každé síťové rozhraní má svoje IP adresy, routovací tabulky, firewall a další síťové prostředky. 
+\cite{namespaces}
 
 \paragraph{MNT}
 
 Kontrolujeme jaké mount pointy budou viditelné.
 Vytvořením nového MNT namespacu přeneseme všechny mount pointy rodiče.
-Změny v~aktuálním namespacu neovlivňují rodičovský namespace. 
-
+Změny v~aktuálním namespacu neovlivňují rodičovský namespace.
+\cite{mnt_namespaces}
 
 \paragraph{IPC}
 
 Meziprocesová komunikace.
 Linux kernel ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi jmennými prostory.
+\cite{namespaces}
 
 % FIXME? PostreSQL pokud má stejné UID, pak přistupuje do stejné paměti a koliduje??
 
 \paragraph{UTS}
 
 Dovoluje systému vystupovat pod více hostitelskými jmény (hostnames).
+\cite{namespaces}
 
 \paragraph{user}
 
 Umožňuje libovolně mapovat uživatelská ID z~kontejneru na ID uživatelů z~hostitele.
 Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru se jedná pouze o~obyčejného uživatele (bez práv roota).
+\cite{user_namespaces}
 
 % https://www.youtube.com/watch?v=sK5i-N34im8
 
-O~vytvoření jmenného prostoru se stará systémové volání FORK.
+O~vytvoření jmenného prostoru se stará systémové volání \verb|fork|.
 
 \subsubsection{Kontrolní skupiny (cgroups)}
 
@@ -125,23 +135,19 @@ Typy prostředků jsou:
 \begin{itemize}
 	\item CPU čas
 	\item Operační paměť
-	\item Disková paměť % FIXME tohle je divny nazev
+	\item Disková paměť
 	\item Síťový provoz
 	\item Provoz na disku
 \end{itemize}
-
-Mezi další vlastnosti kontrolních skupin patří možnost zmrazit skupinu procesů v~určitém stavu a následně je znovu odmrazit. % FIXME mam tohle vubec rozebirat
-
 
 \subsubsection{Copy on write}
 
 Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
 Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
 Za cenu vyšší režie můžeme takto ušetřit mnoho paměti.
+\cite{copy_on_write}
 
-% https://books.google.cz/books?id=9yIEji1UheIC&lpg=PA295&dq="copy+on+write"&pg=PA295&redir_esc=y#v=onepage&q="copy%20on%20write"&f=false
-
-Použití v~Linuxu v systémovém volání FORK nebo v~různých filesystémech (ZFS).
+Použití v~Linuxu v systémovém volání \verb|fork| \cite{fork_manual} nebo v~různých filesystémech (ZFS, BTRFS) \cite{fs_cow}.
 
 \subsection{BSD jails}
 
@@ -160,9 +166,3 @@ Kontejneru lze také omezovat systémové prostředky (RAM, disk, síť, \ldots)
 
 % https://www.freebsd.org/doc/handbook/jails.html
 
-
-\subsection{Hyper-V}
-
-Proprietární technologie firmy Microsoft.
-Dostupné pouze na některých verzích Windows (profesionální verze, dražší oproti klasickým verzím).
-Kontejnerové řešení Docker je schopné využít tuto technologii a fungovat nad ní jako frontend.
