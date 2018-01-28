@@ -33,14 +33,21 @@ Hypervizor typu 1 běží přímo nad hardwarem zatímco hypervizor typu 2 běž
 
 Mezi hypervizory patří PowerVM , VMware \cite{vmware}, ESX Server \cite{esx_server}, Xen \cite{xen}, KVM \cite{kvm}, z/VM \cite{z_vm} a další.
 
+\subsection{Softwarová virtualizace}
+
 \subsection{Hardwarové asistovaná virtualizace}
 
 Jedná se o virtualizaci, která je podpořena procesorem hostitelského systému.
-Na CPU architektuře x86 se jedná o technologie VT-x (intel) \cite{vt_d} a AMD-V (AMD) \cite{amd_v}.
+Použití hardwarově asistované virtualizace přináší oproti softwarové virtualizaci velký skok ve výkonu, protože nemusí docházet k dodatečnému ASDAFEFEWQFVFREAFAEWRFR3WRFR.
+Na CPU architektuře x86 se jedná o technologie VT-x (Intel) \cite{vt_x} a AMD-V (AMD) \cite{amd_v}.
 Princip spočívá v rozšíření instrukční sady CPU o další instrukce, které dovolují procesoru přepínat mezi více kontexty.
 Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuálního prostředí.
 
 \section{Paravirtualizace}
+
+Paravirtualizace je technika, při které je hostovaný systém upraven tak, aby místo namísto přímé komunikace s hardwarem používal API hostitele.
+Výhodou tohoto přístupu byla snížená režie oproti plné softwarové virtualizaci.
+S příchodem harwarové virtualizace, která dokáže být stejně rychlá jako paravirtualiazace se od této technologie postupně upouští \cite{paravirtualization_leave}.
 
 % http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html
 
