@@ -16,11 +16,10 @@ arch:
     - texlive-bibtexextra
     - ttf-dejavu
     - pygmentize
+    - jre9-openjdk
 
   script:
-    - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex 
-    - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
-    - xelatex -shell-escape -interaction=nonstopmode -halt-on-error main.tex
+    - for file in /etc/profile.d/*.sh; do source "${file}"; done && make
     - mv main.pdf $(date +"BT_Franc_Martin_%Y-%m-%d_%H:%M_$TRAVIS_COMMIT.pdf")
 
 before_deploy:
