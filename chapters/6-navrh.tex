@@ -18,31 +18,9 @@ Inspirací pro jméno je firma Pied Piper z TV seriálu Sillicon Valley \cite{pi
 
 \section{Architektura}
 
-Piper~CI bude rozdělen do několika částí, subsystému.
-Tím pádem bude možné libovolnou jeho část nahradit jinou, nebo systém takto rozšířit o další funkcionalitu.
-Jednotlivé části systému spolu budou komunikovat skrze definované API.
-Jádro musí také implementovat uživatelské účtu, jejich autentizaci a autorizaci při přístupu ke svým zdrojům.
+\subsection{Monolitický systém}
 
-\subsection{Jádro}
-
-Středobod celeho systému.
-Stará se o persistenci dat, která poskytuje v rámci svého API.
-Jeho dalším úkolem je komunikace s běhovými klienty, kterým přiděluje práci a ukládá výsledky provedených integrací.
-
-\subsection{Běhový klient}
-
-Běhový klient je zodpovědný za konečný průběh integrací.
-Kontrétně se jedná o vykonání zadaných příkazů a předání výstupu těchto příkazů jadru systému, které je dalé zpracuje.
-Běhový klient by měl využít vlastností běhových prostředí.
-Je na místě, aby byl běhový klient schopen spouštět více souběžných integrací.
-
-\subsection{Webové rozhraní}
-
-Webové rozhraní využívající API jádra pro zobrazení informací o stavů integrací.
-
-\subsection{Terminálové rozhraní}
-
-Podobně jako webové rozhraní jen pomocí terminálu s využitím technologie SSH.
+\subsection{Distribuovaný systém}
 
 \section{Komunikace}
 
@@ -136,7 +114,7 @@ Programovací jazyky jsou pak schopny z tohoto WSDL souboru generovat přímo kl
 
 \section{Komunikace v realném čase}
 
-Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení celé webové stránky.
+Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení dat.
 Server tedy posílá pouze žádané informace a ne celou webovou stránku.
 Jedná se například o~stavy buildů nebo výpis výstupu aktuálně běžícího buildu (tzv. \uv{streaming logu}).
 Klientem je v~této komunikaci webový prohlížeč a serverem CI systém.
@@ -147,31 +125,36 @@ Spočívá v~opakovaném dotazování ze směru klienta (webového prohlížeče
 Nevýhoda tkvý v~plýtvání systémových prostředků z~důvodu velkého počtu dotazů.
 Výhodou je velmi jednoduchá implementace.
 
+
+\begin{listing}[ht]
 \begin{minted}[frame=single, linenos]{text}
 00:00:00 Klient -> Máš pro mě něco?
 00:00:01 Server -> Ne, čekej.
 00:00:01 Klient -> Máš pro mě něco?
 00:00:02 Server -> Ne, čekej.
 00:00:02 Klient -> Máš pro mě něco?
-00:00:03 Server -> Ano.
+00:00:03 Server -> Ano. Tady to je!
 \end{minted}
+\caption{Short polling}
+\end{listing}
 
-K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest|.
-Ze strany serveru se jedná o~klasický HTTP GET požadavek.
+K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest| nebo Fetch API \cite{fetch_api}.
+Z pohledu strany serveru se jedná o~klasický HTTP požadavek.
 
 \subsection{Long-polling}
 
-Server po přijmutí požadavku místo okamžité záporné odpovědi čeká dokud nemůže vrátit kladný výsledek.
-Čekání je omezeno časovým limitem spojení na straně serveru i klienta.
-Na straně serveru je nutné si pohlídat maximální počet aktivních spojení.
+Server po přijmutí požadavku místo okamžité záporné odpovědi čeká dokud nemůže vratít požadovaná data nebo je nucen poslat spojení ukončit z důvodu vypršení spojení (\textit{timeout}).
 
+\begin{listing}[ht]
 \begin{minted}[frame=single, linenos]{text}
 00:00:00 Klient -> Máš pro mě něco?
 00:00:15 Server -> Ano.
 00:00:15 Klient -> Máš pro mě něco?
 \end{minted}
+\caption{Long polling}
+\end{listing}
 
-Implementace témeř totožná s~Short-pollingem.
+Implementace témeř totožná s~short-pollingem.
 Rozdílem je přidání čekací smyčky na straně serveru.
 
 \subsection{Server-Sent Events}
@@ -180,16 +163,21 @@ Jednostranné spojení ve směru od serveru ke klientovi.
 Oproti long-pollingu není nutné stále otevírat nová spojení, drží se stále jedno.
 Spojení, které nekončí chybou, jsou automaticky znovuotevírána.
 
+\begin{listing}[ht]
 \begin{minted}[frame=single, linenos]{text}
 00:00:00 Klient -> Posílej mi všechno!
 00:00:15 Server -> Tady to je.
 00:00:16 Server -> Tady to je.
 \end{minted}
+\caption{SSE}
+\end{listing}
 
 \noindent
 Serverová implementace založena na HTTP se speciální \verb|Content-Type| hlavičkou.
 Jednotlivé zprávy jsou identifikovány pomocí pole \verb|id| a odřádkováním.
+\cite{sse}
 
+\begin{listing}[ht]
 \begin{minted}[frame=single, linenos]{text}
 Content-Type: text/event-stream
 Cache-Control: no-cache
@@ -200,8 +188,10 @@ data: <data>
 id: <id zpravy>
 data: <data>
 \end{minted}
+\caption{SSE struktura komunikace}
+\end{listing}
 
-O~příjem komunikace na straně klienta se stará JavaScript třída \verb|EventSource|.
+O~příjem komunikace na straně klienta se stará JavaScript třída \verb|EventSource| \cite{sse_event_source}.
 
 \subsection{Websocket}
 
@@ -209,74 +199,73 @@ Oboustranné spojení mezi klientem a serverem.
 Prvnotní požadavek přes HTTP protokol se změnou na WebSocket spojení.
 Většína jazyků určených pro vývoj webových aplikací nemá podporu WebSocketů přímo zabudovanou a tak je nutnost sáhnout po knihovně třetí strany.
 Implementace na straně webového prohlížeče implementována pomocí JavaScript třídy \verb|WebSocket|.
-
-% TODO: proc je websocket neyhodny (stream vs message based)
+\cite{websocket}
 
 \subsection{HTTP2}
 
 
 \section{Komuninakce s~běhovým prostředím}
 
-Cílem je vytvořit rozhraní s~VM, které přijme zadaný příkaz nebo jejich sadu a rozhraní schopno streamovat výstup z~příkazů.
-Rozhraní by mělo udržovat stály stav (proměnné shellu, ...).
+Cílem je vytvořit rozhraní s běhovým prostředím, které přijme zadaný příkaz nebo jejich sadu a poskytne přístup k průběžnému výstupu.
+Pokud budeme vykonávat jednotlivé příkazy odděleně, tak je nutné zajistit persistenci prostředí uvnitř běhového prostředí.
+Například pokud jeden příkaz nadefinuje proměnné prostředí, tak další příkaz by k nim měl mít přístup (například změna pracovní složky \verb|$PWD|).
 
 \subsection{Virtualbox}
 
+Jelikož se jedná o plnou virtualizaci, tak je potřeba vytvořit jakýsi můstek mezi hostem a hostitelem.
+
 \subsubsection{COM port pro čtení/zápis}
 
-Pomocí VirtualBox administračního rozhraní vytvoříme COM port, který nasměrujeme do souboru/socketu.
-Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a necháme aplikaci na rodičovském stroji číst výstupy.
-Spojení je oboustranné, takže je možné předávat příkazy i dovnitř stroje, které je ale nutné parsovat a předávat systému další aplikací běžící uvnitř VM.
-Tento způsob předpokládá už přihlášeného uživatele.
+Pomocí VirtualBox administračního rozhraní vytvoříme COM port, jehož výstup nasměrujeme do souboru nebo sockeru na hostitelském systému.
+Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a aplikace provozovaná na hostitelském systému tento výstup převezme.
+Spojení je oboustranné, takže je možné předávat příkazy i do hostovaného systému.
+\cite{virtualbox_serial}
 
 \subsubsection{SSH spojení}
 
-SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky.
-Přihlašování uživatelů do operačního systému virtuálního stroje bez hesla lze docílit uložením jejich veřejných klíčů do souboru \textit{known\_hosts}.
-Soubor \textit{known\_hosts} je uložen v~domovském adresáři uživatele a bude nutno zajistit jeho modifikaci buďto přes dodatečné připojení VDI obrazu disku virtuálního stroje nebo předpřípravou obrazu systému.
-
-\subsubsection{Vzdálený terminál přes COM port}
-
-Podobné SSH spojení.
-Nutná editace konfigurace VM systému, aby daný COM port viděl jako terminálový.
-Přihlašování uživatele a spuštění příkazů za pomoci přímého vpisu/čtení ze socketu.
+SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky \cite{ssh_rfc}.
+Přihlášení uživatele do systému je implementováno na základě věřejného klíče, hesla, hostname nebo lze ověřování úplně vypnout \cite{ssh_auth_rfc}.
+Pro naše účely lze ověřované úplně vypnout za předpokladu, že dokažeme ohlídat možné zneužití.
 
 \subsection{Docker}
 
-Příkazy lze předávat do kontenejneru přímo z~hostujícího stroje.
-Výpis výsledku je přímo na stdout, který lze přesměrovat do roury a z~té dál do CI systému.
+Příkazy lze předávat do kontejneru přímo z~hostujícího stroje.
+Výstup z příkazů pak jednoduše směrujeme do souboru nebo socketu.
 
 \begin{listing}[ht]
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{shell}
-docker start ecstatic_perlman
-docker exec -i ecstatic_perlman bash -c 'ls -al' 
+\begin{minted}[frame=single,linenos]{shell}
+docker start [jmeno_kontejneru]
+docker exec -i [jmeno_kontejneru] [prikaz] >> [soubor]
 \end{minted}
-\caption{Ukázka Docker exekutoru}
-\label{docker-minimal-example}
+\caption{Předání výstupu z Docker kontejneru}
 \end{listing}
 
-\subsection{LXC}
+Pro využití přímo v našem programu můžeme využít jednu z mnoha SDK knihoven \cite{docker_sdk}.
 
+\subsection{LXD}
 
+Jádro LXD je proces běžící na pozadí, který zpřístupňuje svoji funkcionalitu skrze REST API dostupné přes lokální unix socket nebo síť \cite{lxd}.
+Klientem může být naše vlastní implementace podle REST API specifikace nebo využijeme předpřipravené klienty \cite{lxd_rest}.
 
-\subsection{Závěr}
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{shell}
+curl -k -L --cert cert --key key "https://localhost:8443/1.0/images"
+\end{minted}
+\caption{Dotaz na REST API pomocí HTTP}
+\end{listing}
 
-Nejsilnějším nástrojem jsou zajisté WebSockety.
-Nicméně naše použití nepotřebuje plnou oboustrannou komunikaci a z~hlediska implementace jsou WebSockety tou nejsložitější cestou.
-Nejvýhodnějším řešením je technologie SSE, nepotřebuje žádné další externí závislosti a implemetace na serverové straně je velmi jednoduchá.
+\section{Persistence dat}
 
-
-\section{Ukládání dat systému}
-
-Co je třeba ukládat?
+V následující sekci probereme možnosti způsobu persistence dat.
+Nejprve je ale nutné definovat jaké druhy dat je třeba ukládat.
+Budou to například:
 
 \begin{itemize}
-	\item Uživatelé a jejich nastavení
-	\item Výsledky buildů včetně jejich výstupů
-	\item Vazby mezi CI a SCM
+	\item uživatelé a jejich nastavení,
+	\item výsledky buildů včetně jejich výstupů,
+	\item fronty,
+	\item dočasná data (cache),
+	\item vazby mezi CI a SCM.
 \end{itemize}
 
 Data by měla být i jednoduše seřaditelná podle různých kritérií.
@@ -284,20 +273,19 @@ Data by měla být i jednoduše seřaditelná podle různých kritérií.
 \subsection{Souborový systém}
 
 Nejjednodušší persistentní datové uložiště, které lze strukturovat pomocí adresářů a symbolických odkazů.
-Jednotlivé soubory pak uložíme v~nějakém strojově zpracovatelném formátu, například JSON nebo XML.
+Jednotlivé soubory pak uložíme v~nějakém strojově zpracovatelném formátu, například JSON, YAML nebo XML.
 Z~hlediska složité filtrace a řazení nevhodné pro data nad kterými chceme provádět tyto operace.
-
-\textbf{Vhodné pro:}
+Vhodné pro:
 \begin{itemize}
-	\item logy
-	\item binární data
-	\item velké soubory
-	\item konfigurační soubory
+	\item textové logy,
+	\item binární data,
+	\item velké soubory,
+	\item konfigurační soubory.
 \end{itemize}
 
 \subsection{In-memory datová struktura (Redis)}
 
-Klíč-hodnota struktura uložená v~operační paměti podporující následující datové typy:
+Asociativní struktura uložená v~operační paměti podporující následující datové typy:
 
 \begin{itemize}
 	\item řetězce
@@ -309,28 +297,23 @@ Klíč-hodnota struktura uložená v~operační paměti podporující následuj�
 
 Asociativní pole lze zanořovat do sebe a tím vytvářet struktury.
 Funguje na principu klient-server a je tedy snadné sdílet data mezi více systémy, které běží například na různých strojích.
-Operační pamět není persistentním uložištěm a tak je třeba data ukládat také na pevný disk.
-To je možné udělat pomocí průběžných zápisových logů nebo exportem celé struktury do souboru.
-Oba způsoby jsou přímou součástí Redisu.
+Jelikož je celá struktura uložená pouze v operační paměti, tak se ztrátou napětí ztratí i všechna uložena data.
+Vhodné pro:
 
-\medskip\noindent
-\textbf{Vhodné pro:}
 \begin{itemize}
-	\item dočasná data ke kterým potřebujeme rychlý přístup
-	\item fronty
-	\item zámky
+	\item dočasná data ke kterým potřebujeme rychlý přístup,
+	\item fronty,
+	\item zámky.
 \end{itemize}
+\cite{redis}
 
 \subsection{Databáze}
 
-\medskip\noindent
-\textbf{Vhodné pro:}
+Vhodné pro:
+
 \begin{itemize}
-	\item filtrovaná data
-	\item řazená data
-	\item data se složitějšími vazbami
+	\item filtrovaná data,
+	\item řazená data,
+	\item data se složitějšími vazbami.
 \end{itemize}
 
-\section{Závěr}
-
-\imagefigurelarge{architektura_piper.pdf}{Návrh architektury}

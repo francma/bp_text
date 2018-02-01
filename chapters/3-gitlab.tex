@@ -1,52 +1,52 @@
-\chapter{Gitlab CI}
+\chapter{GitLab CI}
 
-\section{Uživatelské použití}
-
-Konfigurace projektů je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři repozitáři projektu.
+GitLab CI je součástí součástí správce GIT repozitářů GitLab.
+Jeho použití je tedy vymezeno pouze pro uživatele tohoto systému.
+Projekt je vydáván pod několika edicemi -- komerční a komunitní, která je vydána pod open source licencí \cite{gitlab_ce}.
 
 \section{Průběh integrace}
+
+Konfigurace integrace je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři repozitáři projektu.
+Konfigurace projektu je dostupná přes webové UI nebo jiné rozhraní využívající dostupné API.
 
 Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
 Pokud jedna z~fází selže, tak celý proces integrace končí chybou.
 
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
 stages:
   - test
   - build
   - deploy
 \end{minted}
+\caption{Definice fázi v .gitlab-ci.yml}
+\end{listing}
 
 Jednotlivé fáze se skládají z~několika úkolů.
-Ůkoly jsou spouštěny nezávisle na sobě a tím pádem je lze paralelizovat.
+Ůkoly v rámci fáze jsou spouštěny nezávisle na sobě a tím pádem je lze paralelizovat.
 Selhání jednoho z~úkolů vede k~neuspěchu celé fáze.
 Úkoly jsou vždy provedeny všechny, nezávisle na výsledku ostatních v~rámci fáze.
 
-
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
 job1:
   stage: test
   script:
     - cmd 1
     - cmd 2
 \end{minted}
+\caption{Definice úkolu job1 v .gitlab-ci.yml}
+\end{listing}
 
 Každý úkol je složen z~několika příkazů.
 Pokud jeden z~příkazů skončí chybovým návratovým kódem, pak je ukončeno provádění úkolu.
 
-Mezi speciální úkoly patří \verb|before\_script| a \verb|after\_script|.
+Mezi speciální úkoly patří \verb|before_script| a \verb|after_script|.
 Tyto úkoly jsou provedeny vždy před nebo po každým uživatelsky definovaným úkolem.
 
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
 before_script:
   - cmd 1
   - cmd 2
@@ -55,77 +55,30 @@ after_script:
   - cmd 1
   - cmd 2
 \end{minted}
+\caption{Definice before\_script a after\_script .gitlab-ci.yml}
+\end{listing}
 
 Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace \verb|when|.
 
 \begin{itemize}
-  \item \verb|on\_success| -- vykonej pouze pokud předchozí fáze skončila úspěchem (výchozí) 
-  \item \verb|on\_failure| -- vykonej pouze pokud předchozí fáze skončila neúspěchem
+  \item \verb|on_success| -- vykonej pouze pokud předchozí fáze skončila úspěchem (výchozí) 
+  \item \verb|on_failure| -- vykonej pouze pokud předchozí fáze skončila neúspěchem
   \item \verb|always| -- vykonej vždy
 \end{itemize}
 
 \section{Architektura}
 
-% \centerline {\picwidth=\hsize \inspic img/gitlab_architecture_diagram.png }
-% \label[my-pic]
-% \nobreak
-% \caption/f Gitlab Architektura
+Celý systém GitLabu je rozdělen do několika podsystémů, které mezi sebou komunikují převážně protokolem GRPC.
+
+\cite{gitlab_architecture}
 
 % https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/development/architecture.md
 
-\subsection{NGINX a Gitlab Pages}
-
-Frontend aplikace. Úloha NGINX jako reverzní proxy z~hlediska cachování je předávána spíše na Gitlab Workhorse.
-Stará je o~šifrování venkovního spojení pomocí HTTPs.
-
-\subsection{Gitlab Workhorse}
-
-Prvotním úkolem bylo podržet dlouhotrvající HTTP spojení vytvořeném GIT clonem přes HTTP a ne SSH.
-Důvodem pro to bylo, že Unicorn tyto spojení po vyprchání času ukončoval a zdálo se technologicky jednodušší implementovat další vrstvu, která obslouží tyto požadavky, než měnit existující modul.
-Po přidání možnosti stažení ZIP souboru s~repozitářem a vytváření tzv. artefaktů během buildu se zrodil stejná problém jako s~GITem přes HTTP a byl také vyřešen stejným způsobem.
-Při dalším vývoji se zdálo moc pracné stále udržovat NGINX server, aby nějaké typy požadavků směroval na Unicorn a jiné na Workhorse, tak se začly všechny požadavky směrovat přes Workhorse.
-Workhorse nyní funguje jako chytřejší proxy poskytující statické soubory, GIT přes HTTP a směruje požadavky dále do Gitlab infrastruktury.
-
-% https://gitlab.com/gitlab-org/gitlab-workhorse
-% https://about.gitlab.com/2016/04/12/a-brief-history-of-gitlab-workhorse/
-
-\subsection{Unicorn}
-
-Ruby HTTP server.
-
-% nejspis hlavni server FIXME
-
-\subsection{Gitlab shell}
-
-Shell obsahující set příkazů pracující na originálním GITem.
-Po připojení na server přes SSH je možné konfigorovat repozitáře přímo přes shell příkazy.
-Řada oprávnění je kontrolována přímo přes GIT hooky, takže není nutné využívat Gitlab Shell.
-Pokud se jedná o~komplexnější akci, vyžadující komplexnější kontrolu oprávnění, pak je nutné využít Gitlab Shellu.
-
-% https://gitlab.com/gitlab-org/gitlab-shell/tree/master
-
-\subsection{Gitaly}
-
-Každý GIT příkaz zpracovávaný Gitlabem nakonec skončí v~Gitaly.
-Cíl Gitaly je urychlit GIT příkazy decentralizováním uložiště a použitím cache.
-V~současné době se uvažuje nad využitím projektu Git Ketch.
-Git Ketch replikuje uložiště mezi několik serverů, u~kterých není pevně určené rozdělení na hlavní a sekundární.
-Hlavní server je vybrán podle hlasování na základě aktuálnosti dat mezi servery.
-
-% https://gitlab.com/gitlab-org/gitaly/tree/master
-% https://www.infoq.com/news/2016/02/google-kick-starts-git-ketch
 
 \subsection{Uložiště}
 
 PostreSQL persistentní.
 Cache a data broker Redis.
-
-\subsection{Komunikace}
-
-GRPC uvnitř Gitlab systému.
-
-
-% https://gitlab.com/gitlab-org/gitaly/tree/master
 
 
 \subsection{Gitlab CI multi-runner}

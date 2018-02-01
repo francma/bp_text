@@ -1,1 +1,31 @@
 \chapter{Implementace}
+
+\section{Architektura}
+
+Piper~CI bude rozdělen do několika částí, subsystému.
+Tím pádem bude možné libovolnou jeho část nahradit jinou, nebo systém takto rozšířit o další funkcionalitu.
+Jednotlivé části systému spolu budou komunikovat skrze definované API.
+Jádro musí také implementovat uživatelské účtu, jejich autentizaci a autorizaci při přístupu ke svým zdrojům.
+
+\subsection{Jádro}
+
+Středobod celeho systému.
+Stará se o persistenci dat, která poskytuje v rámci svého API.
+Jeho dalším úkolem je komunikace s běhovými klienty, kterým přiděluje práci a ukládá výsledky provedených integrací.
+
+\subsection{Běhový klient}
+
+Běhový klient je zodpovědný za konečný průběh integrací.
+Kontrétně se jedná o vykonání zadaných příkazů a předání výstupu těchto příkazů jadru systému, které je dalé zpracuje.
+Běhový klient by měl využít vlastností běhových prostředí.
+Je na místě, aby byl běhový klient schopen spouštět více souběžných integrací.
+
+\subsection{Webové rozhraní}
+
+Webové rozhraní využívající API jádra pro zobrazení informací o stavů integrací.
+
+\subsection{Terminálové rozhraní}
+
+Podobně jako webové rozhraní jen pomocí terminálu s využitím technologie SSH.
+
+\imagefigurelarge{architektura_piper.pdf}{Návrh architektury}
