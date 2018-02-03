@@ -27,3 +27,42 @@ Samotný systém kontinuální intgrace, lze definovat jako množinu softwaru re
 \end{enumerate}
 
 \end{introduction}
+
+Tento popis je velmi obecný a proto bude vhodné se podívat na nějaké konkrétní projekty používající kontinuální integraci.
+Vezmeme například projekt Nette.
+Nette je PHP framework pro stavbu webových aplikací.
+Repozitáře projektu jsou verzované verzovacím nástrojem Git a další integrace je pod systémem kontinuální integrace Travis CI.
+
+\begin{enumerate}
+	\item Spusť integrační a jednotkové testy pro verze PHP 7.1 a 7.2 pro terminálové rozhraní (php-cgi) a webové (php).
+	\item Zkontroluj syntakticky správný zápis programu.
+	\item Předej informace o testovaní službě třetí strany.
+\end{enumerate}
+
+Z tohoto nám vznikne 6 úkolů:
+
+\begin{itemize}
+	\item Kontrola syntaxe.
+	\item Testy na php 7.1.
+	\item Testy na php 7.2.
+	\item Testy na php-cgi 7.1.
+	\item Testy na php-cgi 7.2.
+	\item Předání informací o testování službě třetí strany.
+\end{itemize}
+
+Jelikož nemá smysl pouštět jakékolik testování, pokud program není zapsán syntakticky správně, tak jako první provedeme kontrolu syntaxe.
+Po zkontrolovaní syntaktické správnosti spustíme integrační a jednotkové testy.
+Protože testy na sobě nijak nezávisí, tak je možné je pustit paralelně, abychom zkrátili dobu testování.
+Po dokončení testování předáme výsledky službě třetí strany.
+
+Skupiny testů, které jsou na sobě nezávislé a je možné je paralelizovat nazýváme fází.
+V tomto konrétním případě nám vzniknou 3 fáze:
+
+\begin{itemize}
+	\item Kontrola syntaxe.
+	\item Testy.
+	\item Předání informací o testování službě třetí strany.
+\end{itemize}
+
+Od systému kontrinuální integrace tedy očekáváme určinou možnost integrační proces řídít.
+Většinou se jedná o třízení na fáze a úkoly, ale také o další možnosti, které budou probrány u konkrétních systémů CI.

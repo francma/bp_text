@@ -71,20 +71,24 @@ Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem
 Dalším opatřením může být spuštění nové instance operačního systému pomocí plné virtualizace, která bude využívána pro běh kontejnerů.
 Únikem z~kontejneru se pak útočník dostane pouze do virtualizovaného operačního systému bez možnosti ovlivnit hostitele.
 
-{
+Jelikož kontejner sdílí stejný prostor jádra se svým hostitelem, tak není možné, aby byl kontejner založen na jiném OS než hostitel.
+Není tedy například možné provozovat Linuxové kontejnery na systému s OS Windows.
+
 Mezi technologie pro tvorbu kontejnerů patří:
 
 \begin{itemize}
 	\item Jmenné prostory a kontrolní skupiny (Linux),
 	\item jails (BSD).
 \end{itemize}
-}
 
 \subsection{Nástroje operačního systému Linux}
 
 Linux kernel sám o sobě nenabízí přímé kontejnerové řešení, ale pouze sadu nástrojů, pomocí kterých je kontejner vytvořen.
 Jedná se o jmenné prostory a kontrolní skupiny.
 Nad těmito nástroji je postaveno například kontejnerové řešení LXC nebo Docker.
+
+V podstatě se jedná o založení nového rootu adresářové struktury a následným spuštěním kontejneru pracující nad touto adresářovou strukturou.
+Vzory této adresářové struktury se nazývají obrazy.
 
 \subsubsection{Jmenné prostory (namespaces)}
 
@@ -117,8 +121,6 @@ Změny v~aktuálním namespacu neovlivňují rodičovský namespace.
 Meziprocesová komunikace.
 Linux kernel ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi jmennými prostory.
 \cite{namespaces}
-
-% FIXME? PostreSQL pokud má stejné UID, pak přistupuje do stejné paměti a koliduje??
 
 \paragraph{UTS}
 

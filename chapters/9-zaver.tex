@@ -1,1 +1,32 @@
 \chapter{Závěr}
+
+Výsledkem této práce je minimalistický CI systém vhodný pro menší komunitní projekty.
+
+Práce po úvodu do problematiky kontinuální integrace vysvětluje technologie pro vytváření běhových prostředí a verzovacích nástrojů, jelikož jsou to základní stavební kameny kontinuální integrace.
+Dále následuje analýza existujících řešení.
+Konkrétně Gitlab CI, Travis CI a Buildbot.
+
+Po analýze exitujících projektů následuje vlastní návrh a následná implementace.
+
+Minimalismu je docíleno pečlivým výběrem závislostí třetích stran.
+Konkrétně je pro provoz systému nutný pouze Python verze 3.6 a vyšší, Redis server a technologie pro vytvoření běhového prostředí.
+
+Modularitu a rozšiřitelnost systému je zaručeno rozdělením systému do dílčích systému s rozdělenou zodpovědností a přístupy ke zdrojám pomocí REST API.
+Systém je tedy možné rozšířit o libovolnou podporu běhového prostředí nebo naimplementovat vlastní uživatelské rozhraní.
+Součástí práce je implementace běhového prostředí využívající technologii LXD.
+REST API dovoluje také snadnou integraci na další systémy.
+
+Paralelizace je dosaženo rozdělením integrace do úkolů, které jsou přiřazovany do fází.
+Úkoly v rámci fáze je pak možné provozovat paralelně.
+Výsledné řešení je odlišně od zadaného tzv. \uv{build matrixu}, protože během rešeršní části se ukázal jako vhodnější přístup dělení na fáze a úkoly.
+
+Součástí práce je i implementace webového rozhraní a terminálového rozhraní pomocí SSH.
+Pomocí terminálového i webového rozhraní je možné sledovat stav úloh i včetně tzv. \uv{streaming logů}.
+
+Součástí textu práce je také postup nasazení a uživatelská dokumentace.
+
+V budoucnu bych rád tento projekt dále rozšiřoval.
+Například bych rád projekt rozšířil o podporu dalších běhových prostředí a podíval se na možnosti instlace projektu pomocí Snap balíčků.
+
+
+

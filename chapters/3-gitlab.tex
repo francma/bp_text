@@ -68,47 +68,38 @@ Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace \v
 
 \section{Architektura}
 
-Celý systém GitLabu je rozdělen do několika podsystémů, které mezi sebou komunikují převážně protokolem GRPC.
-
+Celý systém GitLabu je rozdělen do několika podsystémů, které mezi sebou komunikují převážně protokolem gRPC.
+Gitlab CI Runner je zodpovědný za provedení konkrétnách integrací.
+Využívá se i message-based systému pro přenos zpráv.
+Dalším službám systém poskytuje REST API s přípravou GraphQL API.
 \cite{gitlab_architecture}
+\cite{gitlab_api}
 
-% https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/development/architecture.md
-
-
-\subsection{Uložiště}
-
-PostreSQL persistentní.
-Cache a data broker Redis.
-
+Persistetním uložištěm je databáze, konkrétně PostgreSQL.
+Pro dočasná data a zprávy přenášené pomocí message-based protokolu se používá paměťová struktura v RAM Redis.
 
 \subsection{Gitlab CI multi-runner}
 
-CI systém spolupracuje s~několika běhovými servery (\textit{Runners}), které se starají o~samotné vykonání definovaných příkazů (sestavení).
-Běhové servery využívají exekutory.
-Implementuje několik exekutorů.
+CI systém spolupracuje s~několika běhovými servery (\textit{Runners}), které se starají o~samotné vykonání integrace.
+Běhový server je schopen provozovat paralelně několik běhových prostředí různého typu.
 Volba běhováho serveru je definována na úrovni konfigurace projektu a je omezena globálním nastavením Gitlab CI.
 
 % https://docs.gitlab.com/ee/ci/runners/README.html
 % http://docs.gitlab.com/ce/api/ci/builds.html
 
-\subsubsection{Shell exekutor}
+\subsubsection{Shell běhové prostředí}
 
-Příkazy provádí pod stejným uživatelem jako samotný běhový server.
-Příkazy přeneseny jako soubor.
+Příkazy provádí na stejném systému pod stejným uživatelem jako samotný běhový server.
+Z tohoto plyne mnoho bezpečnostních rizik a proto se použití tohoto běhového prostředí doporučuje pouze pro testování.
 
-\subsubsection{Docker exekutor}
+\subsubsection{Docker běhové prostředí}
 
-Docker je kontejnerová technologie.
-Kontejnery jsou sestavovány z~Docker obrazů definující sadu dostupného softwaru.
-Pro jednotlivá sestavení je vytvořena nová instance Docker kontejneru.
-Volba obrazu pro sestavení a pro jednotlivé joby je definována klíčovým slovem \verb|image|.
+Příkazy se provádí uvnitř Dcoker kontejneru.
+Volba Docker obrazu definována klíčovým slovem \verb|image|.
 Sestavení lze obohatit o~tzv. služby, kterými můžeme každému buildu dát k~dispozici přístup k~další Docker instanci, která bude dostupná pod zadanou hostname.
 Služby lze opět konfigurovat na úrovni sestavení, tak na úrovni jobu.
 
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
+\begin{minted}[frame=single,linenos]{yaml}
 image: ruby:2.2
 
 services:
@@ -140,10 +131,7 @@ Soubory a složky určené k~cachování uvedeme jako výčet v~konfiguraci proj
 Cesta k~souboru je uvedená jako relativní ke kořeni projektu, cachování souborů mimo projekt není touto cestou možné. 
 Cache lze také omezit pouze na soubory a složky, které nejsou verzovany GITem.
 
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
+\begin{minted}[frame=single,linenos]{yaml}
 cache:
   key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
   untracked: true
