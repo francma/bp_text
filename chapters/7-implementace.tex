@@ -1,31 +1,69 @@
 \chapter{Implementace}
 
-\section{Architektura}
-
-Piper~CI bude rozdělen do několika částí, subsystému.
-Tím pádem bude možné libovolnou jeho část nahradit jinou, nebo systém takto rozšířit o další funkcionalitu.
+Piper~CI je rozdělen do několika částí, subsystému.
+Tím pádem je možné libovolnou jeho část nahradit jinou, nebo systém takto rozšířit o další funkcionalitu.
 Jednotlivé části systému spolu budou komunikovat skrze definované API.
 Jádro musí také implementovat uživatelské účtu, jejich autentizaci a autorizaci při přístupu ke svým zdrojům.
 
-\subsection{Jádro}
+Jako hlavní programovací jazyk jsem zvolil Python ve verzi 3.6, protože s ním mám už předchozí zkušenosti.
+Také je to jediný programovací jazyk ze zadaných (Rust, Lua, Ruby, Python), který se vyučuje v rámci bakalářského studia na naší fakultě.
+Rozhodl jsem se pro jeho poslední verzi z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd dokáží částečně nahradit dokumentační komentáře.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{python}
+def foo(bar: Bar, count: int) -> List[str]:
+    items: List[str] = ['hello:' + i for i in bar.items()]
+    return items
+\end{minted}
+\caption{Ukázka typových anotací v Pythonu 3.6}
+\end{listing}
+
+\section{Jádro (Piper CI core)}
 
 Středobod celeho systému.
-Stará se o persistenci dat, která poskytuje v rámci svého API.
+Stará se o persistenci dat, která poskytuje v rámci HTTP REST API.
+REST API jsem zvolil z důvodu jeho jednoduchosti na implementaci ze strany klientů i serveru.
 Jeho dalším úkolem je komunikace s běhovými klienty, kterým přiděluje práci a ukládá výsledky provedených integrací.
 
-\subsection{Běhový klient}
+K persistenci dat jsem použil knihovnu peewee, která mi poskytuje abstrakci nad různými databázovými stroji.
+Abstrakcí jsem ztratil možnost optimalizace pro konkrétní databázový stroj, ale naopak získal možnost provozu systému nad různými databázovými stroji včetně SQLite.
+Jádro systému nepotřebuje kromě jednoduché filtrace dat dělat náročnější dotazy do databáze, tak případný ztracený výkon nebude ani znatelný.
+
+Volba webové knihovny padla na webový framework Flask.
+Flask je dostatečně lehký, aby splńoval požadavek na minimalismus systému.
+Flask v sobě nese i webový server, který je ale vhodný jen pro testovací účely.
+Produkční provoz se doporučuje v kombinaci s wsgi implementujícím serverem a volitelně i reverzní proxy (například nginx).
+
+Jádro s běhovými klienty komunikuje pomocí REST API.
+Jádro nebere zodpovědnost za přidělování jednotlivých úkolů běhovým klientům, ale pouze naslouchá a čeká na klienty až se dotáží jádra.
+Tímto je zaručeno, že běhový klient si vezme jen tolik úkolů, kolik je schopen zvládnout.
+Úkoly jsou uložené v FIFO frontě.
+
+Součástí jádra je i terminálové SSH rozhraní, ke kterému se uživatel autentizuje pomocí RSA klíčů.
+REST rozhrání používá k autentizaci tokenů, které jsou součástí HTTP hlaviček dotazů na server.
+
+\section{Běhový klient (Piper CI LXD runner)}
 
 Běhový klient je zodpovědný za konečný průběh integrací.
-Kontrétně se jedná o vykonání zadaných příkazů a předání výstupu těchto příkazů jadru systému, které je dalé zpracuje.
-Běhový klient by měl využít vlastností běhových prostředí.
-Je na místě, aby byl běhový klient schopen spouštět více souběžných integrací.
+Kontrétně se jedná o vykonání zadaných příkazů a předání výstupu těchto příkazů jádru systému, které je dalé zpracuje.
+Běhové prostředí je implemtováno technologií LXD.
+Ke komunikaci mezi Pythonem a LXD jsem použil oficiální pylxd knihovnu.
 
-\subsection{Webové rozhraní}
+Běhový klient převezmu úkol jako sadu příkazů, které sloučí do sebe a tím vytvoří spustitelný skript pro běhové prostředí.
+Výstup z tohotu skriptu je přenášen jádru systému pomocí periodických dotazů na REST api jádra.
+Výstup tedy není \uv{streamovaný} v realném čase, ale nabírá zpoždění v řádu jednotek sekund.
+Toto ale není problém, protože dokončení úkolu trvá průměrně několik minut a na výstup z něho není třeba žádné okamžité reakce.
+Aby bylo možné ve výstupu identifikovat jednolivé příkazy, tak je skript opatřen speciálními značkami, které udávají začátek a konec příkazu s dalšími informacemi jako například návratový kód a aktuální čas.
+Tyto značky jsou následně rozpoznáni jádrem systému, které je dále zpracuje.
 
-Webové rozhraní využívající API jádra pro zobrazení informací o stavů integrací.
+Běhový klient je schopen v rámci jedné své instance spouštět více úkolů paralelně.
 
-\subsection{Terminálové rozhraní}
+\section{Webové rozhraní (Piper CI web)}
 
-Podobně jako webové rozhraní jen pomocí terminálu s využitím technologie SSH.
+Webové rozhraní využívající REST API jádra pro zobrazení informací o stavů integrací.
+K autorizaci se používá již zníněný uživatelský token.
+Streaming logů je implementován pomocí periodických dotazů (short polling) z důvodů zmíněných již dříve.
+Před výpisem logů je potřeba nahradit ANSI sekvence ve výstupu příkazů HTML značkami.
+To se děje na straně prohlížeče pomocí JavaScriptu.
 
-\imagefigurelarge{architektura_piper.pdf}{Návrh architektury}
+\imagefigurelarge{architektura_piper.pdf}{Návrh architektury Piper}
