@@ -1,41 +1,40 @@
 \chapter{Návrh systému}
 
-V této kapitole se budeme věnovat návrhu systému, konkrétně: 
-
-\begin{itemize}
-	\item architektura systému,
-	\item průběh integrace,
-	\item komunikace systému,
-	\item komunikace s běhovým prostředím,
-	\item persistence dat,
-	\item výběr programovacího jazyka pro implementaci a knihoven,
-	\item terminálového rozhraní,
-	\item webového rozhraní.
-\end{itemize}
-
+V této kapitole se budeme věnovat návrhu systému.
 V následujícím textu bude odkazováno na navrhovaný systém jeho vybraným názvem -- Piper~CI.
 Inspirací pro jméno je firma Pied Piper z TV seriálu Sillicon Valley \cite{pied_piper}.
+
+\section{Průběh integrace}
+
+Integrační proces bude rozdělen na fáze, úkoly a příkazy.
+Integrační proces se skládá alespoň z jedné fáze.
+Fáze se skládá z jednoho nebo více úkolů.
+Ůkol v sobě obsahuje jeden nebo více příkazů.
+
+Selhání jednoho z příkazů vede k ukončení vykonávání úkolu a jeho selhání.
+Jelikož jsou úkoly prováděny nezávisle na sobě, tak po selhnáhí jednoho úkolu jsou ostatní úkolu v rámci fáze dokončeny.
+Pokud jeden z úkolů v rámci fáze selže, tak selže celá fáze a další fáze už nejsou prováděny.
+Fáze jsou prováděny sekvenčně.
+
+Integrační proces je pokládán za úspešný poté, co jsou všechny jeho fáze v úspěšném stavu.
+
+Jednotlivé úkoly, fáze nebo celé integrace je možné restartovat nebo rušit.
 
 \section{Architektura}
 
 Při výběru architektury systému by měl být brán v potaz požadavek na jeho modulárnost.
-Jelikož u monolitického systému by dosažení modulárnosti byl problém, tak je vhodnější zvolit systém distribuovaný.
+Modularity systému docílíme výběrem vhodné architektury.
 
-\section{Komunikace}
+\subsection{REST}
 
-Jelikož Piper CI není architektonicky navržen jako monolit, ale jako modularní systém s více nezávislími částmi, tak je nutné zajistit komunikaci těchto jednotlivých částí.
-V následující podkapitole budou probrány možné přístupy k vyřešení tohoto problému.
-
-\subsection{REST architektura}
-
-Za REST kompatibilní rozhraní je považováno rozhraní splňující následující požadavky:
+REST je architektonický vzor splňující následující požadavky:
 
 \begin{itemize}
-	\item model klient-server,
-	\item bezstavový model,
-	\item správa mezipaměťi,
-	\item uniformní rozhraní,
-	\item vrstvená architektura. \cite{rest}
+    \item model klient-server,
+    \item bezstavový model,
+    \item správa mezipaměťi,
+    \item uniformní rozhraní,
+    \item vrstvená architektura. \cite{rest}
 \end{itemize}
 
 \subsubsection{Model klient-server}
@@ -77,53 +76,163 @@ Přínos spočívá v umožnění rozdělení serverové části na více menš�
 
 Základním stavebním kamenem REST rozhraní jsou zdroje.
 Každá pojmenovatelná informace může být zdrojem (např. počasí dnes v Praze, \ldots), kolekce dalších zdrojů (např. počasí v hlavních městech Evropy) a další.
-Zdroj je identifikován URI adresou\footnote{schéma:[//[uživatel[:heslo]@]server[:port]][/cesta][?dotaz][\#fragment]}.
+Zdroj je identifikován URI adresou.
 \cite{rest_zdroje}
 
-\subsection{Příklad realného použití}
+\section{Struktura systému}
 
-Mějme server, který disponuje HTTP REST API s kolekcemi \verb|/projekty|, \verb|/integrace|.
-Klientem bude jednoduché webové rozhraní, které zobrazí detaily o projektu a všechny jeho integrace.
-Tím pádem klient bude potřebovat poslat 2 HTTP požadavky.
-První bude na zdroj \verb|/projekty/[id_projetu]|, aby získal informace o projektu a druhý bude na \verb|/projekty/[id_projektu]/integrace|, aby získal informace o integracích k danému projektu.
+V případě Piper CI je poskytovatelem služeb jádro systému (Piper CI core), které přes API poskytuje přístupy ke svým zdrojům.
+API je zpřístupněno pomocí webového serveru dle výběru provozovatele.
+Webové rozhraní se chová jako prostředník mezi klientem (webovým prohlížečem) a poskytovatelem služeb (tento přístup je definován v REST jako vrstvená architektura).
+Terminálový klient komunikuje s jádrem systému přímo přes SSH protokol.
+Grafická reprezentace systému je vyobrazena v diagramu \ref{pic:architektura_piper.pdf}.
 
-Z příkladu lze vyčíst, že klient potřebuje poslat 2 dotazy na server.
-To nám přináší zvýšenou režii při připojování k severu.
-Ač je REST rozhraní většinou spojováno s protokolem HTTP, tak tomu tak nemusí být \cite{rest_http}.
+\imagefigurelarge{architektura_piper.pdf}{Návrh architektury Piper}
 
-\subsection{GraphQL}
+Poté, co je integrace rozdělena na jednotlivé úkoly, je jádro zařadí do fronty, odkud jsou vyzvednuty běhovými klienty a zpracovány.
+Běhový klient informuje průběžně jádro systému o průběhy integrace (stav a log výstup).
+Jádro systému tyto informace zpracovává a archivuje.
 
-GraphQL se snaží doplnit nedostatky REST rozhraní.
-Kontrétně REST rozhraní nespecifikuje pokročilou filtraci dat a neumožňuje výběr dat z více zdrojů v jednom požadavku.
-Nevýhodou GraphQL oproti REST rozhraní bude jeho větší složitost převážně na straně serveru.
-\cite{graphql}
+\section{Model jádra systému}
 
-\subsection{Vzdálené volání procedur (RPC)}
+Model jádra systému je rozdělen do entit, které mají mezi sebou vazby.
+Vše začíná u projektu, který je vazbou mezi systémem CI a verzovacím systémem.
+Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou.
+Uživatelé jsou přiřazování do projektů.
+K projektu jsou vázány data o jeho provedených integracích.
+Běhovým klientům jsou přiřazovány úkoly, které vykonávájí.
+Grafická reprezentace entit v systému je vyobrazena na obrázku \ref{pic:entity_piper.pdf}.
 
-Vzdálené volání procedur je v principu velmi podobné volání procedur v rámci programu.
-Rozdílem je, že klientem volaná procedura je zpracovávána na vzdáleném serveru namísto, aby byla provedena ve stejném paměťovém adresovém prostoru.
-Parametry procedury je nutné zabalit do formátu vhodného pro přenost (tzv. mashalling) a následně je zase rozbalit (tzv. unmashalling).
-\cite{rpc}
+\imagefigurelarge{entity_piper.pdf}{Entity v Piper CI}
 
-\subsection{SOAP}
+\section{Návrh API}
 
-SOAP je komunikační protokol založený na formátu XML, jehož přenos zpráv probíhá pomocí protokolu HTTP, ale není to pravidlem \cite{soap}.
-Formát komunikace je popsán WSDL souborem \cite{wsdl}.
-Programovací jazyky jsou pak schopny z tohoto WSDL souboru generovat přímo klientskou část, bez nutnosti manuální definice rozhraní \cite{php_wsdl}.
+REST API jádra je dostupné přes HTTP protokol.
+Definice REST zdrojů vychází z definice entit systému.
 
-\section{Komunikace v realném čase}
+\verb|/projects| -- projekty,
+\verb|/builds| -- integrace,
+\verb|/stages| -- fáze,
+\verb|/jobs| -- úkoly,
+\verb|/runners| -- běhový klienti,
+\verb|/users| -- uživatelé.
+
+Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
+Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vratí projekty s daným originem.
+Speciálním případěm filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implemetovat stránkování.
+
+Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \verb|POST| (vytvoř) \verb|PUT| (aktualizuj) \verb|DELETE| (smaž).
+Výsledek akce je reprezentován návratovým HTTP kódem.
+
+\section{Autentizace a autorizace}
+
+Autentizace uživatele do systému je přes terminálové rozhraní je provedená přes SSH RSA klíče.
+Každý uživatel má v systému zavedený svůj veřejný klíč.
+Mimo veřejného klíče uživatel disponuje také tokenem, který je použit pro autentizaci se systémy třetí strany (webové rozhraní).
+
+Oprávnění jsou definována na úrovni systému a jednotlivých projektů v podobě rolí.
+
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+
+Systémové role jsou následující:
+
+\paragraph{ROOT}
+
+Administrátor celého systému.
+Je autorizován ke všem akcím.
+Podobnost s root oprávněním v Unixu.
+
+\paragraph{ADMIN}
+
+Administrátor na úrovni projektů.
+
+\paragraph{NORMAL}
+
+Obyčejný uživatel, který je zařazován do projektů.
+
+\paragraph{GUEST}
+
+Návštěvník.
+Výchozí identita pro nepřihlášeného uživatele.
+
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+
+Projektová role jsou následující:
+
+\paragraph{MASTER}
+
+Správce projektu.
+Edituje projekt a přídává do něj uživatele.
+
+\paragraph{DEVELOPER}
+
+Člen projektu.
+
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+
+\subsection{Uživatelé}
+
+Uživatelé mají plná oprávnění v případě editace sama sebe.
+Role ADMIN může vytvářet pouze uživatele s oprávněním NORMAL.
+
+\begin{table}[h]
+\centering
+\caption{Oprávnění v uživatelskému modelu}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+       & ROOT & ADMIN & NORMAL & GUEST \\ \hline
+Zobrazení   & x    & x     &        &       \\ \hline
+Vytvoření & x    & x     &        &       \\ \hline
+Editace   & x    &       &        &       \\ \hline
+Smazání & x    &       &        &       \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Běhoví klienti}
+
+Přidání běhového klienta by měla být pouze záležitost hlavního administrátora systému (ROOT).
+Naopak zobrazení běhových klientů by mělo být přístupné všem, protože v definici integrace je nutné uvest i běhového klienta.
+
+\begin{table}[h]
+\centering
+\caption{Oprávnění v modulu běhových klientů}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+       & ROOT & ADMIN & NORMAL & GUEST \\ \hline
+Zobrazení   & x    & x     & x      &       \\ \hline
+Vytvoření & x    &       &        &       \\ \hline
+Editace   & x    &       &        &       \\ \hline
+Smazání & x    &       &        &      \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Projektoví uživatelé}
+
+Přidání a odebrání uživatelů do projektů je dovoleno pouze uživatelům, kteří mají v daném projektu roli ADMIN.
+Uživatel je schopen odebrat sám sebe z projektu.
+
+\subsection{Integrace}
+
+Informace o integracích jsou veřejné pro všechny uživatelé, dokonce i v roli GUEST.
+Restart nebo zrušení integrace je dovoleno pouze uživatelům v projektu.
+
+\section{Návrh terminálového rozhraní}
+
+\section{Komunikace v \uv{realném čase}}
 
 Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení dat.
 Server tedy posílá pouze žádané informace a ne celou webovou stránku.
 Jedná se například o~stavy buildů nebo výpis výstupu aktuálně běžícího buildu (tzv. \uv{streaming logu}).
 Klientem je v~této komunikaci webový prohlížeč a serverem CI systém.
 
-\subsection{Short-polling}
+Za opravdovou komunikaci v realném čase by se dalo považovat websocketové spojení \cite{websocket}.
+Je třeba si ale uvědomit, že data systému není nutné poskytovat v opravdu realném čase a i několika sekundové zpoždění není na závadu.
+Důvodem je to, že na stav integrace není nutné okamžitě reagovat, výstup z \uv{streaming logu} je pouze jednostanný, neumožňující uživatelskou interakci.
 
-Spočívá v~opakovaném dotazování ze směru klienta (webového prohlížeče) směrem k~serveru (CI systém) v~určitém časovém intervalu.
+Jako nejvýhodnější řešení se jeví metoda pollingu.
+Metoda pollingu spočívá v~opakovaném dotazování ze směru klienta (webového prohlížeče) směrem k~serveru (CI systém) v~určitém časovém intervalu.
 Nevýhoda tkvý v~plýtvání systémových prostředků z~důvodu velkého počtu dotazů.
 Výhodou je velmi jednoduchá implementace.
-
 
 \begin{listing}[ht]
 \begin{minted}[frame=single, linenos]{text}
@@ -140,68 +249,9 @@ Výhodou je velmi jednoduchá implementace.
 K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest| nebo Fetch API \cite{fetch_api}.
 Z pohledu strany serveru se jedná o~klasický HTTP požadavek.
 
-\subsection{Long-polling}
+Přidání čekací smyčky na straně serveru místo odeslání okamžité odpovědi se nazývá long-polling.
 
-Server po přijmutí požadavku místo okamžité záporné odpovědi čeká dokud nemůže vratít požadovaná data nebo je nucen poslat spojení ukončit z důvodu vypršení spojení (\textit{timeout}).
-
-\begin{listing}[ht]
-\begin{minted}[frame=single, linenos]{text}
-00:00:00 Klient -> Máš pro mě něco?
-00:00:15 Server -> Ano.
-00:00:15 Klient -> Máš pro mě něco?
-\end{minted}
-\caption{Long polling}
-\end{listing}
-
-Implementace témeř totožná s~short-pollingem.
-Rozdílem je přidání čekací smyčky na straně serveru.
-
-\subsection{Server-Sent Events}
-
-Jednostranné spojení ve směru od serveru ke klientovi.
-Oproti long-pollingu není nutné stále otevírat nová spojení, drží se stále jedno.
-Spojení, které nekončí chybou, jsou automaticky znovuotevírána.
-
-\begin{listing}[ht]
-\begin{minted}[frame=single, linenos]{text}
-00:00:00 Klient -> Posílej mi všechno!
-00:00:15 Server -> Tady to je.
-00:00:16 Server -> Tady to je.
-\end{minted}
-\caption{SSE}
-\end{listing}
-
-\noindent
-Serverová implementace založena na HTTP se speciální \verb|Content-Type| hlavičkou.
-Jednotlivé zprávy jsou identifikovány pomocí pole \verb|id| a odřádkováním.
-\cite{sse}
-
-\begin{listing}[ht]
-\begin{minted}[frame=single, linenos]{text}
-Content-Type: text/event-stream
-Cache-Control: no-cache
-
-id: <id zpravy>
-data: <data>
-
-id: <id zpravy>
-data: <data>
-\end{minted}
-\caption{SSE struktura komunikace}
-\end{listing}
-
-O~příjem komunikace na straně klienta se stará JavaScript třída \verb|EventSource| \cite{sse_event_source}.
-
-\subsection{Websocket}
-
-Oboustranné spojení mezi klientem a serverem.
-Prvnotní požadavek přes HTTP protokol se změnou na WebSocket spojení.
-Většína jazyků určených pro vývoj webových aplikací nemá podporu WebSocketů přímo zabudovanou a tak je nutnost sáhnout po knihovně třetí strany.
-Implementace na straně webového prohlížeče implementována pomocí JavaScript třídy \verb|WebSocket|.
-\cite{websocket}
-
-\subsection{HTTP2}
-
+Stále znovuotevírání HTTP spojení ze strany klienta k serveru můžeme vyřešit nasazením HTTP2, které po jednom spojení dokáže odeslat více požadavků.
 
 \section{Komuninakce s~běhovým prostředím}
 
@@ -253,66 +303,102 @@ curl -k -L --cert cert --key key "https://localhost:8443/1.0/images"
 \caption{Dotaz na REST API pomocí HTTP}
 \end{listing}
 
-\section{Persistence dat}
+\section{Konfigurace integrací projektu}
 
-V následující sekci probereme možnosti způsobu persistence dat.
-Nejprve je ale nutné definovat jaké druhy dat je třeba ukládat.
-Budou to například:
+Konfigurace integrací projektu je brána z textového souboru umístěného přímo v repozitáři projektu.
+Velkou výhodou tohoto přístupu je, že v kombinaci s verzovacím systémem se konfigurace integrace váže vždy k určitému stavu repozitáře.
 
-\begin{itemize}
-	\item uživatelé a jejich nastavení,
-	\item výsledky buildů včetně jejich výstupů,
-	\item fronty,
-	\item dočasná data (cache),
-	\item vazby mezi CI a SCM.
-\end{itemize}
+\subsection{Formát souboru}
 
-Data by měla být i jednoduše seřaditelná podle různých kritérií.
+První je nutné rozhodnout formát tohoto souboru.
+Soubor může být pouhým strukturovaným popisem dat (JSON, YAML, XML, \ldots) nebo dokonce jednoduchý skript (Lua, Python, \ldots).
+Jelikož cílem práce je systém minimalistický, tak se jeví jako vhodnější řešení definice integrace pomocí strukturovaného popisu dat.
+Mezi uvažované formáty patří JSON, YAML a XML.
+JSON není vhodný, kvůli absenci komentářů.
+Ač XML formát komentáře podporuje, tak je pro člověka hůže čitelný a méně konfortní na editaci viz. ukázky \ref{listing:xml} a \ref{listing:yaml}.
 
-\subsection{Souborový systém}
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{xml}
+<build>
+    <stages>
+        <stage>
+            <id>1</id>
+            <name>one</name>
+        </stage>
+    </stages>
+</build>
+...
+\end{minted}
+\caption{Ukázka XML}
+\label{listing:xml}
+\end{listing}
 
-Nejjednodušší persistentní datové uložiště, které lze strukturovat pomocí adresářů a symbolických odkazů.
-Jednotlivé soubory pak uložíme v~nějakém strojově zpracovatelném formátu, například JSON, YAML nebo XML.
-Z~hlediska složité filtrace a řazení nevhodné pro data nad kterými chceme provádět tyto operace.
-Vhodné pro:
-\begin{itemize}
-	\item textové logy,
-	\item binární data,
-	\item velké soubory,
-	\item konfigurační soubory.
-\end{itemize}
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
+build:
+    stages:
+        one:
+            id: 1
+...
+\end{minted}
+\caption{Ukázka YAML}
+\label{listing:yaml}
+\end{listing}
 
-\subsection{In-memory datová struktura (Redis)}
+\subsection{Struktura souboru}
 
-Asociativní struktura uložená v~operační paměti podporující následující datové typy:
+Struktura souboru odpovídá průběhu integrace.
+U úkolů (jobs) lze navíc definovat podmínku jejich spuštění (only), typ běhového klienta (runner), obraz běhového prostředí (image) a proměnné prostředí.
+Proměnné prostředí jsou dostupné příkazům, tak i podmínce spuštění úkolu.
+Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM a další.
+Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (after\_failure).
+Vhodné jsou například pro výpis logovacích souborů.
 
-\begin{itemize}
-	\item řetězce,
-	\item seznamy,
-	\item sady,
-	\item seřazené sady,
-	\item hashe (asociativní pole).
-\end{itemize}
 
-Asociativní pole lze zanořovat do sebe a tím vytvářet struktury.
-Funguje na principu klient-server a je tedy snadné sdílet data mezi více systémy, které běží například na různých strojích.
-Jelikož je celá struktura uložená pouze v operační paměti, tak se ztrátou napětí ztratí i všechna uložena data.
-Vhodné pro:
-
-\begin{itemize}
-	\item dočasná data ke kterým potřebujeme rychlý přístup,
-	\item fronty,
-	\item zámky.
-\end{itemize}
-\cite{redis}
-
-\subsection{Databáze}
-
-Vhodné pro:
-
-\begin{itemize}
-	\item filtrovaná data,
-	\item řazená data,
-	\item data se složitějšími vazbami.
-\end{itemize}
-
+% \begin{listing}[ht]
+% \begin{minted}[frame=single,linenos]{yaml}
+% piper-yml:
+%   type: object
+%   additionalProperties: false
+%   properties:
+%     stages:
+%       type: array
+%       items:
+%         type: string
+%     jobs:
+%       type: object
+%       additionalProperties:
+%         type: object
+%         properties:
+%           stage:
+%             type: string
+%           only:
+%             type: string
+%           runner:
+%             type: string
+%           image:
+%             type: string
+%           env:
+%             type: object
+%             additionalProperties:
+%               oneOf:
+%                 - type: string
+%                 - type: integer
+%                 - type: boolean
+%           commands:
+%             type: array
+%             items:
+%               type: string
+%           after_failure:
+%             type: array
+%             items:
+%               type: string
+%         required:
+%           - stage
+%           - image
+%           - commands
+%   required:
+%     - stages
+% \end{minted}
+% \caption{Definice struktury souboru v JSON schema}
+% \end{listing}

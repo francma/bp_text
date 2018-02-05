@@ -57,6 +57,7 @@ Aby bylo možné ve výstupu identifikovat jednolivé příkazy, tak je skript o
 Tyto značky jsou následně rozpoznáni jádrem systému, které je dále zpracuje.
 
 Běhový klient je schopen v rámci jedné své instance spouštět více úkolů paralelně.
+Paralelizaci jsem implementoval pomocí knihovny multiprocessing.
 
 \section{Webové rozhraní (Piper CI web)}
 
@@ -66,4 +67,3 @@ Streaming logů je implementován pomocí periodických dotazů (short polling) 
 Před výpisem logů je potřeba nahradit ANSI sekvence ve výstupu příkazů HTML značkami.
 To se děje na straně prohlížeče pomocí JavaScriptu.
 
-\imagefigurelarge{architektura_piper.pdf}{Návrh architektury Piper}
