@@ -1,10 +1,10 @@
 \chapter{Testování}
 
-K psaní testů jsem využil Python knihovnu pytest a k správě prostředí testu nástroj tox.
+K psaní testů je využito Python knihovny pytest a k správě virtutuálních prostředí testů nástroj tox.
 Úkolem nástroje tox je vytvořit nové virtuální prostředí (virtualenv), v něm nainstalovat závisloti projektu i projekt samotný a nakonec spustit testy dle zadání.
-Použití virtuenv prostředí odstraní možné problémy s lokálním prostředím (kolegovi to funguje, ale mě nikoliv).
+Použití virtuenv prostředí odstraní možné problémy s lokálním prostředím (různé verze knihoven, \ldots).
 
-Ke statické analýze kódu jsem využil knihovny mypy, která dokáže zkontrolovat typovou správnost z poskytnutých typových anotací.
+Ke statické analýze kódu je použito knihovny mypy, která dokáže zkontrolovat typovou správnost z poskytnutých typových anotací.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{python}
@@ -31,13 +31,11 @@ def test_authorize(container: Container):
 Testy jsou dostupné v repozitářích projektů v podsložce \verb|tests| a spouští se přes příkaz \verb|tox|.
 
 Mimo testů samotných je součástí projektu i jednoduchý skript, který nainstaluje v testovacím režimu všechny části Piper CI systému, založí uživatele, nový projekt a spustí testovací integraci.
-Jedná se v podstatě o kompletní integrační test.
+Jedná se doplněk k převážně jednotkovým testům.
 
 U testování webového rozhraní byl zvolen jiný způsob testování, protože obsahuje minimální množství testovatelného kódu.
 Webové rozhraní v podstatě pouze dotazuje REST API Piper CI jádra a interpretuje výsledky.
 Pro tento účel byla vytvořena \uv{falešná} datová třída, poskytující testovací data.
 Testování není tedy prováděno automaticky, ale je třeba manuálně webové rozhraní projít pro odhalení případných chyb.
 
-V průběhu vývoje jsem využil získaných zkušeností ohledně systémů kontinuální integrace a začleníl jsem všechny projekty vytvořené v rámci této práce do kontinuální integrace.
-Konkrétně jsem zvolil Travis CI.
-
+V průběhu vývoje autor využil získaných zkušeností ohledně systémů kontinuální integrace a začleníl všechny projekty vytvořené v rámci této práce do Travis CI.

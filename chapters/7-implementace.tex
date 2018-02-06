@@ -1,13 +1,9 @@
 \chapter{Implementace}
 
-Piper~CI je rozdělen do několika částí, subsystému.
-Tím pádem je možné libovolnou jeho část nahradit jinou, nebo systém takto rozšířit o další funkcionalitu.
-Jednotlivé části systému spolu budou komunikovat skrze definované API.
-Jádro musí také implementovat uživatelské účtu, jejich autentizaci a autorizaci při přístupu ke svým zdrojům.
+Za hlavní programovací jazyk byl zvolen Python ve verzi 3.6, protože s ním má autor této práce největší zkušenosti.
+Také je to jediný programovací jazyk ze zadaných (Rust, Lua, Ruby, Python), který se vyučuje v rámci bakalářského studia na fakultě informačních technologií ČVUT.
 
-Jako hlavní programovací jazyk jsem zvolil Python ve verzi 3.6, protože s ním mám už předchozí zkušenosti.
-Také je to jediný programovací jazyk ze zadaných (Rust, Lua, Ruby, Python), který se vyučuje v rámci bakalářského studia na naší fakultě.
-Rozhodl jsem se pro jeho poslední verzi z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd dokáží částečně nahradit dokumentační komentáře.
+Rozhodnutí padlo na poslední stabilní verzi Pythonu (3.6) bez podpory předchozích verzí hlavně z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd a proměnných dokáží do jisté míry nahradit dokumentační komentáře.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{python}
@@ -20,34 +16,45 @@ def foo(bar: Bar, count: int) -> List[str]:
 
 \section{Jádro (Piper CI core)}
 
-Středobod celeho systému.
-Stará se o persistenci dat, která poskytuje v rámci HTTP REST API.
-REST API jsem zvolil z důvodu jeho jednoduchosti na implementaci ze strany klientů i serveru.
-Jeho dalším úkolem je komunikace s běhovými klienty, kterým přiděluje práci a ukládá výsledky provedených integrací.
-
-K persistenci dat jsem použil knihovnu peewee, která mi poskytuje abstrakci nad různými databázovými stroji.
-Abstrakcí jsem ztratil možnost optimalizace pro konkrétní databázový stroj, ale naopak získal možnost provozu systému nad různými databázovými stroji včetně SQLite.
-Jádro systému nepotřebuje kromě jednoduché filtrace dat dělat náročnější dotazy do databáze, tak případný ztracený výkon nebude ani znatelný.
-
 Volba webové knihovny padla na webový framework Flask.
 Flask je dostatečně lehký, aby splńoval požadavek na minimalismus systému.
-Flask v sobě nese i webový server, který je ale vhodný jen pro testovací účely.
-Produkční provoz se doporučuje v kombinaci s wsgi implementujícím serverem a volitelně i reverzní proxy (například nginx).
+Flask v sobě nese i webový server, který je ale vhodný jen pro testovací účely, produkční provoz se doporučuje v kombinaci s wsgi implementujícím serverem a volitelně i reverzní proxy (například nginx).
+Validace vstupních dat je prováděna proti OpenAPI schématu.
+
+K persistenci dat byla využita knihovna peewee, která poskytuje abstrakci nad různými databázovými stroji.
+Abstrakcí byla ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji včetně SQLite.
+Jádro systému nepotřebuje kromě jednoduché filtrace dat dělat náročnější dotazy do databáze, tak případný ztracený výkon nebude tak znatelný.
+
+Logy úkolů jsou ukládány v textovém soubory, který je vázán s konkrétním úkolem identifikátorem v jeho názvu.
 
 Jádro s běhovými klienty komunikuje pomocí REST API.
 Jádro nebere zodpovědnost za přidělování jednotlivých úkolů běhovým klientům, ale pouze naslouchá a čeká na klienty až se dotáží jádra.
 Tímto je zaručeno, že běhový klient si vezme jen tolik úkolů, kolik je schopen zvládnout.
-Úkoly jsou uložené v FIFO frontě.
+Úkoly jsou uložené v FIFO frontě, kterou implemetuje Redis server.
 
-Součástí jádra je i terminálové SSH rozhraní, ke kterému se uživatel autentizuje pomocí RSA klíčů.
 REST rozhrání používá k autentizaci tokenů, které jsou součástí HTTP hlaviček dotazů na server.
+Součástí jádra je i terminálové SSH rozhraní, ke kterému se uživatel autentizuje pomocí RSA klíčů.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{text}
+localhost$ ssh piper@piper.martinfranc.eu
+Enter passphrase for key '/home/anon/.ssh/id_rsa': 
+[email@martinfranc.eu]$ help
+
+Documented commands (type help <topic>):
+========================================
+build  exit  help  identity  job  project  runner  stage  user
+
+\end{minted}
+\caption{Ukázka terminálového rozhraní}
+\end{listing}
+
+Terminálové rozhraní je implementováno pomocí knihovny \verb|cmd|, která dovoluje i psaní interaktivní dokumentace parsované z komentářů funkcí.
 
 \section{Běhový klient (Piper CI LXD runner)}
 
-Běhový klient je zodpovědný za konečný průběh integrací.
-Kontrétně se jedná o vykonání zadaných příkazů a předání výstupu těchto příkazů jádru systému, které je dalé zpracuje.
 Běhové prostředí je implemtováno technologií LXD.
-Ke komunikaci mezi Pythonem a LXD jsem použil oficiální pylxd knihovnu.
+Ke komunikaci mezi Pythonem a LXD je použita oficiální pylxd knihovna.
 
 Běhový klient převezmu úkol jako sadu příkazů, které sloučí do sebe a tím vytvoří spustitelný skript pro běhové prostředí.
 Výstup z tohotu skriptu je přenášen jádru systému pomocí periodických dotazů na REST api jádra.
@@ -56,14 +63,46 @@ Toto ale není problém, protože dokončení úkolu trvá průměrně několik 
 Aby bylo možné ve výstupu identifikovat jednolivé příkazy, tak je skript opatřen speciálními značkami, které udávají začátek a konec příkazu s dalšími informacemi jako například návratový kód a aktuální čas.
 Tyto značky jsou následně rozpoznáni jádrem systému, které je dále zpracuje.
 
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{text}
+::piper:command:0:start:1514982032::
+fetch http://alpine.org/alpine/v3.5/main/x86_64/APKINDEX.tar.gz
+fetch http://alpine.org/alpine/v3.5/community/x86_64/APKINDEX.tar.gz
+v3.5.2-237-g9e642dbbba [http://alpine.org/alpine/v3.5/main]
+v3.5.2-213-g0860a961bc [http://alpine.org/alpine/v3.5/community]
+OK: 7963 distinct packages available
+::piper:command:0:end:1514982032:0::
+::piper:command:1:start:1514982032::
+(1/10) Installing libbz2 (1.0.6-r5)
+(2/10) Installing expat (2.2.0-r1)
+(3/10) Installing libffi (3.2.1-r2)
+(4/10) Installing gdbm (1.12-r0)
+(5/10) Installing ncurses-terminfo-base (6.0_p20170701-r0)
+(6/10) Installing ncurses-terminfo (6.0_p20170701-r0)
+(7/10) Installing ncurses-libs (6.0_p20170701-r0)
+(8/10) Installing readline (6.3.008-r4)
+(9/10) Installing sqlite-libs (3.15.2-r1)
+(10/10) Installing python2 (2.7.13-r0)
+Executing busybox-1.25.1-r1.trigger
+OK: 53 MiB in 26 packages
+::piper:command:1:end:1514982033:0::
+::piper:command:2:start:1514982033::
+Hello!
+::piper:command:2:end:1514982033:0::
+\end{minted}
+\caption{Ukázka výstupu logu}
+\end{listing}
+
 Běhový klient je schopen v rámci jedné své instance spouštět více úkolů paralelně.
-Paralelizaci jsem implementoval pomocí knihovny multiprocessing.
+K paralelizaci je použita knihovna multiprocessing.
 
 \section{Webové rozhraní (Piper CI web)}
 
 Webové rozhraní využívající REST API jádra pro zobrazení informací o stavů integrací.
 K autorizaci se používá již zníněný uživatelský token.
-Streaming logů je implementován pomocí periodických dotazů (short polling) z důvodů zmíněných již dříve.
+Streaming logů je implementován pomocí periodických dotazů (short polling).
 Před výpisem logů je potřeba nahradit ANSI sekvence ve výstupu příkazů HTML značkami.
 To se děje na straně prohlížeče pomocí JavaScriptu.
+
+\imagefigurelarge{piper-web.png}{Výsledné webové rozhraní}
 

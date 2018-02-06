@@ -124,6 +124,16 @@ Speciálním případěm filtrace jsou HTTP query parametry \verb|limit| a \verb
 Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \verb|POST| (vytvoř) \verb|PUT| (aktualizuj) \verb|DELETE| (smaž).
 Výsledek akce je reprezentován návratovým HTTP kódem.
 
+\section{Návrh terminálového rozhraní}
+
+Návrh terminálového rozhraní stejně jako REST rozhraní vychází z definice entit systému.
+Po připojení k terminálu je uživateli zpřístupněna sada příkazů s názvem sdružené entity.
+Jsou to \verb|build|, \verb|identity|, \verb|job|, \verb|project|, \verb|runner|, \verb|stage| a \verb|user|.
+Jenotlivé příkazy mají svoje podpříkazy.
+Jsou to například \verb|get|, \verb|list|, \verb|count|, \verb|update|, \verb|create| a pak další v závislosti na entitě.
+Podpříkazy mohou mít i argumenty, například \verb|job get 1| vrací úkol s identifikátorem 1.
+Pokud má podpříkaz více argumentů, tak jsou argumenty zadávány se svým jménem, například \verb|project create url="martinfranc.eu"|.
+
 \section{Autentizace a autorizace}
 
 Autentizace uživatele do systému je přes terminálové rozhraní je provedená přes SSH RSA klíče.
@@ -215,8 +225,6 @@ Uživatel je schopen odebrat sám sebe z projektu.
 
 Informace o integracích jsou veřejné pro všechny uživatelé, dokonce i v roli GUEST.
 Restart nebo zrušení integrace je dovoleno pouze uživatelům v projektu.
-
-\section{Návrh terminálového rozhraní}
 
 \section{Komunikace v \uv{realném čase}}
 

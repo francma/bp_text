@@ -1,4 +1,6 @@
 % arara: xelatex: { shell: yes }
+
+
 % arara: makeglossaries
 % arara: biber
 % arara: xelatex: { shell: yes }
@@ -10,6 +12,9 @@
 \usepackage{xevlna}
 \usepackage{caption}
 \usepackage{minted}
+\usepackage{rotating}
+\usepackage{anyfontsize}
+\usepackage{listings}
 \usepackage[export]{adjustbox}
 
 \newcommand{\tg}{\mathop{\mathrm{tg}}}
@@ -64,7 +69,7 @@
 
 \input chapters/0-uvod.tex
 \input chapters/1-behove.tex
-\input chapters/2-scm.tex
+% \input chapters/2-scm.tex
 \input chapters/3-gitlab.tex
 \input chapters/4-travis.tex
 \input chapters/5-buildbot.tex
