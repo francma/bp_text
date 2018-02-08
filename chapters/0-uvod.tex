@@ -28,7 +28,7 @@ Samotný systém kontinuální intgrace, lze definovat jako množinu softwaru re
 
 \end{introduction}
 
-Tento popis je velmi obecný a proto bude vhodné se podívat na nějaké konkrétní projekty používající kontinuální integraci.
+Tento popis je velmi obecný a proto bude vhodné se podívat na nějaký konkrétní projekt používající kontinuální integraci.
 Vezmeme například projekt Nette.
 Nette je PHP framework pro stavbu webových aplikací.
 Repozitáře projektu jsou verzované verzovacím nástrojem Git a další integrace je pod systémem kontinuální integrace Travis CI.
@@ -69,4 +69,12 @@ Většinou se jedná o třízení na fáze a úkoly, ale také o další možnos
 
 Uživatele CI systému také zajímá výstup z jeho zadaných příkazů.
 Velmi vhodné je to například při hledání chyby, kdy by pouhá informace o neuspěchu integrace byla nedostačující.
-Mnoho CI systémů implementuje tzv. \uv{straming logy}, což znamená, že výstup z příkazů je dostupný v \uv{realném čase} místo nutnosti čekat na doběhnutí integrace.
+Mnoho CI systémů implementuje tzv. \uv{straming logy}, což znamená, že výstup z příkazů je dostupný v \uv{realném čase} místo nutnosti čekat na doběhnutí celé integrace.
+
+Cílem této práce je navrhnout minimalistický systém kontinuální integrace, který bude určen pro menší komunitní projekty.
+Hlavní vlastností výsledného projektu bude jeho modulárnost.
+
+V této práci se nejprve budeme zabívat technologií vytváření izolovaných běhových prostředí, jelikož jsou základním stavebním kamenem systému kontinuální integrace.
+V další části se podíváme na existující systémy kontinuální integrace a následně navrhneme systém vlastní.
+Dále bude následnovat samotná implementace a testování vytvořeného systému.
+

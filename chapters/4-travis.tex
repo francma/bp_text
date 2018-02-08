@@ -1,8 +1,66 @@
 \chapter{Travis CI}
 
-Travis CI je open source služba kontinuální integrace spjatá s verzovací hostovací službou Github.
-Travis je naprogramován v Ruby.
+Travis CI je open source služba kontinuální integrace spjatá s verzovací hostovací službou GitHub.
 
+\section{Průběh integrace}
+
+Podobně jako u GitLab CI je konfigurace řešena souborem \verb|.travis.yml|, který je umístěn přímo v~kořenovém adresáři repozitáře projektu.
+
+Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
+Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
+Selhání fáze znamená zastavení provádění všech následujícíh fází.
+Selhání příkazu znamená selhnání celého úkolu, ale ne zastavení provádění tohoto úkolu.
+Úkol vždy provede všechny příkazy bez ohledu na to, jestli nějaký předchozí selhal. 
+Pokud bychom chtěli, aby se po selhnání příkazu úkol ukončil, pak je nutné zadefinovat proměnnou shellu na začátku skriptů (\verb|set -eo pipefail|).
+
+Každý úkol je spoštěn ve svém vlastním běhovém prostředí.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
+stages:
+  - test
+  - build
+  - deploy
+\end{minted}
+\caption{Definice fází v .travis.yml}
+\end{listing}
+
+Úkol náleží právě do jedné fáze a jeho přiřazení se provede vzoru z ukázky kódu \ref{code:travis-stages}.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
+stages:
+  - test
+jobs:
+  include:
+    - stage: test
+      script: pytest
+
+\end{minted}
+\label{code:travis-stages}
+\caption{Definice úkolů s fázemi v .travis.yml}
+\end{listing}
+
+Další možností definice úkolů je přes tzv. Build Matrix jak je ukázáno v ukázce kódu \ref{code:travis-matrix}.
+Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu.
+Oba zmíněné přistupy konfigurace lze kombinovat.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
+language: python
+python:
+  - '3.5'
+  - '3.4'
+  - '2.7'
+env:
+  - TOXENV=first
+  - TOXENV=second
+script:
+  - tox
+\end{minted}
+\label{code:travis-matrix}
+\caption{Definice build matrixu v .travis.yml}
+\end{listing}
 
 \section{Architektura}
 
@@ -44,86 +102,27 @@ Obstaravá webové rozhraní pro koncového uživatele.
 
 Stará se o komunikace mezi Travis Hubem a zbytkem vnitřního systému.
 
-\section{Průběh integrace}
-
-Podobně jako u Gitlab CI je konfigurace řešena souborem \verb|.travis.yml|, který je umístěn přímo v~kořenovém adresáři repozitáře projektu.
-
-Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
-Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
-Selhání fáze znamená zastavení provádění všech následujícíh fází.
-Selhání příkazu znamená selhnáné fáze, aktuálně vykonávaná fáze doběhne dokonce.
-Pokud bychom chtěli, aby se po selhnání příkazu fáze ukončila, pak je nutné zadefinovat proměnnou shellu na začátku skriptů (\verb|set -eo pipefail|)
-
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
-stages:
-  - test
-  - build
-  - deploy
-\end{minted}
-
-Úkol náleží právě do jedné fáze a jeho přiřazení se provede v konfiguraci následovně.
-
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
-stages:
-  - test
-jobs:
-  include:
-    - stage: test
-      script: pytest
-\end{minted}
-
-Každý úkol je spoštěn ve svém vlastním běhovém prostředí.
-
-Další možností definice úkolů je přes tzv. Build Matrix.
-
-\begin{minted}[
-    frame=single,
-    linenos
-  ]{yaml}
-language: python
-python:
-  - '3.5'
-  - '3.4'
-  - '2.7'
-env:
-  - TOXENV=first
-  - TOXENV=second
-script:
-  - tox
-\end{minted}
-
-Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu.
-Oba zmíněné přistupy konfigurace lze kombinovat.
-
-
 \subsection{Běhová prostředí}
 
-Travis CI podporuje několik běhových prostředí vyjmenovaných v následující tabulce.
+Travis CI podporuje několik běhových prostředí vyjmenovaných v následující tabulce \ref{table:travis-env}.
+Výhodou kontejnerového prostředí je jeho rychlejší start.
 
 \begin{table}[h]
 \centering
-\caption{My caption}
-\label{my-label}
-\begin{tabular}{l|llll}
-               & Superuživatel & Technologie & Konfigurace  \\ \hline
-Ubuntu Precise & Ano & Virtulní stroj & \verb|sudo: required| &  \\ 
-& & & \verb|dist: precise| &  \\ \hline
-Ubuntu Trusty & Ano & Virtulní stroj & \verb|sudo: required|  &  \\
-& & & \verb|dist: trusty| &  \\ \hline
-Ubuntu Trusty & Ne & Kontejner & \verb|sudo: false|  &  \\
-& & & \verb|dist: trusty| &  \\ \hline
-OS X & Ano & Virtuální stroj & \verb|os: osx|  &  \\
+\caption{Výčet běhových prostředí v Travis CI}
+\label{table:travis-env}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+& Superuživatel & Technologie & Konfigurace  \\ \hline
+Ubuntu Precise & Ano & Virtulní stroj & \verb|sudo: required| \\ 
+& & & \verb|dist: precise|  \\ \hline
+Ubuntu Trusty & Ano & Virtulní stroj & \verb|sudo: required| \\
+& & & \verb|dist: trusty| \\ \hline
+Ubuntu Trusty & Ne & Kontejner & \verb|sudo: false|  \\
+& & & \verb|dist: trusty| \\ \hline
+OS X & Ano & Virtuální stroj & \verb|os: osx|  \\ \hline
 \end{tabular}
 \end{table}
-
-Výhodou kontejnerového prostředí je jeho rychlejší start.
-
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -133,10 +132,13 @@ script:
   - sudo apt add ...
   - pytest
 \end{minted}
-\caption{Example from external file}
+\caption{Ukázka definice běhového prostředí v .travis.yml}
 \end{listing}
 
+\section{Přístup ke zdrojům systému}
 
+% https://docs.travis-ci.com/user/developer/
 
+\section{Postup nasazení}
 
 % https://github.com/travis-ci/travis-core

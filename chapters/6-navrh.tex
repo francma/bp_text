@@ -34,7 +34,7 @@ REST je architektonický vzor splňující následující požadavky:
     \item bezstavový model,
     \item správa mezipaměťi,
     \item uniformní rozhraní,
-    \item vrstvená architektura. \cite{rest}
+    \item vrstvená architektura.
 \end{itemize}
 
 \subsubsection{Model klient-server}
@@ -136,10 +136,33 @@ Pokud má podpříkaz více argumentů, tak jsou argumenty zadávány se svým j
 
 \section{Autentizace a autorizace}
 
-Autentizace uživatele do systému je přes terminálové rozhraní je provedená přes SSH RSA klíče.
-Každý uživatel má v systému zavedený svůj veřejný klíč.
-Mimo veřejného klíče uživatel disponuje také tokenem, který je použit pro autentizaci se systémy třetí strany (webové rozhraní).
+Autentizace uživatele do systému přes terminálové rozhraní lze implementovat pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
+Uživatel vytvoří 2 klíče -- veřejný a privátní.
+Veřejný klíč následně nasdílí s autentizačním autoritám.
+Pomocí privátního klíče lze data šifrovat a dešífrovat, zatímco věřejným klíčem lze data jen šifrovat.
 
+\begin{enumerate}
+    \item Klient a server se shodnou na společném šifrovacím klíči pomocí Diffie-Hellman algoritmu.
+    Tento klíč bude pak použit k zašifrování celé komunikace.
+    \item Klient pošle serveru identifikátor svého klíče.
+    \item Server dle identifikátoru vybere veřejný klíč (soubor \verb|authorized_keys|), zašífruje s ním náhodné číslo a pošle jej klientovi.
+    \item Klient rozšifruje toto číslo přidá k němu předem dohodnutou hodnotu, znovu zašifruje a pošle zpět serveru.
+    \item Server tuto hodnotu přidá k předen vygenerovanému číslu a znovu zašifruje.
+    \item Server porovná výsledné hodnoty. Pokud se shodují, tak klieta autentikuje.
+\end{enumerate}
+
+Po autentikaci server podle konfigurace předá řízení na předem definovaný program.
+Ve většině případů je timto programem shell systému (například bash, zsh, \ldots).
+V našem případě stačí tento program nastavit na námi vytvořený shell.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single]{text}
+command="[COMMAND]" ssh-rsa AAAA...
+\end{minted}
+\caption{Vlastní příkaz v authorized\_keys}
+\end{listing}
+
+Mimo veřejného klíče uživatel disponuje také tokenem, který je použit pro autentizaci se systémy třetí strany (webové rozhraní).
 Oprávnění jsou definována na úrovni systému a jednotlivých projektů v podobě rolí.
 
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
