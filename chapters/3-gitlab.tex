@@ -1,6 +1,6 @@
 \chapter{GitLab CI}
 
-GitLab CI je součástí součástí správce GIT repozitářů GitLab.
+GitLab CI je součástí součástí správce Git repozitářů GitLab.
 Jeho použití je tedy vymezeno pouze pro uživatele tohoto systému.
 Projekt je vydáván pod několika edicemi -- komerční a komunitní, která je vydána pod open source licencí \cite{gitlab_ce}.
 
@@ -68,15 +68,10 @@ Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace \v
 
 \section{Architektura}
 
-Celý systém GitLabu je rozdělen do několika podsystémů, které mezi sebou komunikují převážně protokolem gRPC.
-Gitlab CI Runner je zodpovědný za provedení konkrétnách integrací.
-Využívá se i message-based systému pro přenos zpráv.
+Celý systém GitLabu je rozdělen do několika podsystémů, z nichž Gitlab CI Runner je zodpovědný za provedení konkrétních integrací.
 Dalším službám systém poskytuje REST API s přípravou GraphQL API.
 \cite{gitlab_architecture}
 \cite{gitlab_api}
-
-Persistetním uložištěm je databáze, konkrétně PostgreSQL.
-Pro dočasná data a zprávy přenášené pomocí message-based protokolu se používá Redis server.
 
 \subsection{Gitlab CI multi-runner}
 
@@ -94,11 +89,12 @@ Z tohoto plyne mnoho bezpečnostních rizik a proto se použití tohoto běhové
 
 \subsubsection{Docker běhové prostředí}
 
-Příkazy se provádí uvnitř Dcoker kontejneru.
+Příkazy se provádí uvnitř Docker kontejneru.
 Volba Docker obrazu definována klíčovým slovem \verb|image|.
 Sestavení lze obohatit o~tzv. služby, kterými můžeme každému buildu dát k~dispozici přístup k~další Docker instanci, která bude dostupná pod zadanou hostname.
-Služby lze opět konfigurovat na úrovni sestavení, tak na úrovni jobu.
+Služby lze opět konfigurovat na úrovni integrace, tak na úrovni úkolu.
 
+\begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
 image: ruby:2.2
 
@@ -109,6 +105,8 @@ test:
   script:
   - bundle exec rake spec
 \end{minted}
+\caption{Definice služeb v .gitlab-ci.yml}
+\end{listing}
 
 \subsubsection{VirtualBox a Parallels}
 
@@ -118,12 +116,10 @@ Virtualní stroje jsou klonovány pro udržení čistého prostředí pro sestav
 
 % https://docs.gitlab.com/runner/executors/README.html
 
-\subsubsection{SSH exekutor}
+\subsection{Cache}
 
-Podobné jako Shell exekutor, jen je využito SSH spojení.
-
-\subsection{Cachování}
-
+Cache je zavedená pro urychlení integrací.
+Například je takto možné sdílet závisloti projektu mezi různými integracemi.
 Ve výchozím stavu je cache sdílena mezi \textit{branch} a \textit{job}.
 Toto chování lze upravit nastavením klíče, který bude identifikovat danou cache.
 Při tvorbě klíče lze využít předdefinované CI proměnné. 
@@ -131,6 +127,7 @@ Soubory a složky určené k~cachování uvedeme jako výčet v~konfiguraci proj
 Cesta k~souboru je uvedená jako relativní ke kořeni projektu, cachování souborů mimo projekt není touto cestou možné. 
 Cache lze také omezit pouze na soubory a složky, které nejsou verzovany GITem.
 
+\begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
 cache:
   key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
@@ -139,6 +136,8 @@ cache:
     - binaries/
     - .config
 \end{minted}
+\caption{Definice cache v .gitlab-ci.yml}
+\end{listing}
  
 Cache je ve výchozím nastavení ukládána přímo na běhovém serveru.
 Pokud fáze běží na různých běhových serverech, tak se cache nesdílí.
@@ -150,4 +149,83 @@ Toto API implementuje samotný Amazon, tak i nějaké self-hosted projekty.
 % https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html
 % https://github.com/minio/minio/
 
+\section{Přístup ke zdrojům systému}
+
+% https://about.gitlab.com/applications
+Gitlab umožňuje přístup ke zdrojům systému pomocí řady aplikací.
+Tyto aplikace využívají HTTP REST API Gitlabu. 
+
+\subsection{API}
+
+GitLab API dovoluje přístup ke zdrojům systému včetně zdrojů spjatých s integrací pomocí HTTP REST API.
+K autentizaci uživatele se používá tokenů, které jsou součístí HTTP hlaviček nebo HTTP query parametrů.
+K reprezentaci dat API požívá formátu JSON jak je vidět z ukázky \ref{code:gitlab-api}.
+
+\begin{table}[ht]
+\centering
+\fontsize{9.5}{11.5}\selectfont
+\caption{Gitlab API}
+\label{table:gitlab-api}
+\begin{tabular}{|l|l|l|}
+\hline
+HTTP metoda + akce                                          & Popis \\ \hline
+\verb|GET  /projects/[id]/jobs|                             & Vratí seznam úkolů projektu      \\ \hline
+\verb|GET  /projects/[id]/pipelines/[pipeline_id]/jobs|     & Vrátí seznam úkolů integrace      \\ \hline
+\verb|POST /projects/[id]/jobs/[job_id]/cancel|             & Zruší probíhající úkol      \\ \hline
+\verb|POST /projects/[id]/jobs/[job_id]/retry|              & Restartuje úkol      \\ \hline
+\verb|POST /projects/[id]/jobs/[job_id]/erase|              & Smaže úkol      \\ \hline
+\verb|POST /projects/[id]/pipeline|                         & Vytvoří novou integraci      \\ \hline
+\verb|GET  /projects/[id]/pipelines/[pipeline_id]|          & Vrátí integraci      \\ \hline
+\verb|POST /projects/[id]/pipelines/[pipeline_id]/cancel|   & Zruší probíhající integraci      \\ \hline
+\verb|POST /projects/[id]/pipelines/[pipeline_id]/retry|    & Restartuje probíhající integraci      \\ \hline
+\end{tabular}
+\end{table}
+
+Fáze integrace nemá přidělený svůj vlastní API koncový bod.
+Seznam API zdrojů v tabulce \ref{table:gitlab-api} je pouze výňatek, úplný senzma zdrojů je k naleznutí v dokumentaci \cite{gitlab_api}. 
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{json}
+{
+  "id": 46,
+  "status": "success",
+  "ref": "master",
+  "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+  "before_sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+  "tag": false,
+  "created_at": "2016-08-11T11:28:34.085Z",
+  "updated_at": "2016-08-11T11:32:35.169Z",
+  "finished_at": "2016-08-11T11:32:35.145Z",
+  "coverage": "30.0"
+}
+\end{minted}
+\label{code:gitlab-api}
+\caption{Odpověď Gitlab API (detail integrace)}
+\end{listing}
+
+\subsection{Terminálové rozhraní}
+
+GitLab neposkytuje přímý terminálový přístup ke svým zdrojům.
+Místo toho lze využít aplikací, které vytváří terminálovou \uv{obálku} nad již zmíněném REST API.
+Příkladem takové aplikace je NARKOZ/gitlab.
+Autentizace je řešena pomocí GitLab tokenu, který se nastaví jako \verb|GITLAB_API_PRIVATE_TOKEN| proměnná shellu.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{shell}
+# Vrať seznam úkolů projekty s ID = 1
+gitlab jobs 1
+# Vrať integraci z projektu 1 s ID = 2
+pipeline 1 2
+\end{minted}
+\label{code:gitlab-api}
+\caption{Odpověď Gitlab API (detail integrace)}
+\end{listing}
+
+\subsection{Webové rozhraní}
+
+GitLab implementuje i webové rozhraní, které je přímou součástí projektu.
+Najdeme zde informace o git repozitářích, tak i integracích.
+Součástí webového rozhraní je i tzv. \uv{streaming log}.
+
+\imagefigurelarge{gitlab-webui.png}{Ukázka GitLab web UI}
 

@@ -201,6 +201,32 @@ Doporučené požadavky:
 	\item Reverzní proxy (nginx, apache, \ldots)
 \end{itemize}
 
+\begin{listing}[H]
+\caption{Instalace Piper CI core}
+\begin{minted}[frame=single]{shell}
+# Připravíme systémové požadavky:
+...
+# Vytvoříme nového systémového uživatele.
+# Nutné pro oddělené ~/.ssh/authorized_keys.
+useradd piper && su - piper
+# Nainstalujeme samotný balíček pomocí pip:
+pip install git+https://github.com/francma/piper-ci-core.git
+# Nainstalujeme uwsgi server (volitelné):
+pip install uwsgi
+# Vytvoříme produkční konfiguraci:
+cp config.example.yml config.yml
+# Upravíme konfiguraci podle instrukcí v souboru:
+vim config.yml
+# Inicializujeme projekt s ROOT uživatelem:
+piper-core config.yml --init "[ROOT_EMAIL] [ROOT_ID_RSA_PATH]"
+# Spustíme:
+uwsgi --http-socket :[PORT] -w piper_core.run:app --pyargv config.yml
+# Obnova databáze uživatelů v authorized_keys.
+# Doporučené je jej přidat jako úlohu do cronu.
+piper-core --reload config.yml
+\end{minted}
+\end{listing}
+
 \subsection{Piper CI LXD runner}
 
 Požadavky na systém:
@@ -211,6 +237,32 @@ Požadavky na systém:
 	\item Git,
 	\item LXD.
 \end{itemize}
+
+\begin{listing}[H]
+\caption{Instalace Piper CI LXD runner}
+\begin{minted}[frame=single]{shell}
+# Připravíme systémové požadavky:
+...
+lxd init
+# LXD server musí naslouchat na HTTP protokolu:
+lxc config set core.https_address [::]
+# Vygenerujeme autentizační klíč a certifikát pro LXD:
+openssl genrsa 2048 > client.key
+openssl req -new -x509 -nodes -sha1 -days 365 -key client.key 
+            -out client.crt
+# Nainstalujeme samotný balíček pomocí pip:
+pip install git+https://github.com/francma/piper-ci-lxd-runner.git
+# Vytvoříme produkční konfiguraci:
+cp config.example.yml config.yml
+# Upravíme konfiguraci podle instrukcí v souboru:
+vim config.yml
+# Stáhneme obrazy k vytvoření kontejnerů:
+lxc image copy images:alpine/3.5 local: --copy-aliases
+# Spustíme:
+piper-lxd config.yml
+\end{minted}
+\end{listing}
+
 
 \subsection{Piper CI web}
 
@@ -228,21 +280,22 @@ Doporučené požadavky:
 	\item Reverzní proxy (nginx, apache, \ldots)
 \end{itemize}
 
-Instalace:
-
-\begin{enumerate}
-	\item Nainstalujeme balíček pomocí pip: \newline
-		\verb|pip install git+https://github.com/francma/piper-ci-web.git|
-	\item Vytvoříme produkční konfiguraci: \newline
-		\verb|cp config.example.yml config.yml|.
-	\item Konfiguraci upravíme podle instrukcí v souboru \verb|config.yml|
-\end{enumerate}
-
-Spuštění:
 \begin{listing}[H]
-\begin{minted}[frame=single]{text}
+\caption{Instalace Piper CI web}
+\begin{minted}[frame=single]{shell}
+# Připravíme systémové požadavky:
+...
+# Nainstalujeme samotný balíček pomocí pip:
+pip install git+https://github.com/francma/piper-ci-web.git
+# Vytvoříme produkční konfiguraci:
+cp config.example.yml config.yml
+# Upravíme konfiguraci podle instrukcí v souboru:
+vim config.yml
+# Nainstalujeme uwsgi server (volitelné):
+pip install uwsgi
+# Spustíme
 uwsgi --http-socket :[PORT] 
       -w piper_web.run:app
-      --pyargv [CONFIG_FILE]
+      --pyargv config.yml
 \end{minted}
 \end{listing}
