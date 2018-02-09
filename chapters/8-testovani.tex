@@ -1,10 +1,8 @@
 \chapter{Testování}
 
-K psaní testů je využito Python knihovny pytest a k správě virtutuálních prostředí testů nástroj tox.
-Úkolem nástroje tox je vytvořit nové virtuální prostředí (virtualenv), v něm nainstalovat závisloti projektu i projekt samotný a nakonec spustit testy dle zadání.
+K psaní testů je využito Python knihovny pytest a k správě virtuálních prostředí testů nástroj tox.
+Úkolem nástroje tox je vytvořit nové virtuální prostředí (virtualenv), v něm nainstalovat závislosti projektu i projekt samotný a nakonec spustit testy dle zadání.
 Použití virtuenv prostředí odstraní možné problémy s lokálním prostředím (různé verze knihoven, \ldots).
-
-Ke statické analýze kódu je použito knihovny mypy, která dokáže zkontrolovat typovou správnost z poskytnutých typových anotací.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{python}
@@ -28,14 +26,23 @@ def test_authorize(container: Container):
 \caption{Ukázka testu pomocí knihovny pytest}
 \end{listing}
 
-Testy jsou dostupné v repozitářích projektů v podsložce \verb|tests| a spouští se přes příkaz \verb|tox|.
+Ke statické analýze kódu je použito knihovny mypy, která dokáže zkontrolovat typovou správnost z poskytnutých typových anotací.
+Kontrola jednotného zápisu kódu (tzv. \uv{coding style}) byl zkontrolován oproti Python PEP specifikacím nástrojem pep8.
 
-Mimo testů samotných je součástí projektu i jednoduchý skript, který nainstaluje v testovacím režimu všechny části Piper CI systému, založí uživatele, nový projekt a spustí testovací integraci.
-Jedná se doplněk k převážně jednotkovým testům.
+Testy jsou dostupné v repozitářích projektů v podsložce \verb|tests| a spouští se přes příkaz \verb|tox|.
 
 U testování webového rozhraní byl zvolen jiný způsob testování, protože obsahuje minimální množství testovatelného kódu.
 Webové rozhraní v podstatě pouze dotazuje REST API Piper CI jádra a interpretuje výsledky.
 Pro tento účel byla vytvořena \uv{falešná} datová třída, poskytující testovací data.
 Testování není tedy prováděno automaticky, ale je třeba manuálně webové rozhraní projít pro odhalení případných chyb.
 
-V průběhu vývoje autor využil získaných zkušeností ohledně systémů kontinuální integrace a začleníl všechny projekty vytvořené v rámci této práce do Travis CI.
+\imagefigurefull{piper-ci-badges.png}{Stav pokrytí testy a CI na GitHubu}{0.33}
+
+Pokrytí kódu testy je změřeno pomocí nástroje coveralls.
+Konkrétní hodnoty jsou 87\% pro projekt Piper CI LXD runner a 65\% pro projekt Piper CI core.
+Samotné vysoké procentuální pokrytí testy nemusí být zárukou kódu bez chyb a tak je součástí projektu i jednoduchý skript, který nainstaluje v testovacím režimu všechny části Piper CI systému.
+Takto lze manuálně vyzkoušet některé mezní případy a případně je pak zahrnou v automatických testech.
+
+V průběhu vývoje autor využil získaných zkušeností ohledně systémů kontinuální integrace a začlenil všechny projekty vytvořené v rámci této práce do Travis CI.
+
+\imagefigurelarge{piper-ci-travis.png}{Integrace Piper CI LXD runner na Travis CI}

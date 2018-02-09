@@ -6,14 +6,14 @@ Travis CI je open source služba kontinuální integrace spjatá s verzovací ho
 
 Podobně jako u GitLab CI je konfigurace řešena souborem \verb|.travis.yml|, který je umístěn přímo v~kořenovém adresáři repozitáře projektu.
 
-Proces integrace je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
+Proces integrace (\textit{build}) je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
-Selhání fáze znamená zastavení provádění všech následujícíh fází.
-Selhání příkazu znamená selhnání celého úkolu, ale ne zastavení provádění tohoto úkolu.
+Selhání fáze znamená zastavení provádění všech následujících fází.
+Selhání příkazu znamená selhání celého úkolu, ale ne zastavení provádění tohoto úkolu.
 Úkol vždy provede všechny příkazy bez ohledu na to, jestli nějaký předchozí selhal. 
-Pokud bychom chtěli, aby se po selhnání příkazu úkol ukončil, pak je nutné zadefinovat proměnnou shellu na začátku skriptů (\verb|set -eo pipefail|).
+Pokud bychom chtěli, aby se po selhání příkazu úkol ukončil, pak je nutné zadefinovat proměnnou shellu na začátku skriptů (\verb|set -eo pipefail|).
 
-Každý úkol je spoštěn ve svém vlastním běhovém prostředí.
+Každý úkol je spuštěn ve svém vlastním běhovém prostředí.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -43,7 +43,7 @@ jobs:
 
 Další možností definice úkolů je přes tzv. Build Matrix jak je ukázáno v ukázce kódu \ref{code:travis-matrix}.
 Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu.
-Oba zmíněné přistupy konfigurace lze kombinovat.
+Oba zmíněné přístupy konfigurace lze kombinovat.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -64,9 +64,11 @@ script:
 
 \section{Architektura}
 
-Systém je rozdělen na několk částí, které mezi sebou komunikující přes distribuovanou frontu RabbitMQ.
+Systém je rozdělen na několik částí, které mezi sebou komunikující přes distribuovanou frontu RabbitMQ.
 Datové uložiště je realizováno v SQL databázi PostreSQL.
-Pro potřeby cachování je využiván Redis.
+Pro potřeby cachování je využíván Redis.
+
+% https://github.com/travis-ci/travis-core
 
 \paragraph{Travis Core}
 
@@ -114,9 +116,9 @@ Výhodou kontejnerového prostředí je jeho rychlejší start.
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 & Superuživatel & Technologie & Konfigurace  \\ \hline
-Ubuntu Precise & Ano & Virtulní stroj & \verb|sudo: required| \\ 
+Ubuntu Precise & Ano & Virtuální stroj & \verb|sudo: required| \\ 
 & & & \verb|dist: precise|  \\ \hline
-Ubuntu Trusty & Ano & Virtulní stroj & \verb|sudo: required| \\
+Ubuntu Trusty & Ano & Virtuální stroj & \verb|sudo: required| \\
 & & & \verb|dist: trusty| \\ \hline
 Ubuntu Trusty & Ne & Kontejner & \verb|sudo: false|  \\
 & & & \verb|dist: trusty| \\ \hline
@@ -137,8 +139,53 @@ script:
 
 \section{Přístup ke zdrojům systému}
 
-% https://docs.travis-ci.com/user/developer/
+Travis CI podobně jako GitLab umožňuje přístup ke zdrojům systému pomocí HTTP API.
+
+\section{HTTP API}
+
+% https://developer.travis-ci.org/
+Travis API nám dává možnost přistupovat ke zdrojům systému skrze HTTP API.
+K autentizaci se používá tokenu, který je součástí HTTP hlaviček.
+K reprezentaci dat API se používá JSON formátu.
+
+\begin{table}[ht]
+\centering
+\fontsize{9.5}{11.5}\selectfont
+\caption{Travis API}
+\label{table:gitlab-api}
+\begin{tabular}{|l|l|l|}
+\hline
+HTTP metoda + akce                                          & Popis \\ \hline
+\verb|GET  /repo/[id]/builds|                               & Vrátí seznam integrací repozitáře      \\ \hline
+\verb|GET  /build/[id]/jobs|                                & Vrátí seznam úkolů integrace      \\ \hline
+\verb|POST /job/[id]/cancel|                                & Zruší probíhající úkol      \\ \hline
+\verb|POST /job/[id]/restart|                               & Restartuje úkol      \\ \hline
+\verb|POST /repo/[id]/[branch]/requests|                    & Vytvoří novou integraci      \\ \hline
+\verb|GET  /build/[id]|                                     & Vrátí integraci      \\ \hline
+\verb|POST /build/[id]/cancel|                              & Zruší probíhající integraci      \\ \hline
+\verb|POST /build/[id]/restart|                             & Restartuje probíhající integraci      \\ \hline
+\verb|GET  /stage/[id]|                                     & Vrátí fázi      \\ \hline
+\verb|GET  /build/[id]/stages|                              & Vrátí seznam fází integrace      \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Terminálové rozhraní}
+
+% http://www.rubydoc.info/gems/travis/1.8.8
+Terminálová aplikace Travis CI, která využívá HTTP API.
+Autentizace je prováděna pomocí tokenu nebo uživatelského jména a hesla.
+Aplikace má několik zajímavých vlastností, které jí činí uživatelsky přívětivou.
+Například pokud jí pustíme ze složky, ve které je se nachází Git repozitář projektu spravovaném Travisem, tak vykonané příkazy se budou vázat právě k tomuto repozitáři.
+Další zajímavou vlastností je příkaz \verb|travis whatsup|, který zobrazí poslední integrace všech projektů.
+Terminálové rozhraní také dovoluje sledovat log výstup integrací v reálném čase. 
+
+\section{Webové rozhraní}
+
+Travis disponuje také webovým rozhraním, ve kterém lze sledovat průběh integrací.
+Data ve webovém rozhraní se automaticky obnovují bez nutného zásahu uživatele.
+Implementačně je toho docíleno websocketovým spojením.
+Stejně jako terminálové rozhraní, tak i to webové dokáže sledovat log výstupy integrací v reálném čase.
 
 \section{Postup nasazení}
 
-% https://github.com/travis-ci/travis-core
+Ač je Travis CI otevřený software, tak provoz na vlastní infrastruktuře je spíše nedoporučován.
