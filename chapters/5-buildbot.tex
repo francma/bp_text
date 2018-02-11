@@ -1,1 +1,61 @@
 \chapter{Buildbot}
+
+Buildbot je framework kontinuální integrace, který nabízí velké množství flexibility v konfiguraci integračního procesu.
+Oproti službám CI nám framework nabízí pouze sadu nástrojů a doporučení pomocí kterých zrealizujeme konečný integrační proces.
+
+\section{Průběh integrace}
+
+Průběh integrace (\textit{build}) je definován souborem \verb|master.cfg|, který je napsaný ve standardním Pythonu.
+Oproti GitLab CI a Travis CI je konfigurační není soubor umístěn v repozitáři projektu, ale na Buildbot serveru.
+
+V základu Buildbot pracuje s jednotlivými příkazy, které podle konfigurace můžeme skládat do úkolů a do fází.
+Tím, že konfigurace je napsaná jako Python skript, nám Buildbot dává téměř neomezené možnosti.
+
+V konfiguračním souboru máme přístup k třídám Buildbotu, z kterých si složíme integraci.
+Základní třídou je \verb|BuildMasterConfig|, která v sobě ukládá veškeré nastavení integrace.
+Příkazy shlukujeme v instanci třídy \verb|BuildFactory|, která společně s instancí třídy \verb|Worker|, která definuje běhové prostředí tvoří výsledný \verb|BuilderConfig|.
+Posledním stavebním kamenem je třída \verb|Scheluder|, která je zodpovědná za naslouchání změnám v repozitáři.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{python}
+from buildbot.plugins import *
+
+c = BuildmasterConfig = {}
+# Základní konfigurace
+c['title'] = "Hello from Buildbot"
+# ...
+
+# Přidání Docker běhového prostředí s PHP
+docker_worker = worker.DockerLatentWorker(
+    "dummy_worker",
+    None,
+    docker_host='unix://var/run/docker.sock',
+    image='php',
+)
+c['workers'] = [docker_worker]
+
+# Naslouchej změnám z [GITHUB_URL] repozitáře
+github_scheduler = schedulers.SingleBranchScheduler(
+    name="project_name",
+    change_filter=util.ChangeFilter(project='[GIT_URL]'),
+    builderNames=["npm"]
+)
+c['schedulers'] = [github_scheduler]
+
+# Konečná definice příkazů
+# včetně stažení Git repozitáře z GitHubu
+build_factory = util.BuildFactory()
+build_factory.addStep(steps.GitHub(repourl='[GIT_UTL]'))
+build_factory.addStep(steps.ShellCommand(command=["echo", "Hello!"]))
+
+# Konečná definice integrace
+c['builders'] = []
+builder = util.BuilderConfig(
+    name="php",
+    workernames=["dummy_worker"],
+    factory=build_factory
+)
+
+\end{minted}
+\caption{Minimální konfigurace integrace}
+\end{listing}

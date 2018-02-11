@@ -1,6 +1,6 @@
 \chapter{Travis CI}
 
-Travis CI je open source služba kontinuální integrace spjatá s verzovací hostovací službou GitHub.
+Travis CI je služba kontinuální integrace spjatá s Git SCM službou GitHub.
 
 \section{Průběh integrace}
 
@@ -26,6 +26,8 @@ stages:
 \end{listing}
 
 Úkol náleží právě do jedné fáze a jeho přiřazení se provede vzoru z ukázky kódu \ref{code:travis-stages}.
+Fáze jsou v Travis CI novým konceptem, který je stále v součástí veřejného beta testování.
+% https://blog.travis-ci.com/2017-05-11-introducing-build-stages
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -109,7 +111,7 @@ Stará se o komunikace mezi Travis Hubem a zbytkem vnitřního systému.
 Travis CI podporuje několik běhových prostředí vyjmenovaných v následující tabulce \ref{table:travis-env}.
 Výhodou kontejnerového prostředí je jeho rychlejší start.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{Výčet běhových prostředí v Travis CI}
 \label{table:travis-env}
@@ -126,10 +128,16 @@ OS X & Ano & Virtuální stroj & \verb|os: osx|  \\ \hline
 \end{tabular}
 \end{table}
 
+Běhové prostředí je pak přizpůsobeno pro konkrétní projekt podle programovacího jazyka konfiguračním klíčem \verb|language|.
+Upřesnění verze se pak docílí definicí build matrixu \ref{code:travis-matrix}.
+Problém nastává pokud Travis nepodporuje námi vyžadovaný jazyk, který není podporován verzí Ubuntu na Travisu.
+Příkladem je \TeX{}live balíček pouze ve verzi 2013 proti aktuální 2017.
+
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
 sudo: required
 dist: trusty
+language: python
 script:
   - sudo apt add ...
   - pytest

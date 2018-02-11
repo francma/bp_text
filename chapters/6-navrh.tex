@@ -9,14 +9,14 @@ Inspirací pro jméno je firma Pied Piper z TV seriálu Sillicon Valley \cite{pi
 Integrační proces bude rozdělen na fáze, úkoly a příkazy.
 Integrační proces se skládá alespoň z jedné fáze.
 Fáze se skládá z jednoho nebo více úkolů.
-Ůkol v sobě obsahuje jeden nebo více příkazů.
+Úkol v sobě obsahuje jeden nebo více příkazů.
 
 Selhání jednoho z příkazů vede k ukončení vykonávání úkolu a jeho selhání.
-Jelikož jsou úkoly prováděny nezávisle na sobě, tak po selhnáhí jednoho úkolu jsou ostatní úkolu v rámci fáze dokončeny.
+Jelikož jsou úkoly prováděny nezávisle na sobě, tak po selhání jednoho úkolu jsou ostatní úkolu v rámci fáze dokončeny.
 Pokud jeden z úkolů v rámci fáze selže, tak selže celá fáze a další fáze už nejsou prováděny.
 Fáze jsou prováděny sekvenčně.
 
-Integrační proces je pokládán za úspešný poté, co jsou všechny jeho fáze v úspěšném stavu.
+Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze v úspěšném stavu.
 
 Jednotlivé úkoly, fáze nebo celé integrace je možné restartovat nebo rušit.
 
@@ -39,7 +39,7 @@ REST je architektonický vzor splňující následující požadavky:
 
 \subsubsection{Model klient-server}
 
-Model klient-server je styl návhru systému, který dělí jeho části na poskytovatele služeb (servery) a jejich uživatele (klienty).
+Model klient-server je styl návrhu systému, který dělí jeho části na poskytovatele služeb (servery) a jejich uživatele (klienty).
 Rozdělením systému na více (na sobě nezávislých) částí je docíleno vylepšené portabtability a škálovatelnosti.
 \cite{rest_klient_server}
 
@@ -55,7 +55,7 @@ Nevýhoda spočívá v redundanci přenesených dat.
 Součástí odpovědi od serveru může být i informace o tom, zda je možné tuto odpověď znovupoužít.
 Klient pak místo posílání dalšího stejného požadavku může použít již obdrženou odpověď z mezipaměti.
 Výhodou je uvolnění systémových prostředků serveru.
-Na druhé straně se může stát, že odpověd v mezipaměti je již neplatná.
+Na druhé straně se může stát, že odpověď v mezipaměti je již neplatná.
 \cite{rest_mezipamet}
 
 \subsubsection{Uniformní rozhraní}
@@ -100,7 +100,7 @@ Vše začíná u projektu, který je vazbou mezi systémem CI a verzovacím syst
 Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou.
 Uživatelé jsou přiřazování do projektů.
 K projektu jsou vázány data o jeho provedených integracích.
-Běhovým klientům jsou přiřazovány úkoly, které vykonávájí.
+Běhovým klientům jsou přiřazovány úkoly, které vykonávají.
 Grafická reprezentace entit v systému je vyobrazena na obrázku \ref{pic:entity_piper.pdf}.
 
 \imagefigurelarge{entity_piper.pdf}{Entity v Piper CI}
@@ -138,21 +138,21 @@ Pokud má podpříkaz více argumentů, tak jsou argumenty zadávány se svým j
 
 Autentizace uživatele do systému přes terminálové rozhraní lze implementovat pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
 Uživatel vytvoří 2 klíče -- veřejný a privátní.
-Veřejný klíč následně nasdílí s autentizačním autoritám.
-Pomocí privátního klíče lze data šifrovat a dešífrovat, zatímco věřejným klíčem lze data jen šifrovat.
+Veřejný klíč následně dá k dispozici autentizačním autoritám.
+Pomocí privátního klíče lze data šifrovat a dešífrovat, zatímco veřejným klíčem lze data jen šifrovat.
 
 \begin{enumerate}
     \item Klient a server se shodnou na společném šifrovacím klíči pomocí Diffie-Hellman algoritmu.
     Tento klíč bude pak použit k zašifrování celé komunikace.
     \item Klient pošle serveru identifikátor svého klíče.
-    \item Server dle identifikátoru vybere veřejný klíč (soubor \verb|authorized_keys|), zašífruje s ním náhodné číslo a pošle jej klientovi.
+    \item Server dle identifikátoru vybere veřejný klíč (soubor \verb|authorized_keys|), zašifruje s ním náhodné číslo a pošle jej klientovi.
     \item Klient rozšifruje toto číslo přidá k němu předem dohodnutou hodnotu, znovu zašifruje a pošle zpět serveru.
     \item Server tuto hodnotu přidá k předen vygenerovanému číslu a znovu zašifruje.
-    \item Server porovná výsledné hodnoty. Pokud se shodují, tak klieta autentikuje.
+    \item Server porovná výsledné hodnoty. Pokud se shodují, tak klienta autentizuje.
 \end{enumerate}
 
-Po autentikaci server podle konfigurace předá řízení na předem definovaný program.
-Ve většině případů je timto programem shell systému (například bash, zsh, \ldots).
+Po autentizaci server podle konfigurace předá řízení na předem definovaný program.
+Ve většině případů je tímto programem shell systému (například bash, zsh, \ldots).
 V našem případě stačí tento program nastavit na námi vytvořený shell.
 
 \begin{listing}[ht]
@@ -195,7 +195,7 @@ Projektová role jsou následující:
 \paragraph{MASTER}
 
 Správce projektu.
-Edituje projekt a přídává do něj uživatele.
+Edituje projekt a přidává do něj uživatele.
 
 \paragraph{DEVELOPER}
 
@@ -224,7 +224,7 @@ Smazání & x    &       &        &       \\ \hline
 \subsection{Běhoví klienti}
 
 Přidání běhového klienta by měla být pouze záležitost hlavního administrátora systému (ROOT).
-Naopak zobrazení běhových klientů by mělo být přístupné všem, protože v definici integrace je nutné uvest i běhového klienta.
+Naopak zobrazení běhových klientů by mělo být přístupné všem, protože v definici integrace je nutné uvést i běhového klienta.
 
 \begin{table}[h]
 \centering
@@ -256,7 +256,7 @@ Server tedy posílá pouze žádané informace a ne celou webovou stránku.
 Jedná se například o~stavy buildů nebo výpis výstupu aktuálně běžícího buildu (tzv. \uv{streaming logu}).
 Klientem je v~této komunikaci webový prohlížeč a serverem CI systém.
 
-Za opravdovou komunikaci v realném čase by se dalo považovat websocketové spojení \cite{websocket}.
+Za opravdovou komunikaci v reálném čase by se dalo považovat websocketové spojení \cite{websocket}.
 Je třeba si ale uvědomit, že data systému není nutné poskytovat v opravdu realném čase a i několika sekundové zpoždění není na závadu.
 Důvodem je to, že na stav integrace není nutné okamžitě reagovat, výstup z \uv{streaming logu} je pouze jednostanný, neumožňující uživatelskou interakci.
 
@@ -296,7 +296,7 @@ Jelikož se jedná o plnou virtualizaci, tak je potřeba vytvořit jakýsi můst
 
 \subsubsection{COM port pro čtení/zápis}
 
-Pomocí VirtualBox administračního rozhraní vytvoříme COM port, jehož výstup nasměrujeme do souboru nebo sockeru na hostitelském systému.
+Pomocí VirtualBox administračního rozhraní vytvoříme COM port, jehož výstup nasměrujeme do souboru nebo socketu na hostitelském systému.
 Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a aplikace provozovaná na hostitelském systému tento výstup převezme.
 Spojení je oboustranné, takže je možné předávat příkazy i do hostovaného systému.
 \cite{virtualbox_serial}
@@ -304,8 +304,8 @@ Spojení je oboustranné, takže je možné předávat příkazy i do hostované
 \subsubsection{SSH spojení}
 
 SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky \cite{ssh_rfc}.
-Přihlášení uživatele do systému je implementováno na základě věřejného klíče, hesla, hostname nebo lze ověřování úplně vypnout \cite{ssh_auth_rfc}.
-Pro naše účely lze ověřované úplně vypnout za předpokladu, že dokažeme ohlídat možné zneužití.
+Přihlášení uživatele do systému je implementováno na základě věřeného klíče, hesla, hostname nebo lze ověřování úplně vypnout \cite{ssh_auth_rfc}.
+Pro naše účely lze ověřované úplně vypnout za předpokladu, že dokážeme ohlídat možné zneužití.
 
 \subsection{Docker}
 
@@ -346,7 +346,7 @@ Soubor může být pouhým strukturovaným popisem dat (JSON, YAML, XML, \ldots)
 Jelikož cílem práce je systém minimalistický, tak se jeví jako vhodnější řešení definice integrace pomocí strukturovaného popisu dat.
 Mezi uvažované formáty patří JSON, YAML a XML.
 JSON není vhodný, kvůli absenci komentářů.
-Ač XML formát komentáře podporuje, tak je pro člověka hůže čitelný a méně konfortní na editaci viz. ukázky \ref{listing:xml} a \ref{listing:yaml}.
+Ač XML formát komentáře podporuje, tak je pro člověka hůře čitelný a méně komfortní na editaci viz. ukázky \ref{listing:xml} a \ref{listing:yaml}.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{xml}
@@ -384,52 +384,3 @@ Proměnné prostředí jsou dostupné příkazům, tak i podmínce spuštění �
 Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM a další.
 Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (after\_failure).
 Vhodné jsou například pro výpis logovacích souborů.
-
-
-% \begin{listing}[ht]
-% \begin{minted}[frame=single,linenos]{yaml}
-% piper-yml:
-%   type: object
-%   additionalProperties: false
-%   properties:
-%     stages:
-%       type: array
-%       items:
-%         type: string
-%     jobs:
-%       type: object
-%       additionalProperties:
-%         type: object
-%         properties:
-%           stage:
-%             type: string
-%           only:
-%             type: string
-%           runner:
-%             type: string
-%           image:
-%             type: string
-%           env:
-%             type: object
-%             additionalProperties:
-%               oneOf:
-%                 - type: string
-%                 - type: integer
-%                 - type: boolean
-%           commands:
-%             type: array
-%             items:
-%               type: string
-%           after_failure:
-%             type: array
-%             items:
-%               type: string
-%         required:
-%           - stage
-%           - image
-%           - commands
-%   required:
-%     - stages
-% \end{minted}
-% \caption{Definice struktury souboru v JSON schema}
-% \end{listing}
