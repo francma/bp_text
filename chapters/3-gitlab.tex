@@ -159,13 +159,13 @@ Tyto aplikace využívají HTTP REST API GitLabu.
 
 GitLab dovoluje přístup ke zdrojům systému včetně zdrojů spjatých s integrací pomocí HTTP REST API.
 K autentizaci uživatele se používá tokenů, které jsou součástí HTTP hlaviček nebo HTTP query parametrů.
-K reprezentaci dat API požívá formátu JSON jak je vidět z ukázky \ref{code:gitlab-api}.
+K reprezentaci dat API požívá formátu JSON jak je vidět z ukázky \ref{code:gitlab-api-json-response}.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \fontsize{9.5}{11.5}\selectfont
 \caption{GitLab API}
-\label{table:gitlab-api}
+\label{table:gitlab-api-spec}
 \begin{tabular}{|l|l|l|}
 \hline
 HTTP metoda + akce                                          & Popis \\ \hline
@@ -182,9 +182,10 @@ HTTP metoda + akce                                          & Popis \\ \hline
 \end{table}
 
 Fáze integrace nemá přidělený svůj vlastní API koncový bod.
-Seznam API zdrojů v tabulce \ref{table:gitlab-api} je pouze výňatek, úplný seznam zdrojů je k dostání v oficiální dokumentaci \cite{gitlab_api}. 
+Seznam API zdrojů v tabulce \ref{table:gitlab-api-spec} je pouze výňatek, úplný seznam zdrojů je k dostání v oficiální dokumentaci \cite{gitlab_api}. 
 
 \begin{listing}[ht]
+\caption{\label{code:gitlab-api-json-response}Odpověď GitLab API (detail integrace)}
 \begin{minted}[frame=single,linenos]{json}
 {
   "id": 46,
@@ -199,8 +200,6 @@ Seznam API zdrojů v tabulce \ref{table:gitlab-api} je pouze výňatek, úplný 
   "coverage": "30.0"
 }
 \end{minted}
-\label{code:gitlab-api}
-\caption{Odpověď GitLab API (detail integrace)}
 \end{listing}
 
 \subsection{Terminálové rozhraní}

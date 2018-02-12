@@ -2,10 +2,38 @@
 
 \section{REST API}
 
+Ke komunikaci s API nám stačí libovolný HTTP klient, například \verb|curl|.
 
+\begin{listing}[ht]
+\caption{Vytvoření nového běhového klienta}
+\begin{minted}[frame=single]{shell}
+curl -H "Authorization: Bearer $TOKEN" 
+     -H "Content-Type: application/json" 
+     -X POST
+     -d '{"token": "$SECRET","group":"all"}' "$API_URL"
+\end{minted}
+\end{listing}
 
-\begin{sidewaystable}[h]
-\fontsize{8.3}{10}\selectfont
+Stránkování je docíleno pomocí offsetu a limitu, příkladem je ukázka \ref{code:doc-paging}.
+
+\begin{listing}[ht]
+\caption{\label{code:doc-paging}Stránkování}
+\begin{minted}[frame=single]{shell}
+# Získej celkový počet
+curl /builds/count
+# První stránka s 10 položkami
+curl /builds?offset=0&limit=10
+# Druhá stránka s 10 položkami
+curl /builds?offset=10&limit=20
+...
+\end{minted}
+\end{listing}
+
+Kompletní dokumentace je uložena v OpenAPI schématu na přiloženém médiu v souboru \verb|/piper-ci-core/openapi.yml|.
+Schéma lze konvertovat do podoby vhodné pro čtení v aplikaci \url{https://editor.swagger.io/}.
+
+\begin{sidewaystable}[ht]
+\fontsize{7.5}{9.5}\selectfont
 \centering
 \begin{tabular}{|l|l|}
 \hline
@@ -53,9 +81,15 @@
 \clearpage\section{Terminálové rozhraní}
 {
 
+Příkazy terminálového rozhraní se dělí na 2 části.
+První část definuje entitu, nad kterou chceme provádět operaci a druhá typ operace.
+Parametry jsou zapisovány jako \verb|klíč = hodnota|.
+Hodnota může být volitelně uzavřená v uvozovkách.
+
 \setminted{fontsize=\scriptsize,baselinestretch=1}
 
 \begin{listing}[H]
+\caption{Přehled příkazů}
 \begin{minted}[frame=single]{text}
 $ help
 
@@ -66,6 +100,7 @@ build  exit  help  identity  job  project  runner  stage  user
 \end{listing}
 
 \begin{listing}[H]
+\caption{Identita přihlášeného uživatele}
 \begin{minted}[frame=single]{text}
 $ help identity
 
@@ -76,16 +111,7 @@ $ help identity
 \end{listing}
 
 \begin{listing}[H]
-\begin{minted}[frame=single]{text}
-$ help identity
-
-> identity get
-> identity update [email = str] [role = (master, admin, normal)] 
-                  [token = str] [public_key = str]
-\end{minted}
-\end{listing}
-
-\begin{listing}[H]
+\caption{Projekty}
 \begin{minted}[frame=single]{text}
 $ help project
 
@@ -99,6 +125,7 @@ $ help project
 \end{listing}
 
 \begin{listing}[H]
+\caption{Integrace}
 \begin{minted}[frame=single]{text}
 $ help build
 
@@ -114,6 +141,7 @@ $ help build
 \end{listing}
 
 \begin{listing}[H]
+\caption{Fáze}
 \begin{minted}[frame=single]{text}
 $ help stage
 
@@ -130,6 +158,7 @@ $ help stage
 \end{listing}
 
 \begin{listing}[H]
+\caption{Úkoly}
 \begin{minted}[frame=single]{text}
 $ help job
 
@@ -148,6 +177,7 @@ $ help job
 \end{listing}
 
 \begin{listing}[H]
+\caption{Uživatelé}
 \begin{minted}[frame=single]{text}
 $ help user
 
@@ -165,6 +195,7 @@ $ help user
 \end{listing}
 
 \begin{listing}[H]
+\caption{Běhoví klienti}
 \begin{minted}[frame=single]{text}
 $ help runner
 
@@ -198,7 +229,7 @@ Doporučené požadavky:
 \begin{itemize}
 	\item SQL server (MariaDB, PostgreSQL, \ldots)
 	\item WSGI server (uwsgi, gunicorn, \ldots)
-	\item Reverzní proxy (nginx, apache, \ldots)
+	\item Webový server (nginx, apache, \ldots).
 \end{itemize}
 
 \begin{listing}[H]

@@ -2,7 +2,20 @@
 
 V této kapitole se budeme věnovat návrhu systému.
 V následujícím textu bude odkazováno na navrhovaný systém jeho vybraným názvem -- Piper~CI.
-Inspirací pro jméno je firma Pied Piper z TV seriálu Sillicon Valley \cite{pied_piper}.
+
+Nejprve je nutné zvolit programovací jazyk v jakém budou jednotlivé části systému napsány.
+Díku modulární architektuře není nutné, aby všechny části systému byly napsány ve stejném programovacím jazykem.
+Za hlavní programovací jazyk byl zvolen Python, protože s ním má autor této práce největší zkušenosti.
+Konkrétně Python ve verzi 3.6 hlavně z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd a proměnných dokáží do jisté míry nahradit dokumentační komentáře
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{python}
+def foo(bar: Bar, count: int) -> List[str]:
+    items: List[str] = ['hello:' + i for i in bar.items()]
+    return items
+\end{minted}
+\caption{Ukázka typových anotací v Pythonu 3.6}
+\end{listing}
 
 \section{Průběh integrace}
 
@@ -14,332 +27,18 @@ Fáze se skládá z jednoho nebo více úkolů.
 Selhání jednoho z příkazů vede k ukončení vykonávání úkolu a jeho selhání.
 Jelikož jsou úkoly prováděny nezávisle na sobě, tak po selhání jednoho úkolu jsou ostatní úkolu v rámci fáze dokončeny.
 Pokud jeden z úkolů v rámci fáze selže, tak selže celá fáze a další fáze už nejsou prováděny.
-Fáze jsou prováděny sekvenčně.
+Fáze jsou prováděny sekvenčně v zadaném pořadí.
 
-Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze v úspěšném stavu.
+Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze v úspěšně dokončeny.
 
 Jednotlivé úkoly, fáze nebo celé integrace je možné restartovat nebo rušit.
 
-\section{Architektura}
+\subsection{Konfigurace}
 
-Při výběru architektury systému by měl být brán v potaz požadavek na jeho modulárnost.
-Modularity systému docílíme výběrem vhodné architektury.
-
-\subsection{REST}
-
-REST je architektonický vzor splňující následující požadavky:
-
-\begin{itemize}
-    \item model klient-server,
-    \item bezstavový model,
-    \item správa mezipaměťi,
-    \item uniformní rozhraní,
-    \item vrstvená architektura.
-\end{itemize}
-
-\subsubsection{Model klient-server}
-
-Model klient-server je styl návrhu systému, který dělí jeho části na poskytovatele služeb (servery) a jejich uživatele (klienty).
-Rozdělením systému na více (na sobě nezávislých) částí je docíleno vylepšené portabtability a škálovatelnosti.
-\cite{rest_klient_server}
-
-\subsubsection{Bezstavový model}
-
-Bezstavové odbavení požadavku znamená, že každý požadavek musí obsahovat všechny informace k jeho vyřízení.
-Přínosem je jednodušší odbavení požadavku z hlediska serveru, který nemusí udržovat jednotlivým klientům jejich stav (\textit{session}) nebo řešit chyby na základě nevalidního stavu.
-Nevýhoda spočívá v redundanci přenesených dat.
-\cite{rest_bezstavovy}
-
-\subsubsection{Správa mezipaměti}
-
-Součástí odpovědi od serveru může být i informace o tom, zda je možné tuto odpověď znovupoužít.
-Klient pak místo posílání dalšího stejného požadavku může použít již obdrženou odpověď z mezipaměti.
-Výhodou je uvolnění systémových prostředků serveru.
-Na druhé straně se může stát, že odpověď v mezipaměti je již neplatná.
-\cite{rest_mezipamet}
-
-\subsubsection{Uniformní rozhraní}
-
-Rozhraní serveru je navrženo obecně, bez přizpůsobení požadavkům jednoho určitého klienta.
-Tímto je dosaženo zjednodušení serverové části za cenu snížení efektivity.
-\cite{rest_uniformni}
-
-\subsubsection{Vrstvená architektura}
-
-Příjemce požadavku a jeho vykonavatel nemusí být tentýž server.
-Z hlediska klienta se v komunikaci se serverem nic nemění.
-Nevýhodou je zvýšení režie a latence přenosu dat.
-Přínos spočívá v umožnění rozdělení serverové části na více menších systémů, které jsou snažší na správu a umožňují lepší škálovatelnost.
-\cite{rest_architektura}
-
-\subsubsection{Reprezentace dat a přístup ke zdrojům}
-
-Základním stavebním kamenem REST rozhraní jsou zdroje.
-Každá pojmenovatelná informace může být zdrojem (např. počasí dnes v Praze, \ldots), kolekce dalších zdrojů (např. počasí v hlavních městech Evropy) a další.
-Zdroj je identifikován URI adresou.
-\cite{rest_zdroje}
-
-\section{Struktura systému}
-
-V případě Piper CI je poskytovatelem služeb jádro systému (Piper CI core), které přes API poskytuje přístupy ke svým zdrojům.
-API je zpřístupněno pomocí webového serveru dle výběru provozovatele.
-Webové rozhraní se chová jako prostředník mezi klientem (webovým prohlížečem) a poskytovatelem služeb (tento přístup je definován v REST jako vrstvená architektura).
-Terminálový klient komunikuje s jádrem systému přímo přes SSH protokol.
-Grafická reprezentace systému je vyobrazena v diagramu \ref{pic:architektura_piper.pdf}.
-
-\imagefigurelarge{architektura_piper.pdf}{Návrh architektury Piper}
-
-Poté, co je integrace rozdělena na jednotlivé úkoly, je jádro zařadí do fronty, odkud jsou vyzvednuty běhovými klienty a zpracovány.
-Běhový klient informuje průběžně jádro systému o průběhy integrace (stav a log výstup).
-Jádro systému tyto informace zpracovává a archivuje.
-
-\section{Model jádra systému}
-
-Model jádra systému je rozdělen do entit, které mají mezi sebou vazby.
-Vše začíná u projektu, který je vazbou mezi systémem CI a verzovacím systémem.
-Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou.
-Uživatelé jsou přiřazování do projektů.
-K projektu jsou vázány data o jeho provedených integracích.
-Běhovým klientům jsou přiřazovány úkoly, které vykonávají.
-Grafická reprezentace entit v systému je vyobrazena na obrázku \ref{pic:entity_piper.pdf}.
-
-\imagefigurelarge{entity_piper.pdf}{Entity v Piper CI}
-
-\section{Návrh API}
-
-REST API jádra je dostupné přes HTTP protokol.
-Definice REST zdrojů vychází z definice entit systému.
-
-\verb|/projects| -- projekty,
-\verb|/builds| -- integrace,
-\verb|/stages| -- fáze,
-\verb|/jobs| -- úkoly,
-\verb|/runners| -- běhový klienti,
-\verb|/users| -- uživatelé.
-
-Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
-Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vratí projekty s daným originem.
-Speciálním případěm filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implemetovat stránkování.
-
-Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \verb|POST| (vytvoř) \verb|PUT| (aktualizuj) \verb|DELETE| (smaž).
-Výsledek akce je reprezentován návratovým HTTP kódem.
-
-\section{Návrh terminálového rozhraní}
-
-Návrh terminálového rozhraní stejně jako REST rozhraní vychází z definice entit systému.
-Po připojení k terminálu je uživateli zpřístupněna sada příkazů s názvem sdružené entity.
-Jsou to \verb|build|, \verb|identity|, \verb|job|, \verb|project|, \verb|runner|, \verb|stage| a \verb|user|.
-Jenotlivé příkazy mají svoje podpříkazy.
-Jsou to například \verb|get|, \verb|list|, \verb|count|, \verb|update|, \verb|create| a pak další v závislosti na entitě.
-Podpříkazy mohou mít i argumenty, například \verb|job get 1| vrací úkol s identifikátorem 1.
-Pokud má podpříkaz více argumentů, tak jsou argumenty zadávány se svým jménem, například \verb|project create url="martinfranc.eu"|.
-
-\section{Autentizace a autorizace}
-
-Autentizace uživatele do systému přes terminálové rozhraní lze implementovat pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
-Uživatel vytvoří 2 klíče -- veřejný a privátní.
-Veřejný klíč následně dá k dispozici autentizačním autoritám.
-Pomocí privátního klíče lze data šifrovat a dešífrovat, zatímco veřejným klíčem lze data jen šifrovat.
-
-\begin{enumerate}
-    \item Klient a server se shodnou na společném šifrovacím klíči pomocí Diffie-Hellman algoritmu.
-    Tento klíč bude pak použit k zašifrování celé komunikace.
-    \item Klient pošle serveru identifikátor svého klíče.
-    \item Server dle identifikátoru vybere veřejný klíč (soubor \verb|authorized_keys|), zašifruje s ním náhodné číslo a pošle jej klientovi.
-    \item Klient rozšifruje toto číslo přidá k němu předem dohodnutou hodnotu, znovu zašifruje a pošle zpět serveru.
-    \item Server tuto hodnotu přidá k předen vygenerovanému číslu a znovu zašifruje.
-    \item Server porovná výsledné hodnoty. Pokud se shodují, tak klienta autentizuje.
-\end{enumerate}
-
-Po autentizaci server podle konfigurace předá řízení na předem definovaný program.
-Ve většině případů je tímto programem shell systému (například bash, zsh, \ldots).
-V našem případě stačí tento program nastavit na námi vytvořený shell.
-
-\begin{listing}[ht]
-\begin{minted}[frame=single]{text}
-command="[COMMAND]" ssh-rsa AAAA...
-\end{minted}
-\caption{Vlastní příkaz v authorized\_keys}
-\end{listing}
-
-Mimo veřejného klíče uživatel disponuje také tokenem, který je použit pro autentizaci se systémy třetí strany (webové rozhraní).
-Oprávnění jsou definována na úrovni systému a jednotlivých projektů v podobě rolí.
-
-\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
-
-Systémové role jsou následující:
-
-\paragraph{ROOT}
-
-Administrátor celého systému.
-Je autorizován ke všem akcím.
-Podobnost s root oprávněním v Unixu.
-
-\paragraph{ADMIN}
-
-Administrátor na úrovni projektů.
-
-\paragraph{NORMAL}
-
-Obyčejný uživatel, který je zařazován do projektů.
-
-\paragraph{GUEST}
-
-Návštěvník.
-Výchozí identita pro nepřihlášeného uživatele.
-
-\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
-
-Projektová role jsou následující:
-
-\paragraph{MASTER}
-
-Správce projektu.
-Edituje projekt a přidává do něj uživatele.
-
-\paragraph{DEVELOPER}
-
-Člen projektu.
-
-\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
-
-\subsection{Uživatelé}
-
-Uživatelé mají plná oprávnění v případě editace sama sebe.
-Role ADMIN může vytvářet pouze uživatele s oprávněním NORMAL.
-
-\begin{table}[h]
-\centering
-\caption{Oprávnění v uživatelskému modelu}
-\begin{tabular}{|l|l|l|l|l|}
-\hline
-       & ROOT & ADMIN & NORMAL & GUEST \\ \hline
-Zobrazení   & x    & x     &        &       \\ \hline
-Vytvoření & x    & x     &        &       \\ \hline
-Editace   & x    &       &        &       \\ \hline
-Smazání & x    &       &        &       \\ \hline
-\end{tabular}
-\end{table}
-
-\subsection{Běhoví klienti}
-
-Přidání běhového klienta by měla být pouze záležitost hlavního administrátora systému (ROOT).
-Naopak zobrazení běhových klientů by mělo být přístupné všem, protože v definici integrace je nutné uvést i běhového klienta.
-
-\begin{table}[h]
-\centering
-\caption{Oprávnění v modulu běhových klientů}
-\begin{tabular}{|l|l|l|l|l|}
-\hline
-       & ROOT & ADMIN & NORMAL & GUEST \\ \hline
-Zobrazení   & x    & x     & x      &       \\ \hline
-Vytvoření & x    &       &        &       \\ \hline
-Editace   & x    &       &        &       \\ \hline
-Smazání & x    &       &        &      \\ \hline
-\end{tabular}
-\end{table}
-
-\subsection{Projektoví uživatelé}
-
-Přidání a odebrání uživatelů do projektů je dovoleno pouze uživatelům, kteří mají v daném projektu roli ADMIN.
-Uživatel je schopen odebrat sám sebe z projektu.
-
-\subsection{Integrace}
-
-Informace o integracích jsou veřejné pro všechny uživatelé, dokonce i v roli GUEST.
-Restart nebo zrušení integrace je dovoleno pouze uživatelům v projektu.
-
-\section{Komunikace v \uv{realném čase}}
-
-Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení dat.
-Server tedy posílá pouze žádané informace a ne celou webovou stránku.
-Jedná se například o~stavy buildů nebo výpis výstupu aktuálně běžícího buildu (tzv. \uv{streaming logu}).
-Klientem je v~této komunikaci webový prohlížeč a serverem CI systém.
-
-Za opravdovou komunikaci v reálném čase by se dalo považovat websocketové spojení \cite{websocket}.
-Je třeba si ale uvědomit, že data systému není nutné poskytovat v opravdu realném čase a i několika sekundové zpoždění není na závadu.
-Důvodem je to, že na stav integrace není nutné okamžitě reagovat, výstup z \uv{streaming logu} je pouze jednostanný, neumožňující uživatelskou interakci.
-
-Jako nejvýhodnější řešení se jeví metoda pollingu.
-Metoda pollingu spočívá v~opakovaném dotazování ze směru klienta (webového prohlížeče) směrem k~serveru (CI systém) v~určitém časovém intervalu.
-Nevýhoda tkvý v~plýtvání systémových prostředků z~důvodu velkého počtu dotazů.
-Výhodou je velmi jednoduchá implementace.
-
-\begin{listing}[ht]
-\begin{minted}[frame=single, linenos]{text}
-00:00:00 Klient -> Máš pro mě něco?
-00:00:01 Server -> Ne, čekej.
-00:00:01 Klient -> Máš pro mě něco?
-00:00:02 Server -> Ne, čekej.
-00:00:02 Klient -> Máš pro mě něco?
-00:00:03 Server -> Ano. Tady to je!
-\end{minted}
-\caption{Short polling}
-\end{listing}
-
-K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest| nebo Fetch API \cite{fetch_api}.
-Z pohledu strany serveru se jedná o~klasický HTTP požadavek.
-
-Přidání čekací smyčky na straně serveru místo odeslání okamžité odpovědi se nazývá long-polling.
-
-Stále znovuotevírání HTTP spojení ze strany klienta k serveru můžeme vyřešit nasazením HTTP2, které po jednom spojení dokáže odeslat více požadavků.
-
-\section{Komuninakce s~běhovým prostředím}
-
-Cílem je vytvořit rozhraní s běhovým prostředím, které přijme zadaný příkaz nebo jejich sadu a poskytne přístup k průběžnému výstupu.
-Pokud budeme vykonávat jednotlivé příkazy odděleně, tak je nutné zajistit persistenci prostředí uvnitř běhového prostředí.
-Například pokud jeden příkaz nadefinuje proměnné prostředí, tak další příkaz by k nim měl mít přístup (například změna pracovní složky \verb|$PWD|).
-
-\subsection{Virtualbox}
-
-Jelikož se jedná o plnou virtualizaci, tak je potřeba vytvořit jakýsi můstek mezi hostem a hostitelem.
-
-\subsubsection{COM port pro čtení/zápis}
-
-Pomocí VirtualBox administračního rozhraní vytvoříme COM port, jehož výstup nasměrujeme do souboru nebo socketu na hostitelském systému.
-Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a aplikace provozovaná na hostitelském systému tento výstup převezme.
-Spojení je oboustranné, takže je možné předávat příkazy i do hostovaného systému.
-\cite{virtualbox_serial}
-
-\subsubsection{SSH spojení}
-
-SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky \cite{ssh_rfc}.
-Přihlášení uživatele do systému je implementováno na základě věřeného klíče, hesla, hostname nebo lze ověřování úplně vypnout \cite{ssh_auth_rfc}.
-Pro naše účely lze ověřované úplně vypnout za předpokladu, že dokážeme ohlídat možné zneužití.
-
-\subsection{Docker}
-
-Příkazy lze předávat do kontejneru přímo z~hostujícího stroje.
-Výstup z příkazů pak jednoduše směrujeme do souboru nebo socketu.
-
-\begin{listing}[ht]
-\begin{minted}[frame=single,linenos]{shell}
-docker start [jmeno_kontejneru]
-docker exec -i [jmeno_kontejneru] [prikaz] >> [soubor]
-\end{minted}
-\caption{Předání výstupu z Docker kontejneru}
-\end{listing}
-
-Pro využití přímo v našem programu můžeme využít jednu z mnoha SDK knihoven \cite{docker_sdk}.
-
-\subsection{LXD}
-
-Jádro LXD je proces běžící na pozadí, který zpřístupňuje svoji funkcionalitu skrze REST API dostupné přes lokální unix socket nebo síť \cite{lxd}.
-Klientem může být naše vlastní implementace podle REST API specifikace nebo využijeme předpřipravené klienty \cite{lxd_rest}.
-
-\begin{listing}[ht]
-\begin{minted}[frame=single,linenos]{shell}
-curl -k -L --cert cert --key key "https://localhost:8443/1.0/images"
-\end{minted}
-\caption{Dotaz na REST API pomocí HTTP}
-\end{listing}
-
-\section{Konfigurace integrací projektu}
-
-Konfigurace integrací projektu je brána z textového souboru umístěného přímo v repozitáři projektu.
+Konfigurace integrací projektu je brána z textového souboru umístěného přímo v SCM repozitáři projektu.
 Velkou výhodou tohoto přístupu je, že v kombinaci s verzovacím systémem se konfigurace integrace váže vždy k určitému stavu repozitáře.
 
-\subsection{Formát souboru}
+\subsubsection{Formát souboru}
 
 První je nutné rozhodnout formát tohoto souboru.
 Soubor může být pouhým strukturovaným popisem dat (JSON, YAML, XML, \ldots) nebo dokonce jednoduchý skript (Lua, Python, \ldots).
@@ -376,11 +75,365 @@ build:
 \label{listing:yaml}
 \end{listing}
 
-\subsection{Struktura souboru}
+\subsubsection{Struktura souboru}
 
 Struktura souboru odpovídá průběhu integrace.
-U úkolů (jobs) lze navíc definovat podmínku jejich spuštění (only), typ běhového klienta (runner), obraz běhového prostředí (image) a proměnné prostředí.
+U úkolů (\textit{jobs}) lze navíc definovat podmínku jejich spuštění (\textit{when}), typ běhového klienta (\textit{runner}), obraz běhového prostředí (\textit{image}) a proměnné prostředí (\textit{env}).
+Podmínka spuštění bude vykonána pomocí knihovny simpleeval, která oproti Python eval implementuje jen podmnožinu bezpečných operací.
 Proměnné prostředí jsou dostupné příkazům, tak i podmínce spuštění úkolu.
-Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM a další.
-Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (after\_failure).
-Vhodné jsou například pro výpis logovacích souborů.
+Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM (\textit{branch}, \textit{commit}, \ldots) a další.
+Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (\textit{after\_failure}).
+Vhodné jsou například pro výpis log souborů, které produkují vykonávané příkazy.
+
+% Vyhodnocení podmínky kódu je implementováno pomocí knihovny simpleeval.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
+stages:
+  - first
+
+jobs:
+  job1:
+    stage: first
+    image: "alpine/3.5"
+    commands:
+      - apk update
+      - apk add python
+      - python -c 'print("Hello!")'
+\end{minted}
+\caption{Ukázka YAML konfigurace integrace}
+\label{listing:yaml}
+\end{listing}
+
+Přesná struktura souboru je popsána v OpenAPI schématu na přiloženém médiu.
+
+\section{Architektura systému}
+
+Při výběru architektury systému by měl být brán v potaz požadavek na jeho modulárnost.
+Proto bude vhodné systém koncipovat jako soubor menších části, které bude možné obměňovat nebo přidávat.
+Tento požadavek na modulárnost splňuje architektonický vzor REST.
+
+\subsection{REST architektura}
+
+REST je architektonický vzor systémů splňující následující požadavky:
+
+\begin{itemize}
+    \item model klient-server,
+    \item bezstavový model,
+    \item správa mezipaměťi,
+    \item uniformní rozhraní,
+    \item vrstvená architektura. \cite{rest}
+\end{itemize}
+
+\paragraph{Model klient-server}
+
+Model klient-server je styl návrhu systému, který dělí jeho části na poskytovatele služeb (servery) a jejich uživatele (klienty).
+Rozdělením systému na více (na sobě nezávislých) částí je docíleno vylepšené portability a škálovatelnosti.
+
+\paragraph{Bezstavový model}
+
+Bezstavové odbavení požadavku znamená, že každý požadavek musí obsahovat všechny informace k jeho vyřízení.
+Přínosem je jednodušší odbavení požadavku z hlediska serveru, který nemusí udržovat jednotlivým klientům jejich stav (\textit{session}) nebo řešit chyby na základě nevalidního stavu.
+Nevýhoda spočívá v redundanci přenesených dat.
+
+\paragraph{Správa mezipaměti}
+
+Součástí odpovědi od serveru může být i informace o tom, zda je možné tuto odpověď použít znovu.
+Klient pak místo posílání dalšího stejného požadavku může použít již obdrženou odpověď z mezipaměti.
+Výhodou je uvolnění systémových prostředků serveru.
+Na druhé straně se může stát, že odpověď v mezipaměti je již neplatná.
+
+\paragraph{Uniformní rozhraní}
+
+Rozhraní serveru je navrženo obecně, bez přizpůsobení požadavkům jednoho určitého klienta.
+Tímto je dosaženo zjednodušení serverové části za cenu snížení efektivity.
+
+\paragraph{Vrstvená architektura}
+
+Příjemce požadavku a jeho vykonavatel nemusí být tentýž server.
+Z hlediska klienta se v komunikaci se serverem nic nemění.
+Nevýhodou je zvýšení režie a latence přenosu dat.
+Přínos spočívá v umožnění rozdělení serverové části na více menších systémů, které jsou snažší na správu a umožňují lepší škálovatelnost.
+
+\paragraph{Reprezentace dat a přístup ke zdrojům}
+
+Základním stavebním kamenem REST rozhraní jsou zdroje.
+Každá pojmenovatelná informace může být zdrojem (např. počasí dnes v Praze, \ldots), kolekce dalších zdrojů (např. počasí v hlavních městech Evropy) a další.
+Zdroj je identifikován URI adresou.
+\cite{rest_zdroje}
+
+\subsection{Rozdělení systému na části}
+
+Systém se bude dělit na dvě hlavní části -- na jádro (Piper CI core) a běhové klienty (Piper CI runner).
+Jádro zodpovídá za správu dat integrací, projektů a uživatelů a jejich poskytnutí dalším systémům skrze REST API.
+Úkolem jádra je naslouchat změnám v SCM repozitářích spravovaných projektů a následně z nich vytvořit integraci.
+Tato integrace je rozdělena na jednotlivé úkoly, které jsou přidělovány běhovým klientům.
+Běhový klient úkol příjme jako sadu příkazů, připraví běhové prostředí a spustí příkazy.
+Výstup z těchto příkazů předává jádru systému, které je dále zpracovává.
+
+\imagefigurelarge{architektura_piper.pdf}{Návrh struktury systému}
+
+Součástí jádra systému bude i uživatelské terminálové rozhraní ve kterém lze konfigurovat projekty, spravovat uživatelé a sledovat stav současných i minulých integrací.
+Implementovat další uživatelská rozhraní bude pomocí již zmíněného REST API.
+Například bude takto možné implementovat webové rozhraní.
+
+\section{Jádro systému (Piper CI core)}
+
+Jádro reprezentuje středobod celého systému.
+Jeho úkolem je naslouchat změnám ve spravovaných repozitářích (tzv. \uv{webhooky}) a následně řídit průběh integrace.
+Úkoly, které jsou připravené k zpracování, jsou zařazovány do fronty, kde čekají na vyzvednutí jedním z běhových klientů.
+Fronta bude implementována pomocí Redis serveru a jeho \textit{list} struktury.
+Tato struktura poskytuje základní operace pro implementaci fronty (\textit{push} a \textit{pop}) a dostatečnou rychlost pro časté přístupy.
+Následný log výstup od běhových klientů bude ukládán v textových souborech.
+
+\subsection{Model}
+
+Model jádra systému je rozdělen do entit, které jsou mezi sebou spojené vazbami.
+Vše začíná u projektu, který je vazbou mezi CI a SCM.
+Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou, která je dále přidělována k projektům.
+K projektu jsou vázány data o integracích, které se dále dělí na fáze, úkoly a příkazy.
+Úkol vykonává právě jeden běhový klient.
+
+\imagefigurefull{entity_piper.pdf}{Entity v Piper CI}{0.75}
+
+Nad daty systému bude třeba provádět také filtrace (například vrať mi všechny integrace tohoto projektu, které byli provedeny na SCM větvi \textit{master}).
+Těmto požadavkům vyhovuje databázové uložiště, které vztahy mezi entitami implementuje pomocí cizích klíčů a má nástroje pro filtrace dat.
+K abstrakci nad různými databázovými stroji bude použita knihovna peewee.
+Abstrakcí bude ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji včetně například SQLite.
+Jádro systému nepotřebuje mimo jednoduché filtrace dat dělat náročnější dotazy do databáze, tak případný ztracený výkon nebude tak znatelný.
+
+\subsection{HTTP REST API}
+
+REST API jádra vychází z definice entit systému.
+API je dostupné přes HTTP protokol, kde jsou jednotlivé kolekce zdrojů identifikovány přes část URL adresy reprezentující umístění na serveru.
+Výsledná URL adresa je pak například \verb|https://piper.martinfranc.eu/projects|.
+
+\begin{table}[ht]
+\centering
+\caption{Mapování entit na HTTP zdroje}
+\begin{tabular}{|l|l|}
+\hline
+Umístění na serveru & Entita \\ \hline
+\verb|/projects| & Projekty \\ \hline
+\verb|/builds| & Integrace \\ \hline
+\verb|/stages| & Fáze \\ \hline
+\verb|/jobs| & Úkoly \\ \hline
+\verb|/runners| & Běhoví klienti \\ \hline
+\verb|/users| & Uživatelé \\ \hline
+\end{tabular}
+\end{table}
+
+Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \verb|POST| (vytvoř) \verb|PUT| (aktualizuj) \verb|DELETE| (smaž).
+Výsledek akce je reprezentován návratovým HTTP kódem.
+
+Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
+Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vratí projekty s daným originem.
+Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implemetovat stránkování.
+
+Autentizace uživatele bude probíhat pomocí tokenu, který bude součástí HTTP hlaviček v požadavku klienta.
+Pro získání svého tokenu se uživatel bude muset nejprve přihlásit do terminálového rozhraní.
+
+API bude implementováno pomocí webového frameworku založeného na protokolu wsgi Flask.
+Flask je dostatečně lehký, aby splňoval požadavek na minimalismus systému a autor práce s ním má již předešlé zkušenosti.
+
+\subsection{Terminálové rozhraní}
+
+Návrh terminálového rozhraní stejně jako REST rozhraní vychází z definice entit systému.
+Po připojení k terminálu je uživateli zpřístupněna sada příkazů s názvem sdružené entity (například \verb|build| pro integrace, \ldots).
+Každý příkaz má sadu podpříkazů, definující akci.
+Jsou to například \verb|get|, \verb|list|, \verb|count|, \verb|update|, \verb|create| a pak další v závislosti na entitě.
+Podpříkazy mohou mít i argumenty, například \verb|job get 1| vrací úkol s identifikátorem 1.
+Více argumentů je identifikováno svým jménem, například \verb|project create url="martinfranc.eu"|.
+
+Autentizace uživatele do systému přes terminálové rozhraní lze implementovat pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
+Uživatel vytvoří 2 klíče -- veřejný a privátní.
+Veřejný klíč následně dá k dispozici autentizačním autoritám.
+Pomocí privátního klíče lze data šifrovat a dešifrovat, zatímco veřejným klíčem lze data jen šifrovat.
+
+\begin{enumerate}
+    \item Klient a server se shodnou na společném šifrovacím klíči pomocí Diffie-Hellman algoritmu.
+    Tento klíč bude pak použit k zašifrování celé komunikace.
+    \item Klient pošle serveru identifikátor svého klíče.
+    \item Server dle identifikátoru vybere veřejný klíč (soubor \verb|authorized_keys|), zašifruje s ním náhodné číslo a pošle jej klientovi.
+    \item Klient rozšifruje toto číslo přidá k němu předem dohodnutou hodnotu, znovu zašifruje a pošle zpět serveru.
+    \item Server tuto hodnotu přidá k předen vygenerovanému číslu a znovu zašifruje.
+    \item Server porovná výsledné hodnoty. Pokud se shodují, tak klienta autentizuje.
+\end{enumerate}
+
+Po autentizaci server podle konfigurace předá řízení na předem definovaný program.
+Ve většině případů je tímto programem shell systému (například bash, zsh, \ldots).
+V našem případě stačí tento program nastavit na námi vytvořený shell.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single]{text}
+command="[COMMAND]" ssh-rsa AAAA...
+\end{minted}
+\caption{Vlastní příkaz v authorized\_keys}
+\end{listing}
+
+Terminálové rozhraní bude implementováno pomocí knihovny \verb|cmd|, která dovoluje i psaní interaktivní dokumentace vytvořené z dokumentačních komentářů funkcí (ukázka kódu \ref{code:shell-term}).
+
+\begin{listing}[ht]
+\caption{\label{code:shell-term}Ukázka terminálového rozhraní}
+\begin{minted}[frame=single,linenos]{text}
+localhost$ ssh piper@piper.martinfranc.eu
+Enter passphrase for key '/home/anon/.ssh/id_rsa': 
+[email@martinfranc.eu]$ help
+
+Documented commands (type help <topic>):
+========================================
+build  exit  help  identity  job  project  runner  stage  user
+
+\end{minted}
+\end{listing}
+
+\subsection{Autorizace}
+
+Oprávnění budou definována na úrovni systému (předpona \textit{system}) a jednotlivých projektů (předpona \textit{project}) v podobě rolí.
+Uživatel bude mít právě jednu systémovou roli a právě jednu projektovou roli.
+Výjimkou je role system.GUEST, která nemá projektovou roli.
+
+\paragraph{system.ROOT}
+
+Administrátor celého systému, který je autorizován ke všem akcím na všech entitách.
+Jako jediná role může přidávat běhové klienty k systému.
+
+\paragraph{system.ADMIN}
+
+Administrátor na úrovni projektů.
+Je mu dovoleno vytvářet nové uživatele (pouze s oprávněním system.NORMAL) a projekty.
+
+\paragraph{system.NORMAL}
+
+Obyčejný uživatel, který je zařazován do projektů.
+
+\paragraph{system.GUEST}
+
+Výchozí identita pro nepřihlášeného uživatele.
+Je mu dovoleno číst data projektů a jejich integrací.
+
+\paragraph{project.MASTER}
+
+Správce projektu, který má právo na jeho editaci.
+Jeho úkolem je také přidávat a odebírat uživatele projektu.
+
+\paragraph{project.DEVELOPER}
+
+Člen projektu.
+Získává práva na restartovaní a rušení integrací v rámci projektu.
+
+\section{Běhový klient}
+
+Běhový klient bude sloužit jako prostředník mezi běhovým prostředím, ve kterém je vykonáván úkol z integrace a jádrem systému.
+Jeho úkolem je přeložit zadání úkolu jádra systému (ukázka kódu \ref{code:piper-core-job-export}) pro konkrétní běhové prostředí.
+Například překlad pro Linuxové běhové prostředí se bude velmi lišit od toho založeného na OS Windows.
+
+\begin{listing}[ht]
+\caption{\label{code:piper-core-job-export}Zadání úkolu od jádra systému}
+\begin{minted}[frame=single]{json}
+{
+  "commands": [
+    "echo $A",
+    "echo $B",
+  ],
+  "secret": "ok",
+  "env": {
+    "A": "Hello",
+    "B": "World"
+  },
+  "image": "alpine/3.5",
+  "repository": {
+    "origin": "https://github.com/francma/piper-ci-test-repo.git",
+    "branch": "master",
+    "commit": "e7a4739755a81a06242bc3249e36b133b3783f9b"
+  }
+}
+\end{minted}
+\end{listing}
+
+Výsledkem překladu je spustitelný skript, která mimo výstupu zadaných příkazů přidá do výstupu i speciální značky podle kterých systém rozpozná konec jednoho příkazu a začátek dalšího.
+Značky také obsahují informaci o návratovém kódu příkazu a časovou značku.
+
+Komunikace je navazována vždy směrem od běhového klienta k jádru systému, včetně žádosti klienta o přidělení úkolu.
+Toto vede k metodě tzv. \uv{short-pollingu}, ve které klient opakuje stále stejný dotaz směrem k serveru dokud nedostane kladnou odpověď.
+Plýtvání prostředků ze stále znovu navazování spojení směrem k serveru lze omezit zavedením HTTP2. 
+
+Výstup skriptu je pak postupně předáván jádru systému přes definované REST API.
+Součástí zadání úkolu je i tajný klíč (\textit|secret|), kterým se běhový klient prokazuje jádru systému a slouží také jako identifikátor daného úkolu.
+Běhový klient si bude ukládat výsledky skriptu v dočasné paměti a v definovaném časovém intervalu je bude předávat jádru.
+
+\subsection{Komunikace s~běhovým prostředím}
+
+Cílem je vytvořit rozhraní s běhovým prostředím, které přijme zadaný příkaz nebo jejich sadu a poskytne přístup k průběžnému výstupu.
+Pokud budeme vykonávat jednotlivé příkazy odděleně, tak je nutné zajistit persistenci prostředí uvnitř běhového prostředí.
+Například pokud jeden příkaz nadefinuje proměnné prostředí, tak další příkaz by k nim měl mít přístup (například změna pracovní složky \verb|$PWD|).
+
+\subsubsection{Virtualbox}
+
+Jelikož se jedná o plnou virtualizaci, tak je potřeba vytvořit určitý můstek mezi hostem a hostitelem.
+
+\paragraph{COM port pro čtení/zápis}
+
+Pomocí VirtualBox administračního rozhraní vytvoříme COM port, jehož výstup nasměrujeme do souboru nebo socketu na hostitelském systému.
+Každý spuštěný příkaz poté přesměrujeme na zvolený COM port a aplikace provozovaná na hostitelském systému tento výstup převezme.
+Spojení je oboustranné, takže je možné předávat příkazy i do hostovaného systému.
+\cite{virtualbox_serial}
+
+\paragraph{SSH spojení}
+
+SSH je kryptografický protokol, který umožňuje oboustrannou komunikaci mezi účastníky \cite{ssh_rfc}.
+Přihlášení uživatele do systému je implementováno na základě věřeného klíče, hesla, hostname nebo lze ověřování úplně vypnout \cite{ssh_auth_rfc}.
+Pro naše účely lze ověřované úplně vypnout za předpokladu, že dokážeme zamezit možnému zneužití.
+
+\subsubsection{Docker}
+
+Příkazy lze předávat do kontejneru přímo z~hostujícího stroje.
+Výstup z příkazů pak jednoduše směrujeme do souboru nebo socketu.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{shell}
+docker start [jmeno_kontejneru]
+docker exec -i [jmeno_kontejneru] [prikaz] >> [soubor]
+\end{minted}
+\caption{Předání výstupu z Docker kontejneru}
+\end{listing}
+
+Pro využití přímo v našem programu můžeme využít jednu z mnoha SDK knihoven \cite{docker_sdk}.
+
+\subsubsection{LXD}
+
+Jádro LXD je proces běžící na pozadí, který zpřístupňuje svoji funkcionalitu skrze REST API dostupné přes lokální unix socket nebo síť \cite{lxd}.
+Klientem může být naše vlastní implementace podle REST API specifikace nebo využijeme předpřipravené klienty \cite{lxd_rest}.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{shell}
+curl -k -L --cert cert --key key "https://localhost:8443/1.0/images"
+\end{minted}
+\caption{Dotaz na REST API pomocí HTTP}
+\end{listing}
+
+\section{Webové rozhraní}
+
+Webové rozhraní rozhraní bude interpretovat výsledky REST API jádra systému a vracet je v uživatelsky přívětivé podobě.
+
+Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení dat.
+Server tedy posílá pouze žádané informace a ne celou webovou stránku.
+Jedná se například o~stavy integrace nebo výpis výstupu aktuálně běžícího úkolu (tzv. \uv{streaming logu}).
+Klientem je v~této komunikaci webový prohlížeč a serverem jádro systému.
+
+Za opravdovou komunikaci v reálném čase by se dalo považovat websocketové spojení \cite{websocket}.
+Je třeba si ale uvědomit, že data systému není nutné poskytovat v opravdu realném čase a i několika sekundové zpoždění není na závadu.
+Důvodem je to, že na stav integrace není nutné okamžitě reagovat, výstup z \uv{streaming logu} je pouze jednostanný, neumožňující uživatelskou interakci.
+Tím pádem se jako nejvýhodnější řešení se jeví metoda tzv \uv{short-pollingu}.
+
+K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest| nebo Fetch API \cite{fetch_api}.
+Z pohledu strany serveru se jedná o~klasický HTTP požadavek.
+
+Stále znovuotevírání HTTP spojení ze strany klienta k serveru můžeme vyřešit nasazením HTTP2, které po jednom spojení dokáže odeslat více požadavků.
+
+Webové rozhraní bude muset přeložit značky v log výstupu příkazů (\verb|::piper|) za skutečné příkazy a výsledek pak přeložit do HTML.
+
+Stejně jako jádro systému bude webové rozhraní implementováno ve frameworku Flask.
+
+
+

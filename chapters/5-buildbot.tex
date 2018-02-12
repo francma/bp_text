@@ -15,8 +15,10 @@ V konfiguračním souboru máme přístup k třídám Buildbotu, z kterých si s
 Základní třídou je \verb|BuildMasterConfig|, která v sobě ukládá veškeré nastavení integrace.
 Příkazy shlukujeme v instanci třídy \verb|BuildFactory|, která společně s instancí třídy \verb|Worker|, která definuje běhové prostředí tvoří výsledný \verb|BuilderConfig|.
 Posledním stavebním kamenem je třída \verb|Scheluder|, která je zodpovědná za naslouchání změnám v repozitáři.
+Ukázka kódu \ref{code:buildbot-minimal-config} obsahuje minimální konfiguraci.
 
 \begin{listing}[ht]
+\caption{\label{code:buildbot-minimal-config}Minimální konfigurace integrace}
 \begin{minted}[frame=single,linenos]{python}
 from buildbot.plugins import *
 
@@ -57,5 +59,86 @@ builder = util.BuilderConfig(
 )
 
 \end{minted}
-\caption{Minimální konfigurace integrace}
+\end{listing}
+
+\section{Architektura}
+
+Systém se dělí na \textit{build masters} a \textit{workers}.
+\textit{Workers} jsou zodpovědní za zpracování jednotlivých příkazů definovaných v integraci.
+\textit{Build master} reprezentuje samotný systém -- naslouchá změnám v repozitáři, informuje o výsledku integrací, zpřístupňuje své zdroje pomocí REST API a zadává práci podřazeným \textit{Workerům}.
+Buildbot podporuje mimo Gitu i další SCM (SVN, Mercurial, \ldots) a díky modulům dokáže spolupracovat s velkým množstvím systému.
+Komunikaci uvnitř systému zajišťuje Twisted framework.
+
+\section{Přístup ke zdrojům systému}
+
+Buildbot jako dřívěji uvedená CI poskytuje přístup ke zdrojům systému přes REST API.
+
+\subsection{Webové rozhraní}
+
+Webové rozhraní se aktivuje v hlavním konfiguračním souboru \verb|master.cfg|.
+Jeho podobu lze dále upravovat pomocí zásuvných modulů.
+
+\begin{listing}[ht]
+\caption{\label{code:buildbot-enable-web}Povolení webového rozhraní v master.cfg}
+\begin{minted}[frame=single,linenos]{python}
+c['www'] = {
+    'plugins': {'waterfall_view': True}
+}
+\end{minted}
+\end{listing}
+
+% https://docs.buildbot.net/latest/manual/cfg-www.html
+
+\subsection{Postup nasazení}
+
+Buildbot lze nainstalovat přes Python baličkovací manažer pip.
+Další možností je využít připravených Docker obrazů.
+
+\begin{listing}[ht]
+\caption{Instalace Buildbotu přes pip}
+\begin{minted}[frame=single]{shell}
+pip install 'buildbot[bundle]'
+\end{minted}
+\end{listing}
+
+Po instalaci je třeba vytvořit v systému skupinu a uživatele pod kterým poběží Buildbot služby.
+
+\begin{listing}[ht]
+\caption{Vytvoření uživatele a skupiny pro Buildbot služby}
+\begin{minted}[frame=single]{shell}
+addgroup --system buildbot
+adduser buildbot --system --ingroup buildbot --shell /bin/bash
+su - buildbot
+\end{minted}
+\end{listing}
+
+Pod identitou uživatele \verb|buildbot| založíme nový \textit{build master} a upravíme jeho konfigurační soubor \verb|master.cfg|
+
+\begin{listing}[ht]
+\caption{Vytvoření build mastera a upravení jeho konfigurace}
+\begin{minted}[frame=single]{shell}
+buildbot create-master ~/master
+mv ~/master/master.cfg.sample ~/master/master.cfg
+vim ~/master/master.cfg
+\end{minted}
+\end{listing}
+
+Stejně jako jsme vytvořili \textit{build mastera}, tak vytvoříme \textit{workera}.
+
+\begin{listing}[ht]
+\caption{Vytvoření workera a upravení jeho konfigurace}
+\begin{minted}[frame=single]{shell}
+buildbot-worker create-worker \
+    ~/worker [MASTER_ENDPOINT] example-worker [MASTER-PASSWORD]
+\end{minted}
+\end{listing}
+
+Nakonec zbývá systém už jen spustit.
+
+\begin{listing}[ht]
+\caption{Spuštění Buildbot systému}
+\begin{minted}[frame=single]{shell}
+buildbot-worker start ~/worker
+buildbot start ~/master
+\end{minted}
 \end{listing}
