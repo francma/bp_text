@@ -592,7 +592,7 @@ of works or by adapting the Work (including translation), and at the same time m
 \DeclareRobustCommand{\abstractpage}{%
 	\if@abstractcsdefined
 		\cleardoublepage
-		\thispagestyle{empty}
+		\thispagestyle{plain}
 		~
 		\vfill
 		\chapterstyletitle{Abstrakt}\theabstractcs
@@ -608,7 +608,7 @@ of works or by adapting the Work (including translation), and at the same time m
 
 	\if@abstractendefined
 		\cleardoublepage
-		\thispagestyle{empty}
+		\thispagestyle{plain}
 		~
 		\vfill
 		\chapterstyletitle{Abstract}\theabstracten
@@ -628,6 +628,7 @@ of works or by adapting the Work (including translation), and at the same time m
 
 \AtBeginDocument{
 	\if@assignmentdefined{\includepdf[pages={1}]{\theassignment}}
+	\frontmatter
 
 	\cleardoublepage
 	\titlepage
@@ -657,4 +658,5 @@ of works or by adapting the Work (including translation), and at the same time m
 	\listoffigurescond
 
 	\pagestyle{ruled}
+	\mainmatter
 }
