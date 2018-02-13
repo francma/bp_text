@@ -1,11 +1,11 @@
 \chapter{Návrh systému}
 
-V této kapitole se budeme věnovat návrhu systému.
-V následujícím textu bude odkazováno na navrhovaný systém jeho vybraným názvem -- Piper~CI.
+V této kapitole se budeme věnovat návrhu architektury systému a výběrem použitých technologií.
+V následujícím textu bude odkazováno na navrhovaný systém jeho názvem -- Piper~CI.
 
-Nejprve je nutné zvolit programovací jazyk v jakém budou jednotlivé části systému napsány.
-Díku modulární architektuře není nutné, aby všechny části systému byly napsány ve stejném programovacím jazykem.
-Za hlavní programovací jazyk byl zvolen Python, protože s ním má autor této práce největší zkušenosti.
+Nejprve bude nutné vybrat programovací jazyk v jakém bude systém napsán.
+Z jazyků Rust, Lua, Ruby a Python se Python jeví jako nejvhodnější volba, protože s ním má autor práce největší zkušenosti.
+Python velmi rozsáhlou standardní knihovnu a další knihovny jsou vytvářeny aktivní komunitou.
 Konkrétně Python ve verzi 3.6 hlavně z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd a proměnných dokáží do jisté míry nahradit dokumentační komentáře
 
 \begin{listing}[ht]
@@ -19,33 +19,42 @@ def foo(bar: Bar, count: int) -> List[str]:
 
 \section{Průběh integrace}
 
-Integrační proces bude rozdělen na fáze, úkoly a příkazy.
-Integrační proces se skládá alespoň z jedné fáze.
-Fáze se skládá z jednoho nebo více úkolů.
-Úkol v sobě obsahuje jeden nebo více příkazů.
+Integrační proces bude rozdělen na fáze (\textit{stage}), které jsou vykovány v zadaném pořadí sekvenčně za sebou.
+Fáze se skládá z jednoho nebo více na sobě nezávislých úkolů (\textit{job}), které bude možné paralelizovat. 
+Úkol v sobě obsahuje jeden nebo více příkazů vykonávaných sekvenčně po sobě.
 
 Selhání jednoho z příkazů vede k ukončení vykonávání úkolu a jeho selhání.
 Jelikož jsou úkoly prováděny nezávisle na sobě, tak po selhání jednoho úkolu jsou ostatní úkolu v rámci fáze dokončeny.
 Pokud jeden z úkolů v rámci fáze selže, tak selže celá fáze a další fáze už nejsou prováděny.
 Fáze jsou prováděny sekvenčně v zadaném pořadí.
-
 Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze v úspěšně dokončeny.
 
-Jednotlivé úkoly, fáze nebo celé integrace je možné restartovat nebo rušit.
+Jednotlivé úkoly, fáze nebo celé integrace bude možné restartovat nebo rušit.
 
 \subsection{Konfigurace}
 
-Konfigurace integrací projektu je brána z textového souboru umístěného přímo v SCM repozitáři projektu.
+Konfigurace integrací projektu bude brána z textového souboru umístěného přímo v SCM repozitáři projektu.
 Velkou výhodou tohoto přístupu je, že v kombinaci s verzovacím systémem se konfigurace integrace váže vždy k určitému stavu repozitáře.
 
 \subsubsection{Formát souboru}
 
-První je nutné rozhodnout formát tohoto souboru.
-Soubor může být pouhým strukturovaným popisem dat (JSON, YAML, XML, \ldots) nebo dokonce jednoduchý skript (Lua, Python, \ldots).
-Jelikož cílem práce je systém minimalistický, tak se jeví jako vhodnější řešení definice integrace pomocí strukturovaného popisu dat.
+Soubor může být pouhým strukturovaným popisem dat (JSON, YAML, XML, \ldots) nebo jednoduchý skript (Lua, Python, \ldots).
+Jelikož cílem práce je systém minimalistický, tak se jeví jako vhodnější řešení jednodušší definice integrace pomocí strukturovaného popisu dat.
 Mezi uvažované formáty patří JSON, YAML a XML.
 JSON není vhodný, kvůli absenci komentářů.
 Ač XML formát komentáře podporuje, tak je pro člověka hůře čitelný a méně komfortní na editaci viz. ukázky \ref{listing:xml} a \ref{listing:yaml}.
+
+\begin{listing}[ht]
+\begin{minted}[frame=single,linenos]{yaml}
+build:
+    stages:
+        one:
+            id: 1
+...
+\end{minted}
+\caption{Ukázka YAML}
+\label{listing:yaml}
+\end{listing}
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{xml}
@@ -63,47 +72,41 @@ Ač XML formát komentáře podporuje, tak je pro člověka hůře čitelný a m
 \label{listing:xml}
 \end{listing}
 
-\begin{listing}[ht]
-\begin{minted}[frame=single,linenos]{yaml}
-build:
-    stages:
-        one:
-            id: 1
-...
-\end{minted}
-\caption{Ukázka YAML}
-\label{listing:yaml}
-\end{listing}
-
 \subsubsection{Struktura souboru}
 
-Struktura souboru odpovídá průběhu integrace.
+Struktura souboru odpovídá průběhu integrace (ukázka kódu \ref{code:piper-yml-example}).
+
+\begin{listing}[ht]
+\caption{\label{code:piper-yml-example}Ukázka YAML konfigurace integrace}
+\begin{minted}[frame=single,linenos]{yaml}
+# Definujeme fáze s názvy "first", "second", ... (na pořadí záleží)
+stages:
+  - first
+  - second
+  - ...
+
+jobs:
+  job1:
+    env:
+      test: "1"
+    stage: first # Úkol patří do fáze s názvem "first"
+    image: "alpine/3.5" # Obraz pro běhové prostředí
+    commands: # definice příkazů (na pořadí záleží)
+      - apk update
+      - apk add python
+      - python -c 'print("Hello!")'
+    when: "PIPER_BRANCH == 'master'" # Podmínka spuštění
+    after_failure: # Vykonej tyto příkazy po selhání
+      - cat /logs/piper
+\end{minted}
+\end{listing}
+
 U úkolů (\textit{jobs}) lze navíc definovat podmínku jejich spuštění (\textit{when}), typ běhového klienta (\textit{runner}), obraz běhového prostředí (\textit{image}) a proměnné prostředí (\textit{env}).
 Podmínka spuštění bude vykonána pomocí knihovny simpleeval, která oproti Python eval implementuje jen podmnožinu bezpečných operací.
 Proměnné prostředí jsou dostupné příkazům, tak i podmínce spuštění úkolu.
 Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM (\textit{branch}, \textit{commit}, \ldots) a další.
 Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (\textit{after\_failure}).
 Vhodné jsou například pro výpis log souborů, které produkují vykonávané příkazy.
-
-% Vyhodnocení podmínky kódu je implementováno pomocí knihovny simpleeval.
-
-\begin{listing}[ht]
-\begin{minted}[frame=single,linenos]{yaml}
-stages:
-  - first
-
-jobs:
-  job1:
-    stage: first
-    image: "alpine/3.5"
-    commands:
-      - apk update
-      - apk add python
-      - python -c 'print("Hello!")'
-\end{minted}
-\caption{Ukázka YAML konfigurace integrace}
-\label{listing:yaml}
-\end{listing}
 
 Přesná struktura souboru je popsána v OpenAPI schématu na přiloženém médiu.
 
@@ -183,30 +186,30 @@ Jádro reprezentuje středobod celého systému.
 Jeho úkolem je naslouchat změnám ve spravovaných repozitářích (tzv. \uv{webhooky}) a následně řídit průběh integrace.
 Úkoly, které jsou připravené k zpracování, jsou zařazovány do fronty, kde čekají na vyzvednutí jedním z běhových klientů.
 Fronta bude implementována pomocí Redis serveru a jeho \textit{list} struktury.
-Tato struktura poskytuje základní operace pro implementaci fronty (\textit{push} a \textit{pop}) a dostatečnou rychlost pro časté přístupy.
-Následný log výstup od běhových klientů bude ukládán v textových souborech.
+Tato struktura poskytuje základní operace pro implementaci fronty (\textit{push} a \textit{pop}) a dostatečný výkon pro časté přístupy.
+Následný log výstup z úkolů zpracovávanými běhovými klienty bude ukládán v textových souborech.
 
 \subsection{Model}
 
 Model jádra systému je rozdělen do entit, které jsou mezi sebou spojené vazbami.
 Vše začíná u projektu, který je vazbou mezi CI a SCM.
-Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou, která je dále přidělována k projektům.
+Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou, které jsou přidělována práva v projektech.
 K projektu jsou vázány data o integracích, které se dále dělí na fáze, úkoly a příkazy.
 Úkol vykonává právě jeden běhový klient.
 
 \imagefigurefull{entity_piper.pdf}{Entity v Piper CI}{0.75}
 
 Nad daty systému bude třeba provádět také filtrace (například vrať mi všechny integrace tohoto projektu, které byli provedeny na SCM větvi \textit{master}).
-Těmto požadavkům vyhovuje databázové uložiště, které vztahy mezi entitami implementuje pomocí cizích klíčů a má nástroje pro filtrace dat.
+Těmto požadavkům vyhovuje databázové uložiště, které vztahy mezi entitami implementuje pomocí cizích klíčů a disponuje nástroji pro filtraci dat.
 K abstrakci nad různými databázovými stroji bude použita knihovna peewee.
-Abstrakcí bude ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji včetně například SQLite.
+Abstrakcí bude ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji a komfortnější vývoj pro programátora systému.
 Jádro systému nepotřebuje mimo jednoduché filtrace dat dělat náročnější dotazy do databáze, tak případný ztracený výkon nebude tak znatelný.
 
 \subsection{HTTP REST API}
 
 REST API jádra vychází z definice entit systému.
 API je dostupné přes HTTP protokol, kde jsou jednotlivé kolekce zdrojů identifikovány přes část URL adresy reprezentující umístění na serveru.
-Výsledná URL adresa je pak například \verb|https://piper.martinfranc.eu/projects|.
+Výsledná URL adresa pak například vypadá následovně: \verb|https://piper.martinfranc.eu/projects|.
 
 \begin{table}[ht]
 \centering
@@ -224,16 +227,16 @@ Umístění na serveru & Entita \\ \hline
 \end{table}
 
 Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \verb|POST| (vytvoř) \verb|PUT| (aktualizuj) \verb|DELETE| (smaž).
-Výsledek akce je reprezentován návratovým HTTP kódem.
+Výsledek akce je reprezentován návratovým HTTP kódem (200 -- OK, 404 -- nenalezeno, \ldots).
 
 Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
 Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vratí projekty s daným originem.
-Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implemetovat stránkování.
+Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implementovat stránkování.
 
 Autentizace uživatele bude probíhat pomocí tokenu, který bude součástí HTTP hlaviček v požadavku klienta.
 Pro získání svého tokenu se uživatel bude muset nejprve přihlásit do terminálového rozhraní.
 
-API bude implementováno pomocí webového frameworku založeného na protokolu wsgi Flask.
+API bude implementováno pomocí Flask webového frameworku založeného na protokolu wsgi.
 Flask je dostatečně lehký, aby splňoval požadavek na minimalismus systému a autor práce s ním má již předešlé zkušenosti.
 
 \subsection{Terminálové rozhraní}
@@ -291,7 +294,7 @@ build  exit  help  identity  job  project  runner  stage  user
 
 Oprávnění budou definována na úrovni systému (předpona \textit{system}) a jednotlivých projektů (předpona \textit{project}) v podobě rolí.
 Uživatel bude mít právě jednu systémovou roli a právě jednu projektovou roli.
-Výjimkou je role system.GUEST, která nemá projektovou roli.
+Výjimkou je systémová role GUEST, která nemá projektovou roli.
 
 \paragraph{system.ROOT}
 
@@ -409,7 +412,7 @@ Klientem může být naše vlastní implementace podle REST API specifikace nebo
 \begin{minted}[frame=single,linenos]{shell}
 curl -k -L --cert cert --key key "https://localhost:8443/1.0/images"
 \end{minted}
-\caption{Dotaz na REST API pomocí HTTP}
+\caption{Dotaz na LXD REST API pomocí HTTP}
 \end{listing}
 
 \section{Webové rozhraní}
@@ -422,8 +425,8 @@ Jedná se například o~stavy integrace nebo výpis výstupu aktuálně běžíc
 Klientem je v~této komunikaci webový prohlížeč a serverem jádro systému.
 
 Za opravdovou komunikaci v reálném čase by se dalo považovat websocketové spojení \cite{websocket}.
-Je třeba si ale uvědomit, že data systému není nutné poskytovat v opravdu realném čase a i několika sekundové zpoždění není na závadu.
-Důvodem je to, že na stav integrace není nutné okamžitě reagovat, výstup z \uv{streaming logu} je pouze jednostanný, neumožňující uživatelskou interakci.
+Je třeba si ale uvědomit, že data systému není nutné poskytovat v opravdu reálném čase a i několika sekundové zpoždění není na závadu.
+Důvodem je to, že na stav integrace není nutné okamžitě reagovat, výstup z \uv{streaming logu} je pouze jednostranný, neumožňující uživatelskou interakci.
 Tím pádem se jako nejvýhodnější řešení se jeví metoda tzv \uv{short-pollingu}.
 
 K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest| nebo Fetch API \cite{fetch_api}.

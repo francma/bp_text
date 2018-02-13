@@ -81,7 +81,7 @@ Běhový klient je schopen v rámci jedné své instance spouštět více úkol�
 K paralelizaci je použita knihovna multiprocessing.
 
 Během implementace se objevil problém, kdy vytvořený kontejner neměl prvním pár sekund přístup k síti z důvodu přidělování údajů k síti přes DHCP.
-Problém je vyřešen pomocí aktivního čekání na přidělení routy k libovolné veřejné adrese (ukázka kódu \ref{code:piper-runner-job-wait}).
+Problém je vyřešen pomocí aktivního čekání na přidělení výchozí routy (ukázka kódu \ref{code:piper-runner-job-wait}).
 
 \begin{listing}[ht]
 \caption{\label{code:piper-runner-job-wait}Čekání na síť uvnitř kontejneru}
