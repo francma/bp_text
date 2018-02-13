@@ -1,26 +1,25 @@
 \chapter{GitLab CI}
 
-GitLab CI je systém kontinuální integrace, který součástí součástí správce Git repozitářů GitLab.
+GitLab CI je systém kontinuální integrace, který součástí součástí správce Git repozitářů a plánovače projektů GitLab.
 Jeho použití je tedy vymezeno pouze pro uživatele tohoto systému.
 Projekt je vydáván pod několika edicemi -- komerční a komunitní, která je vydána jako otevřený software \cite{gitlab_ce}.
 
 \section{Průběh integrace}
 
-Konfigurace integrace je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři repozitáři projektu.
-Konfigurace projektu je dostupná přes webové UI nebo jiné rozhraní využívající dostupné API.
+Konfigurace integrace je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři Git repozitáře projektu.
 
 Proces integrace (\textit{pipeline}) je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
 Pokud jedna z~fází selže, tak celý proces integrace končí chybou.
 
 \begin{listing}[ht]
+\caption{Definice fázi v .gitlab-ci.yml}
 \begin{minted}[frame=single,linenos]{yaml}
 stages:
   - test
   - build
   - deploy
 \end{minted}
-\caption{Definice fázi v .gitlab-ci.yml}
 \end{listing}
 
 Jednotlivé fáze se skládají z~několika úkolů.
@@ -29,6 +28,7 @@ Selhání jednoho z~úkolů vede k~neúspěchu celé fáze.
 Úkoly jsou vždy provedeny všechny, nezávisle na výsledku ostatních v~rámci fáze.
 
 \begin{listing}[ht]
+\caption{Definice úkolu v .gitlab-ci.yml}
 \begin{minted}[frame=single,linenos]{yaml}
 job1:
   stage: test
@@ -36,7 +36,6 @@ job1:
     - cmd 1
     - cmd 2
 \end{minted}
-\caption{Definice úkolu job1 v .gitlab-ci.yml}
 \end{listing}
 
 Každý úkol je složen z~několika příkazů.
@@ -68,10 +67,9 @@ Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace \v
 
 \section{Architektura}
 
-Celý systém GitLabu je rozdělen do několika podsystémů, z nichž GitLab CI Runner je zodpovědný za provedení konkrétních integrací.
-Dalším službám systém poskytuje REST API s přípravou GraphQL API.
+Systém GitLabu je rozdělen do několika podsystémů, z nichž GitLab CI Runner je zodpovědný za vykonání úkolů integrace.
+Integrační proces je pak korigován GitLab systémem.
 \cite{gitlab_architecture}
-\cite{gitlab_api}
 
 \subsection{GitLab CI multi-runner}
 
@@ -143,7 +141,7 @@ Cache je ve výchozím nastavení ukládána přímo na běhovém serveru.
 Pokud fáze běží na různých běhových serverech, tak se cache nesdílí.
 Alternativně můžeme použít sdílené cachování na S3 kompatibilních serverech.
 S3 je REST API, které bylo původně vytvořeno jako část Amazon services.
-Toto API implementuje samotný Amazon, tak i nějaké self-hosted projekty.
+Toto API implementuje samotný Amazon, tak i nějaké open-source projekty, které lze provozovat na vlastní infrastruktuře.
 
 % https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/merge_requests/88
 % https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html

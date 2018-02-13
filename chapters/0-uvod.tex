@@ -6,7 +6,7 @@ Přidáváním vyšších vrstev abstrakce se vzdalujeme od stroje samotného a 
 Jsou to také nově vznikající vývojové techniky, které urychlují vývoj softwaru.
 Jednou z~nich je i technika kontinuální integrace (zkráceně CI).
 Tato technika spočívá v~časté integraci kódu mezi vývojáři ve společném repozitáři.
-Během integrace kódu se mohou provádět i ruzné testy, například:
+Během integrace kódu se mohou provádět i různé testy, například:
 
 \begin{enumerate}
 	\item Integrační a jednotkové testy kontrolující funkčnost programu.
@@ -15,13 +15,13 @@ Během integrace kódu se mohou provádět i ruzné testy, například:
 \end{enumerate}
 
 Kontinuální integrace je úzce spjatá s~verzovacím systémem, který spravuje repozitář projektu.
-Samotný systém kontinuální intgrace, lze definovat jako množinu softwaru realizující následující úkony:
+Samotný systém kontinuální integrace, lze definovat jako množinu softwaru realizující následující úkony:
 
 \begin{enumerate}
 	\item Naslouchat a reagovat na změny v~repozitáři projektu.
 	\item Připravit běhové prostředí vhodné pro testovací proces.
 	\item Stáhnout zdrojové soubory projektu z~repozitáře.
-	\item Sestavit stážený projekt včetně jeho závislostí.
+	\item Sestavit stažený projekt včetně jeho závislostí.
 	\item Spustit testovaní dle zadání projektu.
 	\item Informovat vývojáře a další systémy o~výsledku testování.
 \end{enumerate}
@@ -50,13 +50,13 @@ Z tohoto nám vznikne 6 úkolů:
 	\item Předání informací o testování službě třetí strany.
 \end{itemize}
 
-Jelikož nemá smysl pouštět jakékolik testování, pokud program není zapsán syntakticky správně, tak jako první provedeme kontrolu syntaxe.
+Jelikož nemá smysl pouštět jakékoliv testování, pokud program není zapsán syntakticky správně, tak jako první provedeme kontrolu syntaxe.
 Po zkontrolovaní syntaktické správnosti spustíme integrační a jednotkové testy.
 Protože testy na sobě nijak nezávisí, tak je možné je pustit paralelně, abychom zkrátili dobu testování.
 Po dokončení testování předáme výsledky službě třetí strany.
 
 Skupiny testů, které jsou na sobě nezávislé a je možné je paralelizovat nazýváme fází.
-V tomto konrétním případě nám vzniknou 3 fáze:
+V tomto konkrétním případě nám vzniknou 3 fáze:
 
 \begin{itemize}
 	\item Kontrola syntaxe.
@@ -64,17 +64,17 @@ V tomto konrétním případě nám vzniknou 3 fáze:
 	\item Předání informací o testování službě třetí strany.
 \end{itemize}
 
-Od systému kontrinuální integrace tedy očekáváme určinou možnost integrační proces řídít.
-Většinou se jedná o třízení na fáze a úkoly, ale také o další možnosti, které budou probrány u konkrétních systémů CI.
+Od systému kontinuální integrace tedy očekáváme určitou možnost integrační proces řídit.
+Většinou se jedná o rozdělení na fáze a úkoly, ale také o další možnosti, které budou probrány u konkrétních systémů CI.
 
 Uživatele CI systému také zajímá výstup z jeho zadaných příkazů.
-Velmi vhodné je to například při hledání chyby, kdy by pouhá informace o neuspěchu integrace byla nedostačující.
-Mnoho CI systémů implementuje tzv. \uv{streaming logy}, což znamená, že výstup z příkazů je dostupný v \uv{realném čase} místo nutnosti čekat na doběhnutí celé integrace.
+Velmi vhodné je to například při hledání chyby, kdy by pouhá informace o neúspěchu integrace byla nedostačující.
+Mnoho CI systémů implementuje tzv. \uv{streaming logy}, což znamená, že výstup z příkazů je dostupný v \uv{reálném čase} místo nutnosti čekat na doběhnutí celé integrace.
 
 Cílem této práce je navrhnout minimalistický systém kontinuální integrace, který bude určen pro menší komunitní projekty.
 Hlavní vlastností výsledného projektu bude jeho modulárnost.
 
-V této práci se nejprve budeme zabívat technologií vytváření izolovaných běhových prostředí, jelikož jsou základním stavebním kamenem systému kontinuální integrace.
+V této práci se nejprve budeme zabývat technologií vytváření izolovaných běhových prostředí, jelikož jsou základním stavebním kamenem systému kontinuální integrace.
 V další části se podíváme na existující systémy kontinuální integrace a následně navrhneme systém vlastní.
-Dále bude následnovat samotná implementace a testování vytvořeného systému.
+Dále bude následovat samotná implementace a testování vytvořeného systému.
 
