@@ -81,16 +81,15 @@ Mezi technologie pro tvorbu kontejnerů patří: jmenné prostory a kontrolní s
 \subsubsection{Nástroje operačního systému Linux}
 
 Linux kernel sám o sobě nenabízí přímé kontejnerové řešení, ale pouze sadu nástrojů, pomocí kterých je kontejner vytvořen.
-Jedná se o jmenné prostory a kontrolní skupiny.
+Jedná se o jmenné prostory (\textit{namespaces}), kontrolní skupiny (\textit{cgroups}) a tzv \uv{capabilities}.
 Nad těmito nástroji je postaveno například kontejnerové řešení LXC nebo Docker.
 
-Zjednodušeně se jedná o založení nového rootu adresářové struktury (Linux příkaz \verb|chroot|), následným spuštěním kontejneru pracující nad touto adresářovou strukturou a kontrolou přístupu ke zdrojům hostitelského systému.
+Velmi zjednodušeně se jedná o založení nového rootu adresářové struktury (Linux příkaz \verb|chroot|), následným spuštěním kontejneru pracující nad touto adresářovou strukturou a kontrolou přístupu ke zdrojům hostitelského systému.
 Vzory této adresářové struktury se nazývají obrazy (\textit{images}).
 
 \subsubsection{Jmenné prostory (namespaces)}
 
 Nástroj Linux kernelu sloužící k~vytvoření izolovaných skupin procesů.
-% https://linux.die.net/man/7/capabilities
 Každý proces má svůj jmenný prostor, který mu vymezuje viditelnost pouze na vlastní prostředky a prostředky podřízených jmenných prostorů.
 Jmenné prostory tvoří hierarchickou stromovou strukturu.
 Při startu systému existuje nejméně jeden jmenný prostor.
@@ -133,19 +132,33 @@ Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru 
 
 % https://www.youtube.com/watch?v=sK5i-N34im8
 
-O~vytvoření jmenného prostoru se stará systémové volání \verb|fork|, \verb|unshare| a \verb|clone|.
+O~vytvoření jmenného prostoru se starají systémová volání \verb|fork|, \verb|unshare| a \verb|clone|.
 
 \subsubsection{Kontrolní skupiny (cgroups)}
 
 Nástroj Linux kernelu umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim.
-Mezi typy prostředků patří:
+Mezi typy prostředků patří například:
 
 \begin{itemize}
 	\item CPU čas,
 	\item operační paměť,
 	\item síťový provoz,
 	\item přístup na disk.
-\end{itemize} % konkretni nazev, brat z man stranky linuxu, neni uplny vycet[]
+\end{itemize} % konkretni nazev, brat z man stranky linuxu
+
+\subsubsection{Capabilities}
+
+Historicky UNIXové systémy dělily procesy na privilegované a neprivilegované.
+Privilegované procesy pak nepodléhaly klasické kontrole oprávnění.
+Nicméně pokud proces potřebuje pouze některá oprávnění, tak není z bezpečnostního hlediska z něj udělat proces privilegovaný, ale pouze mu přidělit oprávnění, která vyžaduje.
+Toto dělení oprávnění je zavedeno do systému pomocí tzv. \uv{capabilities}.
+
+Například příkaz \verb|ping|, využívající protokol ICMP, potřebuje přímí přístup k socketu a tím pádem by měl být spouštěn jako privilegovaný.
+S využitím \textit{capabilities} je možné tomuto procesu přidělit pouze oprávnění \verb|CAP_NET_RAW|.
+
+Tohoto můžeme využít ke kontrole oprávnění při vytváření kontejneru.
+
+% https://github.com/lxc/lxc/blob/master/config/templates/alpine.common.conf.in
 
 \subsubsection{Copy on write}
 
@@ -156,7 +169,8 @@ Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
 Za cenu vyšší režie můžeme takto ušetřit mnoho paměti.
 \cite{copy_on_write}
 
-Použití v~Linuxu v systémovém volání \verb|fork| \cite{fork_manual} nebo v~různých souborových systémech (ZFS, BTRFS) \cite{fs_cow}.
+V kontextu kontejnerů tohoto lze využít k jejich velmi rychlému vytváření (vytvoření kopie obrazu) nebo k vytváření tzv. \uv{snapshotů}
+\cite{fs_cow}
 
 \subsection{BSD jails}
 
