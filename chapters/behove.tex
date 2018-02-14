@@ -1,23 +1,17 @@
 \section{Běhová prostředí}
 
-Proces integrace je potřeba spustit v běhovém prostředí, které jsme pro tento účel připravili.
-Z bezpečnostních hledisek by mělo být toto běhové prostředí:
+Při opakovaném spouštění testů v rámci různých integrací se můžeme dostat do stavu, kdy se integrace budou mezi sebou nechtěně ovlivňovat.
+Například nedůkladné vyčištění dočasných souborů pak může vést k falešně negativnímu nebo falešně pozitivnímu výsledku testování.
 
-\begin{itemize}
-	\item Odolné vůči vnějším vlivům prostředí.
-	\item Izolované proti neoprávněným zásahům do vnějšího systému.
-	\item Limitované na zdroje.
-\end{itemize}
+Další problém může nastat v případě, že repozitář projektu je veřejně dostupný a dovoluje otevření tzv. \textit{pull requestu}.
+Útočník tohoto může využít k modifikaci testovacího procesu s cílem poškodit systém nebo ke krádeži důvěrných dat.
+Mimo útoku na náš systém může útočník také využít systémových prostředků k útoku na další systémy (například DDoS útok).
+Také se může stát, že k poškození systému dojde neúmyslně v důsledku fatální chyby při provádění testů.
+% https://github.com/MrMEEE/bumblebee-Old-and-abbandoned/issues/123
 
-Nechceme například, aby byl záškodník schopen za pomoci integrace kompromitovat nesouvisející části systému nebo použil proces integrace pro útok na externí systémy.
-Záškodníkem může být v případě veřejných repozitářů téměř kdokoliv.
-Systém je také nutné chránit před neúmyslným poškozením uživateli CI systému.
-
-Dalším požadavkem je, aby integrace nad SCM repozitářem v určitém stavu dospěla do stejného výsledku.
-Pokud například budeme integraci spouštět vždy ve stejném adresáři, který nebude po každé integrace důkladně uklizen od dočasných souborů, tak se nám může stát, že se jednotlivé integrace mezi sebou budou ovlivňovat.
-
-Těchto požadavků lze dosáhnout vytvořením virtualizovaného prostředí, které nám zajistí izolaci integrace.
-Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, aplikací jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, emulace, QoS a dalších \cite{virt_intro}.
+Uvedené problémy můžeme vyřešit vytvořením virtualizovaného běhového prostředí.
+Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, pomocí jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, limitace prostředků a dalších \cite{virt_intro}.
+Problém s údržbou prostředí integrací vyřešíme tak, že každé integraci jednoduše vytvoříme prostředí nové.
 
 \subsection{Plná virtualizace}
 
@@ -34,7 +28,7 @@ Nevýhodou plné virtualizace nemožnost měnit množství přidělených prost�
 
 Mezi hypervizory například patří VMware, KVM a z/VM.
 
-\subsubsection{Softwarová virtualizace}
+\subsubsection{Softwarová virtualizace (emulace)}
 
 Softwarová virtualizace spoléhá na úpravu strojových instrukcí za běhu hostovaného stroje.
 Jedná se například o překlad privilegovaných instrukcí na neprivilegované a úpravy přístupů do paměti.
