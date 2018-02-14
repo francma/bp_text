@@ -1,0 +1,28 @@
+\begin{introduction}
+
+Kontinuální integrace (CI) je technika vývoje softwaru, která vývojářům pomáhá odhalit chyby v jejich programech.
+Technika spočívá v časté integraci (slučování) kódu ve společném repozitáři projektu, který je následně podroben integračním a jednotkovým testům.
+Úkolem kontinuální integrace není definice samotných testů (to je stále úkolem vývojářů projektu), ale jejich vynucené spuštění při každé integraci.
+Vývojář nemusí mít vždy možnosti spustit testy na svém lokálním prostředí (například testování pro více platforem) nebo se může jednat o prosté opomenutí nebo dokonce přehranou důvěru ve svůj vyprodukovaný kód.
+Systém kontinuální integrace pak funguje jako hráz, která zabraňuje zanesení chyb do produkčního prostředí.
+Kontinuální integrace také dopomáhá k časnému odhalení chyb a tím pádem snižuje náklady na jejich opravení.
+
+Samotný systém kontinuální integrace, lze definovat jako množinu softwaru realizující následující úkony:
+
+\begin{enumerate}
+	\item Naslouchat a reagovat na změny v~repozitáři projektu.
+	\item Připravit běhové prostředí vhodné pro testovací proces.
+	\item Stáhnout zdrojové soubory projektu z~repozitáře.
+	\item Sestavit stažený projekt včetně jeho závislostí.
+	\item Spustit testovaní dle zadání projektu.
+	\item Informovat vývojáře a další systémy o~výsledku testování.
+\end{enumerate}
+
+Cílem této práce je navrhnout minimalistický systém kontinuální integrace, který bude určen pro menší komunitní projekty.
+Hlavním rysem tohoto systému bude jeho minimálnost a jednoduchost, čímž docílíme snadného rozšíření tohoto systému o další funkcionalitu a připravíme půdu pro integraci s dalšími systémy.
+
+V této práci se nejprve budeme zabývat problematikou úzce spjatou s kontinuální integrací a to testováním softwaru, verzovacími nástroji a běhovými prostředími.
+V následující části analyzujeme existující open-source systémy kontinuální integrace a následně navrhneme systém vlastní.
+Námi navržený systém následně naimplementujeme a otestujeme.
+
+\end{introduction}
