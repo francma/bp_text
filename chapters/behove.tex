@@ -10,10 +10,11 @@ Z bezpečnostních hledisek by mělo být toto běhové prostředí:
 \end{itemize}
 
 Nechceme například, aby byl záškodník schopen za pomoci integrace kompromitovat nesouvisející části systému nebo použil proces integrace pro útok na externí systémy.
+Záškodníkem může být v případě veřejných repozitářů téměř kdokoliv.
 Systém je také nutné chránit před neúmyslným poškozením uživateli CI systému.
 
 Dalším požadavkem je, aby integrace nad SCM repozitářem v určitém stavu dospěla do stejného výsledku.
-Pokud například budeme integraci spouštět vždy ve stejném adresáři, který nebude po každé integrace důkladně uklizen od dočasných souborů, tak se nám může stát, že se nám jednotlivé integrace mezi sebou ovlivňovat.
+Pokud například budeme integraci spouštět vždy ve stejném adresáři, který nebude po každé integrace důkladně uklizen od dočasných souborů, tak se nám může stát, že se jednotlivé integrace mezi sebou budou ovlivňovat.
 
 Těchto požadavků lze dosáhnout vytvořením virtualizovaného prostředí, které nám zajistí izolaci integrace.
 Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, aplikací jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, emulace, QoS a dalších \cite{virt_intro}.
@@ -161,8 +162,6 @@ Tohoto můžeme využít ke kontrole oprávnění při vytváření kontejneru.
 % https://github.com/lxc/lxc/blob/master/config/templates/alpine.common.conf.in
 
 \subsubsection{Copy on write}
-
-% vow na filesystemu, vyhodit fork BTFS, snapshoty
 
 Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
 Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.

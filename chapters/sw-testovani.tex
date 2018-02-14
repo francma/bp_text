@@ -1,1 +1,65 @@
 \section{Testování softwaru}
+
+Téměř každý programátor při psaní programů píše také testy.
+Příkladem takového testu je i jednoduché vypsání výstupu funkce a následné ověření výsledku (ukázka kódu \ref{test-basic-code}).
+
+\begin{listing}[ht]
+\caption{\label{test-basic-code}Primitivní test}
+\begin{minted}[frame=single,linenos]{python}
+def mult(a, b):
+    return a * b
+
+# Opravdu mi toto vrátí 6?
+print(mult(3, 2))
+\end{minted}
+\end{listing}
+
+Po vyzkoušení několika vstupů a ověření korektního fungování test smaže a začne se věnovat jiné části programu.
+V budoucnu se rozhodne tento kód revidovat (ukázka kódu \ref{test-optimized-code}) a znovu napíše testy, čímž dojde k plýtvání času.
+
+\begin{listing}[ht]
+\caption{\label{test-optimized-code}Optimalizace kódu}
+\begin{minted}[frame=single,linenos]{python}
+def mult(a, b):
+    if a == 0 or b == 0:
+        return 0
+
+    return a * b
+
+# Bude výsledek opět 6?
+print(mult(3, 2))
+\end{minted}
+\end{listing}
+
+Lepším přístupem je testy zachovávat a při vývoji je používat k průběžné kontrole (ukázka kódu \ref{test-test}).
+Pokrytím kódu testy dojde k zefektivnění vývoje a umožní odhalit chyby včas než budou zavedené do zbytku systému.
+
+\begin{listing}[ht]
+\caption{\label{test-test}Ukázka napsaného testu}
+\begin{minted}[frame=single,linenos]{python}
+from project import mult
+
+assert mult(3, 2) == 6
+\end{minted}
+\end{listing}
+
+K ulehčení psaní testů můžeme využít některé z knihoven.
+
+\subsection{Typy testů}
+
+Testy dělíme na dva typy -- integrační a jednotkové.
+
+Úkolem jednotkového testu je otestovat právě jednu komponentu (třídu, funkci, modul, \ldots) v izolaci od ostatních komponent.
+Tohoto docílíme tak, že závislé komponenty nahradíme komponentami \uv{falešnými}, které simulují určité deterministické chovaní.
+Například se jedná o simulaci odeslání HTTP požadavku.
+Místo vytváření spojení a čekání na odpověď můžeme nahradit zodpovědnou komponentu tak, že vždy vrátí kladný návratový HTTP kód s určitou odpovědí.
+
+Testováním více komponent, bez pomoci komponent \uv{falešných}, vytvoříme test integrační.
+V našem uvedeném případě bychom použili reálný HTTP server.
+
+Výhodou jednotkových testů oproti integračním je jejich vyšší rychlost (například ušetříme čas potřebný na navázání spojení k serveru).
+Další výhodou je i jednodušší simulace mezních stavů (například server vrátí konkrétní chybovou hlášku).
+Jednotkové testy nám také dovolují testovat komponenty v případě, že jejich závislosti v podobě komponent nejsou ještě dokončené.
+Naopak test integrační lépe testuje reálné prostředí.
+
+% https://cs-blog.petrzemek.net/2015-04-18-proc-rozlisovat-jednotkove-a-integracni-testy

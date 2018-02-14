@@ -1,28 +1,22 @@
 \begin{introduction}
 
-Kontinuální integrace (CI) je technika vývoje softwaru, která vývojářům pomáhá odhalit chyby v jejich programech.
-Technika spočívá v časté integraci (slučování) kódu ve společném repozitáři projektu, který je následně podroben integračním a jednotkovým testům.
-Úkolem kontinuální integrace není definice samotných testů (to je stále úkolem vývojářů projektu), ale jejich vynucené spuštění při každé integraci.
-Vývojář nemusí mít vždy možnosti spustit testy na svém lokálním prostředí (například testování pro více platforem) nebo se může jednat o prosté opomenutí nebo dokonce přehranou důvěru ve svůj vyprodukovaný kód.
-Systém kontinuální integrace pak funguje jako hráz, která zabraňuje zanesení chyb do produkčního prostředí.
-Kontinuální integrace také dopomáhá k časnému odhalení chyb a tím pádem snižuje náklady na jejich opravení.
+Programování a procesy s~ním spojené prochází neustálým vývojem, který tuto disciplínu stále mění. 
+Přidáváním vyšších vrstev abstrakce se vzdalujeme od stroje samotného a přecházíme k~simulaci fungování reálného světa.
+Vývoj softwaru je také podporován různými nástroji a technikami, které si kladou za cíl snížení nákladů.
+Jednou z takových technik je i technika kontinuální integrace.
 
-Samotný systém kontinuální integrace, lze definovat jako množinu softwaru realizující následující úkony:
+Kontinuální integrace (CI) je technika vývoje softwaru, která spočívá v časté integraci (slučování) práce mezi členy projektu ve společném repozitáři.
+Součástí každé integrace je sestavení projektu a následné spuštění testů dle zadání.
+Časté integrace spolu s kvalitně napsanými testy vedou k brzkému odhalení chyb a tím pádem ke snížení nákladů na jejich opravení.
+\cite{fowler_ci}
 
-\begin{enumerate}
-	\item Naslouchat a reagovat na změny v~repozitáři projektu.
-	\item Připravit běhové prostředí vhodné pro testovací proces.
-	\item Stáhnout zdrojové soubory projektu z~repozitáře.
-	\item Sestavit stažený projekt včetně jeho závislostí.
-	\item Spustit testovaní dle zadání projektu.
-	\item Informovat vývojáře a další systémy o~výsledku testování.
-\end{enumerate}
+\section{Cíle a obsah práce}
 
-Cílem této práce je navrhnout minimalistický systém kontinuální integrace, který bude určen pro menší komunitní projekty.
-Hlavním rysem tohoto systému bude jeho minimálnost a jednoduchost, čímž docílíme snadného rozšíření tohoto systému o další funkcionalitu a připravíme půdu pro integraci s dalšími systémy.
+Cílem této práce je navrhnout a implementovat minimalistický systém CI vhodný pro menší a komunitní projekty.
+Při návrhu systému budeme dbát na jeho jednoduchost, modularitu a možnou integraci s dalšími systémy.
 
-V této práci se nejprve budeme zabývat problematikou úzce spjatou s kontinuální integrací a to testováním softwaru, verzovacími nástroji a běhovými prostředími.
-V následující části analyzujeme existující open-source systémy kontinuální integrace a následně navrhneme systém vlastní.
-Námi navržený systém následně naimplementujeme a otestujeme.
+Tato práce nejprve uvede do problematiky testování, verzovacích nástrojů a běhových prostředí jakožto základních stavebních kamenů kontinuální integrace.
+Práce se následně bude zabývat analýzou existujících řešení -- konkrétně Gitlab~CI, Travis~CI a Buildbot.
+Práce následně provede čtenáře návrhem a popisem použitých technologií, implementací a následným testováním vlastního CI systému.
 
 \end{introduction}
