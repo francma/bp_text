@@ -47,9 +47,9 @@ Ač XML formát komentáře podporuje, tak je pro člověka hůře čitelný a m
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
 build:
-    stages:
-        one:
-            id: 1
+  stages:
+    one:
+      id: 1
 ...
 \end{minted}
 \caption{Ukázka YAML}
@@ -235,6 +235,9 @@ Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|
 
 Autentizace uživatele bude probíhat pomocí tokenu, který bude součástí HTTP hlaviček v požadavku klienta.
 Pro získání svého tokenu se uživatel bude muset nejprve přihlásit do terminálového rozhraní.
+
+% technicky zdatni uzivatele, duraz je na CLI rozhrani
+% hesla jsou nebezpecna
 
 API bude implementováno pomocí Flask webového frameworku založeného na protokolu wsgi.
 Flask je dostatečně lehký, aby splňoval požadavek na minimalismus systému a autor práce s ním má již předešlé zkušenosti.

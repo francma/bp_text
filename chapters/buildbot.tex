@@ -1,9 +1,9 @@
-\chapter{Buildbot}
+\section{Buildbot}
 
 Buildbot je framework kontinuální integrace, který nabízí velké množství flexibility v konfiguraci integračního procesu.
 Oproti službám CI nám framework nabízí pouze sadu nástrojů a doporučení pomocí kterých zrealizujeme konečný integrační proces.
 
-\section{Průběh integrace}
+\subsection{Průběh integrace}
 
 Průběh integrace (\textit{build}) je definován souborem \verb|master.cfg|, který je napsaný ve standardním Pythonu.
 Oproti GitLab CI a Travis CI je konfigurační není soubor umístěn v repozitáři projektu, ale na Buildbot serveru.
@@ -61,7 +61,7 @@ builder = util.BuilderConfig(
 \end{minted}
 \end{listing}
 
-\section{Architektura}
+\subsection{Architektura}
 
 Systém se dělí na \textit{build masters} a \textit{workers}.
 \textit{Workers} jsou zodpovědní za zpracování jednotlivých příkazů definovaných v integraci.
@@ -69,11 +69,11 @@ Systém se dělí na \textit{build masters} a \textit{workers}.
 Buildbot podporuje mimo Gitu i další SCM (SVN, Mercurial, \ldots) a díky modulům dokáže spolupracovat s velkým množstvím systému.
 Komunikaci uvnitř systému zajišťuje Twisted framework.
 
-\section{Přístup ke zdrojům systému}
+\subsection{Přístup ke zdrojům systému}
 
 Buildbot jako dřívěji uvedená CI poskytuje přístup ke zdrojům systému přes REST API.
 
-\subsection{Webové rozhraní}
+\subsubsection{Webové rozhraní}
 
 Webové rozhraní se aktivuje v hlavním konfiguračním souboru \verb|master.cfg|.
 Jeho podobu lze dále upravovat pomocí zásuvných modulů.
@@ -93,52 +93,3 @@ c['www'] = {
 
 Buildbot lze nainstalovat přes Python baličkovací manažer pip.
 Další možností je využít připravených Docker obrazů.
-
-\begin{listing}[ht]
-\caption{Instalace Buildbotu přes pip}
-\begin{minted}[frame=single]{shell}
-pip install 'buildbot[bundle]'
-\end{minted}
-\end{listing}
-
-Po instalaci je třeba vytvořit v systému skupinu a uživatele pod kterým poběží Buildbot služby.
-
-\begin{listing}[ht]
-\caption{Vytvoření uživatele a skupiny pro Buildbot služby}
-\begin{minted}[frame=single]{shell}
-addgroup --system buildbot
-adduser buildbot --system --ingroup buildbot --shell /bin/bash
-su - buildbot
-\end{minted}
-\end{listing}
-
-Pod identitou uživatele \verb|buildbot| založíme nový \textit{build master} a upravíme jeho konfigurační soubor \verb|master.cfg|
-
-\begin{listing}[ht]
-\caption{Vytvoření build mastera a upravení jeho konfigurace}
-\begin{minted}[frame=single]{shell}
-buildbot create-master ~/master
-mv ~/master/master.cfg.sample ~/master/master.cfg
-vim ~/master/master.cfg
-\end{minted}
-\end{listing}
-
-Stejně jako jsme vytvořili \textit{build mastera}, tak vytvoříme \textit{workera}.
-
-\begin{listing}[ht]
-\caption{Vytvoření workera a upravení jeho konfigurace}
-\begin{minted}[frame=single]{shell}
-buildbot-worker create-worker \
-    ~/worker [MASTER_ENDPOINT] example-worker [MASTER-PASSWORD]
-\end{minted}
-\end{listing}
-
-Nakonec zbývá systém už jen spustit.
-
-\begin{listing}[ht]
-\caption{Spuštění Buildbot systému}
-\begin{minted}[frame=single]{shell}
-buildbot-worker start ~/worker
-buildbot start ~/master
-\end{minted}
-\end{listing}

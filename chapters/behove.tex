@@ -1,4 +1,4 @@
-\chapter{Běhová prostředí}
+\section{Běhová prostředí}
 
 Proces integrace je potřeba spustit v běhovém prostředí, které jsme pro tento účel připravili.
 Z bezpečnostních hledisek by mělo být toto běhové prostředí:
@@ -18,7 +18,7 @@ Pokud například všechny integrace provádíme ve stejném běhovém prostřed
 Těchto požadavků lze dosáhnout vytvořením virtualizovaného prostředí, které nám zajistí izolaci integrace.
 Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, aplikací jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, emulace, QoS a dalších \cite{virt_intro}.
 
-\section{Plná virtualizace}
+\subsection{Plná virtualizace}
 
 Výsledkem plné virtualizace je virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
 Takto provozovaná instance OS se nazývá host a systém, pod kterým host běží, hostitel.
@@ -33,13 +33,13 @@ Nevýhodou plné virtualizace nemožnost měnit množství přidělených prost�
 
 Mezi hypervizory například patří VMware, KVM a z/VM.
 
-\subsection{Softwarová virtualizace}
+\subsubsection{Softwarová virtualizace}
 
 Softwarová virtualizace spoléhá na úpravu strojových instrukcí za běhu hostovaného stroje.
 Jedná se například o překlad privilegovaných instrukcí na neprivilegované a úpravy přístupů do paměti.
 Z těchto důvodů je tento typ plné virtualizace velmi pomalý.
 
-\subsection{Hardwarové asistovaná virtualizace}
+\subsubsection{Hardwarové asistovaná virtualizace}
 
 Jedná se o virtualizaci, která je podpořena procesorem hostitelského systému.
 Použití hardwarově asistované virtualizace přináší oproti softwarové virtualizaci velký skok ve výkonu.
@@ -47,7 +47,7 @@ Na CPU architektuře x86 se jedná o technologie VT-x (Intel) \cite{vt_x} a AMD-
 Princip spočívá v rozšíření instrukční sady CPU o další instrukce, které dovolují procesoru přepínat mezi více kontexty.
 Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuálního prostředí.
 
-\section{Paravirtualizace}
+\subsection{Paravirtualizace}
 
 Paravirtualizace je technika, při které je hostovaný systém upraven tak, aby místo namísto přímé komunikace s hardwarem používal API hostitele.
 Výhodou tohoto přístupu byla snížená režie oproti plné softwarové virtualizaci.
@@ -55,9 +55,9 @@ S příchodem hardwarové virtualizace, která dokáže být stejně rychlá jak
 
 % http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html
 
-\section{Virtualizace na úrovni operačního systému}
+\subsection{Virtualizace na úrovni operačního systému}
 
-Systémová paměť moderních operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
+Systémová paměť operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
 Prostor jádra je přímo využíván pro běh jádra operačního systému a jeho služeb.
 V~uživatelském prostoru běží procesy spuštěné uživatelem bez přístupu do prostoru jádra.
 Uživatelské procesy komunikují s~prostorem jádra pouze skrze systémové metody.
@@ -72,19 +72,13 @@ Výhodou je menší režie oproti plné virtualizaci, protože už není nutné 
 Oproti plné virtualizaci je naopak nutné zajistit, aby se jednotlivé uživatelské režimy nemohly neoprávněně ovlivňovat.
 Toto je netriviální úloha a proto je vhodné zavést některá bezpečností opatření.
 Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem (ne-root, ne-administrátor), takže případní \uv{únik} z~kontejneru nezpůsobí škodu.
-Dalším opatřením může být spuštění nové instance operačního systému pomocí plné virtualizace, která bude využívána pro běh kontejnerů.
-Únikem z~kontejneru se pak útočník dostane pouze do virtualizovaného operačního systému bez možnosti ovlivnit původního hostitele.
 
 Jelikož kontejner sdílí stejný prostor jádra se svým hostitelem, tak není možné, aby byl kontejner založen na jiném OS než hostitel.
 Není tedy například možné provozovat Linuxové kontejnery na systému s OS Windows.
-Mezi technologie pro tvorbu kontejnerů patří:
+Mezi technologie pro tvorbu kontejnerů patří: jmenné prostory a kontrolní skupiny (Linux), jails (BSD).
 
-\begin{itemize}
-	\item jmenné prostory a kontrolní skupiny (Linux),
-	\item jails (BSD).
-\end{itemize}
 
-\subsection{Nástroje operačního systému Linux}
+\subsubsection{Nástroje operačního systému Linux}
 
 Linux kernel sám o sobě nenabízí přímé kontejnerové řešení, ale pouze sadu nástrojů, pomocí kterých je kontejner vytvořen.
 Jedná se o jmenné prostory a kontrolní skupiny.
@@ -96,6 +90,7 @@ Vzory této adresářové struktury se nazývají obrazy (\textit{images}).
 \subsubsection{Jmenné prostory (namespaces)}
 
 Nástroj Linux kernelu sloužící k~vytvoření izolovaných skupin procesů.
+% https://linux.die.net/man/7/capabilities
 Každý proces má svůj jmenný prostor, který mu vymezuje viditelnost pouze na vlastní prostředky a prostředky podřízených jmenných prostorů.
 Jmenné prostory tvoří hierarchickou stromovou strukturu.
 Při startu systému existuje nejméně jeden jmenný prostor.
@@ -138,7 +133,7 @@ Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru 
 
 % https://www.youtube.com/watch?v=sK5i-N34im8
 
-O~vytvoření jmenného prostoru se stará systémové volání \verb|fork|.
+O~vytvoření jmenného prostoru se stará systémové volání \verb|fork|, \verb|unshare| a \verb|clone|.
 
 \subsubsection{Kontrolní skupiny (cgroups)}
 
@@ -148,19 +143,20 @@ Mezi typy prostředků patří:
 \begin{itemize}
 	\item CPU čas,
 	\item operační paměť,
-	\item disková paměť,
 	\item síťový provoz,
-	\item provoz na disku.
-\end{itemize}
+	\item přístup na disk.
+\end{itemize} % konkretni nazev, brat z man stranky linuxu, neni uplny vycet[]
 
 \subsubsection{Copy on write}
+
+% vow na filesystemu, vyhodit fork BTFS, snapshoty
 
 Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
 Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
 Za cenu vyšší režie můžeme takto ušetřit mnoho paměti.
 \cite{copy_on_write}
 
-Použití v~Linuxu v systémovém volání \verb|fork| \cite{fork_manual} nebo v~různých filesystémech (ZFS, BTRFS) \cite{fs_cow}.
+Použití v~Linuxu v systémovém volání \verb|fork| \cite{fork_manual} nebo v~různých souborových systémech (ZFS, BTRFS) \cite{fs_cow}.
 
 \subsection{BSD jails}
 
@@ -172,7 +168,7 @@ Kontejner nám zajišťuje izolaci:
 	\item Proces vidí procesy ze svého kontejneru.
 	\item Modifikace síťového nastavení zevnitř kontejneru není povolena (pevná IP adresa, routovací tabulky).
 	\item Kontejner nemá přímý přístup k síťovému socketu (ICMP protokol nebude fungovat).
-	\item Kontejner je vymezen pouze na adresářovou strukturu, ve které byl založen.
+	\item Kontejner je omezen pouze na adresářovou strukturu, ve které byl založen.
 \end{itemize}
 
 Kontejneru lze také omezovat systémové prostředky (RAM, disk, síť, \ldots)

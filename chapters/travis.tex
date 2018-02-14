@@ -1,8 +1,8 @@
-\chapter{Travis CI}
+\section{Travis CI}
 
 Travis CI je služba kontinuální integrace spjatá s Git SCM službou GitHub.
 
-\section{Průběh integrace}
+\subsection{Průběh integrace}
 
 Podobně jako u GitLab CI je konfigurace řešena souborem \verb|.travis.yml|, který je umístěn přímo v~kořenovém adresáři repozitáře projektu.
 
@@ -11,21 +11,21 @@ Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
 Selhání fáze znamená zastavení provádění všech následujících fází.
 Selhání příkazu znamená selhání celého úkolu, ale ne zastavení provádění tohoto úkolu.
 Úkol vždy provede všechny příkazy bez ohledu na to, jestli nějaký předchozí selhal. 
-Pokud bychom chtěli, aby se po selhání příkazu úkol ukončil, pak je nutné zadefinovat proměnnou shellu na začátku skriptů (\verb|set -eo pipefail|).
+Pokud bychom chtěli, aby se po selhání příkazu úkol ukončil, pak je nutné zadefinovat v shellu na začátku skriptů (\verb|set -eo pipefail|).
 
 Každý úkol je spuštěn ve svém vlastním běhovém prostředí.
 
 \begin{listing}[ht]
+\caption{Definice fází v .travis.yml}
 \begin{minted}[frame=single,linenos]{yaml}
 stages:
   - test
   - build
   - deploy
 \end{minted}
-\caption{Definice fází v .travis.yml}
 \end{listing}
 
-Úkol náleží právě do jedné fáze a jeho přiřazení se provede vzoru z ukázky kódu \ref{code:travis-stages}.
+Úkol náleží právě do jedné fáze a jeho přiřazení se provede ( \ref{code:travis-stages}).
 Fáze jsou v Travis CI novým konceptem, který je stále ve fázi veřejného beta testování.
 % https://blog.travis-ci.com/2017-05-11-introducing-build-stages
 
@@ -44,7 +44,7 @@ jobs:
 \end{listing}
 
 Další možností definice úkolů je přes tzv. build matrix jak je ukázáno v ukázce kódu \ref{code:travis-matrix}.
-Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu.
+Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu zadaných parametrů.
 Oba zmíněné přístupy konfigurace lze kombinovat.
 
 \begin{listing}[ht]
@@ -64,7 +64,7 @@ script:
 \caption{Definice build matrixu v .travis.yml}
 \end{listing}
 
-\section{Architektura}
+\subsection{Architektura}
 
 Systém je rozdělen na několik částí, které mezi sebou komunikující přes distribuovanou frontu RabbitMQ.
 Datové uložiště je realizováno v SQL databázi PostreSQL.
@@ -106,7 +106,7 @@ Obstaravá webové rozhraní pro koncového uživatele.
 
 Stará se o komunikace mezi Travis Hubem a zbytkem vnitřního systému.
 
-\subsection{Běhová prostředí}
+\subsubsection{Běhová prostředí}
 
 Travis CI podporuje několik běhových prostředí vyjmenovaných v následující tabulce \ref{table:travis-env}.
 Výhodou kontejnerového prostředí je jeho rychlejší start.
@@ -145,11 +145,11 @@ script:
 \caption{Ukázka definice běhového prostředí v .travis.yml}
 \end{listing}
 
-\section{Přístup ke zdrojům systému}
+\subsection{Uživatelské rozhraní}
 
 Travis CI podobně jako GitLab umožňuje přístup ke zdrojům systému pomocí HTTP API.
 
-\section{HTTP API}
+\subsubsection{HTTP API}
 
 % https://developer.travis-ci.org/
 Travis API nám dává možnost přistupovat ke zdrojům systému skrze HTTP API.
@@ -177,23 +177,23 @@ HTTP metoda + akce                                          & Popis \\ \hline
 \end{tabular}
 \end{table}
 
-\section{Terminálové rozhraní}
+\subsection{Terminálové rozhraní}
 
 % http://www.rubydoc.info/gems/travis/1.8.8
 Terminálová aplikace Travis CI, která využívá HTTP API.
 Autentizace je prováděna pomocí tokenu nebo uživatelského jména a hesla.
-Aplikace má několik zajímavých vlastností, které jí činí uživatelsky přívětivou.
-Například pokud jí pustíme ze složky, ve které je se nachází Git repozitář projektu spravovaném Travisem, tak vykonané příkazy se budou vázat právě k tomuto repozitáři.
+Aplikace má několik zajímavých vlastností, které ji činí uživatelsky přívětivou.
+Například pokud ji pustíme ze složky, ve které je se nachází Git repozitář projektu spravovaném Travisem, tak vykonané příkazy se budou vázat právě k tomuto repozitáři.
 Další zajímavou vlastností je příkaz \verb|travis whatsup|, který zobrazí poslední integrace všech projektů.
 Terminálové rozhraní také dovoluje sledovat log výstup integrací v reálném čase. 
 
-\section{Webové rozhraní}
+\subsection{Webové rozhraní}
 
 Travis disponuje také webovým rozhraním, ve kterém lze sledovat průběh integrací.
 Data ve webovém rozhraní se automaticky obnovují bez nutného zásahu uživatele.
 Implementačně je toho docíleno websocketovým spojením.
 Stejně jako terminálové rozhraní, tak i to webové dokáže sledovat log výstupy integrací v reálném čase.
 
-\section{Postup nasazení}
+\subsection{Postup nasazení}
 
 Ač je Travis CI otevřený software, tak provoz na vlastní infrastruktuře je spíše nedoporučován.

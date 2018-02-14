@@ -9,7 +9,7 @@ Všechny části systému (core, web, runner) jsou implementovány jako Python b
 
 \imagefigurelarge{core.pdf}{Vnitřní architektura systému}
 
-Aby se během programování zamezilo duplikace kódu z důvodu 2 různých přístupů k datům systému, tak byla vytvořila sada tříd (fasády) zodpovědná za veškeré operace nad entitami.
+Aby se během programování zamezilo duplikace kódu z důvodu dvou různých přístupů k datům systému, tak byla vytvořila sada tříd (fasády) zodpovědná za veškeré operace nad entitami.
 Jedna fasáda odpovídá jedné entitě.
 S fasádami pak spolupracuje Flask aplikace, tak i shell aplikace.
 
