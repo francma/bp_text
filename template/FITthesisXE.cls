@@ -121,7 +121,7 @@
 	\setquotestyle {czech}
 
 	\RequirePackage [backend=biber, style=iso-numeric, autolang=other,%
-					sorting=none, sortlocale=cs_CZ, spacecolon=false]{ biblatex }
+					sorting=nty, sortlocale=cs_CZ, spacecolon=false]{ biblatex }
 
 	\renewcommand*{\acronymname}{Seznam použitých zkratek}
 	\renewcommand*{\dirfigurename}{Adresářová struktura}
