@@ -13,10 +13,10 @@ Aby se během programování zamezilo duplikace kódu z důvodu dvou různých p
 Jedna fasáda odpovídá jedné entitě.
 S fasádami pak spolupracuje Flask aplikace, tak i shell aplikace.
 
-Flask aplikace je dále rozdělena na tzv. \uv{blueprinty}, kde každý reprezentuje jeden REST API koncový bod (ukázka kódu \ref{code:piper-core-blueprint}).
+Flask aplikace je dále rozdělena na tzv. \uv{blueprinty}, kde každý reprezentuje jeden HTTP API koncový bod (ukázka kódu \ref{code:piper-core-blueprint}).
 
 \begin{listing}[ht]
-\caption{\label{code:piper-core-blueprint}Implementace koncového bodu REST API}
+\caption{\label{code:piper-core-blueprint}Implementace koncového bodu HTTP API}
 \begin{minted}[frame=single,linenos]{python}
 @builds_view.route(
     '/builds',
@@ -145,7 +145,7 @@ var fn = function() {
     );
 };
 \end{minted}
-\caption{Dotaz na REST API pomocí HTTP}
+\caption{Dotaz na HTTP API}
 \end{listing}
 
 \imagefigurelarge{piper-web.png}{Výsledné webové rozhraní}

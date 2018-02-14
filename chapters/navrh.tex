@@ -1,9 +1,9 @@
 \chapter{Návrh systému}
 
-V této kapitole se budeme věnovat návrhu architektury systému a výběrem použitých technologií.
-V následujícím textu bude odkazováno na navrhovaný systém jeho názvem -- Piper~CI.
+V této kapitole bude popsán návrh architektury systému a výběr použitých technologií.
+V následujícím textu je odkazováno na navrhovaný systém jeho názvem -- Piper~CI.
 
-Nejprve bude nutné vybrat programovací jazyk v jakém bude systém napsán.
+Nejprve je nutné vybrat programovací jazyk v jakém bude systém napsán.
 Z jazyků Rust, Lua, Ruby a Python se Python jeví jako nejvhodnější volba, protože s ním má autor práce největší zkušenosti.
 Python velmi rozsáhlou standardní knihovnu a další knihovny jsou vytvářeny aktivní komunitou.
 Konkrétně Python ve verzi 3.6 hlavně z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd a proměnných dokáží do jisté míry nahradit dokumentační komentáře
@@ -19,8 +19,8 @@ def foo(bar: Bar, count: int) -> List[str]:
 
 \section{Průběh integrace}
 
-Integrační proces bude rozdělen na fáze (\textit{stage}), které jsou vykovány v zadaném pořadí sekvenčně za sebou.
-Fáze se skládá z jednoho nebo více na sobě nezávislých úkolů (\textit{job}), které bude možné paralelizovat. 
+Integrační proces je rozdělen na fáze (\textit{stage}), které jsou vykovány v zadaném pořadí sekvenčně za sebou.
+Fáze se skládá z jednoho nebo více na sobě nezávislých úkolů (\textit{job}), které je možné paralelizovat. 
 Úkol v sobě obsahuje jeden nebo více příkazů vykonávaných sekvenčně po sobě.
 
 Selhání jednoho z příkazů vede k ukončení vykonávání úkolu a jeho selhání.
@@ -29,16 +29,16 @@ Pokud jeden z úkolů v rámci fáze selže, tak selže celá fáze a další f�
 Fáze jsou prováděny sekvenčně v zadaném pořadí.
 Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze v úspěšně dokončeny.
 
-Jednotlivé úkoly, fáze nebo celé integrace bude možné restartovat nebo rušit.
+Jednotlivé úkoly, fáze nebo celé integrace je možné restartovat nebo rušit.
 
 \subsection{Konfigurace}
 
-Konfigurace integrací projektu bude brána z textového souboru umístěného přímo v SCM repozitáři projektu.
+Konfigurace integrací projektu je brána z textového souboru umístěného přímo v SCM repozitáři projektu.
 Velkou výhodou tohoto přístupu je, že v kombinaci s verzovacím systémem se konfigurace integrace váže vždy k určitému stavu repozitáře.
 
 \subsubsection{Formát souboru}
 
-Soubor může být pouhým strukturovaným popisem dat (JSON, YAML, XML, \ldots) nebo jednoduchý skript (Lua, Python, \ldots).
+Soubor může být deklarativním popisem dat (JSON, YAML, XML, \ldots) nebo jednoduchý procedurální skript (Lua, Python, \ldots).
 Jelikož cílem práce je systém minimalistický, tak se jeví jako vhodnější řešení jednodušší definice integrace pomocí strukturovaného popisu dat.
 Mezi uvažované formáty patří JSON, YAML a XML.
 JSON není vhodný, kvůli absenci komentářů.
@@ -160,15 +160,16 @@ Přínos spočívá v umožnění rozdělení serverové části na více menš�
 
 \paragraph{Reprezentace dat a přístup ke zdrojům}
 
-Základním stavebním kamenem REST rozhraní jsou zdroje.
+Základním stavebním kamenem RESTful rozhraní jsou zdroje.
 Každá pojmenovatelná informace může být zdrojem (např. počasí dnes v Praze, \ldots), kolekce dalších zdrojů (např. počasí v hlavních městech Evropy) a další.
 Zdroj je identifikován URI adresou.
 \cite{rest_zdroje}
 
 \subsection{Rozdělení systému na části}
 
-Systém se bude dělit na dvě hlavní části -- na jádro (Piper CI core) a běhové klienty (Piper CI runner).
-Jádro zodpovídá za správu dat integrací, projektů a uživatelů a jejich poskytnutí dalším systémům skrze REST API.
+Architektura systému se řídí REST principy.
+Systém se dělí na dvě hlavní části -- na jádro (Piper CI core) a běhové klienty (Piper CI runner).
+Jádro zodpovídá za správu dat integrací, projektů a uživatelů a jejich poskytnutí dalším systémům skrze JSON HTTP API.
 Úkolem jádra je naslouchat změnám v SCM repozitářích spravovaných projektů a následně z nich vytvořit integraci.
 Tato integrace je rozdělena na jednotlivé úkoly, které jsou přidělovány běhovým klientům.
 Běhový klient úkol příjme jako sadu příkazů, připraví běhové prostředí a spustí příkazy.
@@ -176,18 +177,18 @@ Výstup z těchto příkazů předává jádru systému, které je dále zpracov
 
 \imagefigurelarge{architektura_piper.pdf}{Návrh struktury systému}
 
-Součástí jádra systému bude i uživatelské terminálové rozhraní ve kterém lze konfigurovat projekty, spravovat uživatelé a sledovat stav současných i minulých integrací.
-Implementovat další uživatelská rozhraní bude pomocí již zmíněného REST API.
-Například bude takto možné implementovat webové rozhraní.
+Součástí jádra systému je i uživatelské terminálové rozhraní ve kterém lze konfigurovat projekty, spravovat uživatelé a sledovat stav současných i minulých integrací.
+Implementovat další uživatelská rozhraní je možné pomocí již zmíněného HTTP API.
+Příkladem takového uživatelského rozhraní je webové rozhraní.
 
 \section{Jádro systému (Piper CI core)}
 
 Jádro reprezentuje středobod celého systému.
 Jeho úkolem je naslouchat změnám ve spravovaných repozitářích (tzv. \uv{webhooky}) a následně řídit průběh integrace.
 Úkoly, které jsou připravené k zpracování, jsou zařazovány do fronty, kde čekají na vyzvednutí jedním z běhových klientů.
-Fronta bude implementována pomocí Redis serveru a jeho \textit{list} struktury.
+Fronta je implementována pomocí Redis serveru a jeho \textit{list} struktury.
 Tato struktura poskytuje základní operace pro implementaci fronty (\textit{push} a \textit{pop}) a dostatečný výkon pro časté přístupy.
-Následný log výstup z úkolů zpracovávanými běhovými klienty bude ukládán v textových souborech.
+Následný log výstup z úkolů zpracovávanými běhovými klienty je ukládán v textových souborech.
 
 \subsection{Model}
 
@@ -199,17 +200,19 @@ K projektu jsou vázány data o integracích, které se dále dělí na fáze, �
 
 \imagefigurefull{entity_piper.pdf}{Entity v Piper CI}{0.75}
 
-Nad daty systému bude třeba provádět také filtrace (například vrať mi všechny integrace tohoto projektu, které byli provedeny na SCM větvi \textit{master}).
+Nad daty systému je třeba provádět také filtrace (například vrať mi všechny integrace tohoto projektu, které byli provedeny na SCM větvi \textit{master}).
 Těmto požadavkům vyhovuje databázové uložiště, které vztahy mezi entitami implementuje pomocí cizích klíčů a disponuje nástroji pro filtraci dat.
-K abstrakci nad různými databázovými stroji bude použita knihovna peewee.
-Abstrakcí bude ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji a komfortnější vývoj pro programátora systému.
+K abstrakci nad různými databázovými stroji je použita knihovna peewee.
+Abstrakcí je sice ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji a komfortnější vývoj pro programátora systému.
 Jádro systému nepotřebuje mimo jednoduché filtrace dat dělat náročnější dotazy do databáze, tak případný ztracený výkon nebude tak znatelný.
 
-\subsection{HTTP REST API}
+\subsection{HTTP API}
 
-REST API jádra vychází z definice entit systému.
+HTTP API jádra vychází z definice entit systému.
 API je dostupné přes HTTP protokol, kde jsou jednotlivé kolekce zdrojů identifikovány přes část URL adresy reprezentující umístění na serveru.
 Výsledná URL adresa pak například vypadá následovně: \verb|https://piper.martinfranc.eu/projects|.
+API není záměrně označováno za RESTful, protože se přesně neřídí jeho předpisy -- například definice akce nad zdroji Piper CI core jsou dostupné umístěním na serveru \verb|/builds/1/cancel|.
+Pravé RESTful API by stejného docílilo přes \verb|/builds/1| a definicí akce v těle HTTP požadavku.
 
 \begin{table}[ht]
 \centering
@@ -233,25 +236,25 @@ Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do se
 Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vratí projekty s daným originem.
 Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implementovat stránkování.
 
-Autentizace uživatele bude probíhat pomocí tokenu, který bude součástí HTTP hlaviček v požadavku klienta.
+Autentizace uživatele probíhá pomocí tokenu, který bude součástí HTTP hlaviček v požadavku klienta.
 Pro získání svého tokenu se uživatel bude muset nejprve přihlásit do terminálového rozhraní.
 
 % technicky zdatni uzivatele, duraz je na CLI rozhrani
 % hesla jsou nebezpecna
 
-API bude implementováno pomocí Flask webového frameworku založeného na protokolu wsgi.
+HTTP API je implementováno pomocí Flask webového frameworku založeného na protokolu wsgi.
 Flask je dostatečně lehký, aby splňoval požadavek na minimalismus systému a autor práce s ním má již předešlé zkušenosti.
 
 \subsection{Terminálové rozhraní}
 
-Návrh terminálového rozhraní stejně jako REST rozhraní vychází z definice entit systému.
+Návrh terminálového rozhraní stejně jako HTTP rozhraní vychází z definice entit systému.
 Po připojení k terminálu je uživateli zpřístupněna sada příkazů s názvem sdružené entity (například \verb|build| pro integrace, \ldots).
 Každý příkaz má sadu podpříkazů, definující akci.
 Jsou to například \verb|get|, \verb|list|, \verb|count|, \verb|update|, \verb|create| a pak další v závislosti na entitě.
 Podpříkazy mohou mít i argumenty, například \verb|job get 1| vrací úkol s identifikátorem 1.
 Více argumentů je identifikováno svým jménem, například \verb|project create url="martinfranc.eu"|.
 
-Autentizace uživatele do systému přes terminálové rozhraní lze implementovat pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
+Autentizace uživatele do systému přes terminálové rozhraní je implementována pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
 Uživatel vytvoří 2 klíče -- veřejný a privátní.
 Veřejný klíč následně dá k dispozici autentizačním autoritám.
 Pomocí privátního klíče lze data šifrovat a dešifrovat, zatímco veřejným klíčem lze data jen šifrovat.
@@ -277,7 +280,7 @@ command="[COMMAND]" ssh-rsa AAAA...
 \caption{Vlastní příkaz v authorized\_keys}
 \end{listing}
 
-Terminálové rozhraní bude implementováno pomocí knihovny \verb|cmd|, která dovoluje i psaní interaktivní dokumentace vytvořené z dokumentačních komentářů funkcí (ukázka kódu \ref{code:shell-term}).
+Terminálové rozhraní je implementováno pomocí knihovny \verb|cmd|, která dovoluje i psaní interaktivní dokumentace vytvořené z dokumentačních komentářů funkcí (ukázka kódu \ref{code:shell-term}).
 
 \begin{listing}[ht]
 \caption{\label{code:shell-term}Ukázka terminálového rozhraní}
@@ -295,7 +298,7 @@ build  exit  help  identity  job  project  runner  stage  user
 
 \subsection{Autorizace}
 
-Oprávnění budou definována na úrovni systému (předpona \textit{system}) a jednotlivých projektů (předpona \textit{project}) v podobě rolí.
+Oprávnění jsou definována na úrovni systému (předpona \textit{system}) a jednotlivých projektů (předpona \textit{project}) v podobě rolí.
 Uživatel bude mít právě jednu systémovou roli a právě jednu projektovou roli.
 Výjimkou je systémová role GUEST, která nemá projektovou roli.
 
@@ -330,7 +333,7 @@ Získává práva na restartovaní a rušení integrací v rámci projektu.
 
 \section{Běhový klient}
 
-Běhový klient bude sloužit jako prostředník mezi běhovým prostředím, ve kterém je vykonáván úkol z integrace a jádrem systému.
+Běhový klient slouží jako prostředník mezi běhovým prostředím, ve kterém je vykonáván úkol z integrace a jádrem systému.
 Jeho úkolem je přeložit zadání úkolu jádra systému (ukázka kódu \ref{code:piper-core-job-export}) pro konkrétní běhové prostředí.
 Například překlad pro Linuxové běhové prostředí se bude velmi lišit od toho založeného na OS Windows.
 
@@ -420,9 +423,9 @@ curl -k -L --cert cert --key key "https://localhost:8443/1.0/images"
 
 \section{Webové rozhraní}
 
-Webové rozhraní rozhraní bude interpretovat výsledky REST API jádra systému a vracet je v uživatelsky přívětivé podobě.
+Webové rozhraní rozhraní interpretuje výsledky HTTP API jádra systému a poskytuje je uživateli v čitelné podobě v podobě webové HTML stránky.
 
-Pro zaručení co největší uživatelské přívětivosti by bylo vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení dat.
+Pro zaručení co největší uživatelské přívětivosti je vhodné, aby webové rozhraní CI systému umělo zobrazit některé informace ihned jakmile budou dostupné, bez nutnosti manuálně vyvolat obnovení dat.
 Server tedy posílá pouze žádané informace a ne celou webovou stránku.
 Jedná se například o~stavy integrace nebo výpis výstupu aktuálně běžícího úkolu (tzv. \uv{streaming logu}).
 Klientem je v~této komunikaci webový prohlížeč a serverem jádro systému.

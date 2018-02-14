@@ -1,6 +1,6 @@
 \chapter{Dokumentace}
 
-\section{REST API}
+\section{HTTP API}
 
 Ke komunikaci s API nám stačí libovolný HTTP klient, například \verb|curl|.
 
@@ -39,41 +39,41 @@ Schéma lze konvertovat do podoby vhodné pro čtení v aplikaci \url{https://ed
 \hline
 \verb|GET    /|                                          & Vrací schéma API ve formátu OpenAPI \\ \hline
 \verb|GET    /builds|                                    & Vrací seznam integrací \\ \hline
-\verb|GET    /builds/[build-id]|                         & Vrací integraci s identifikátorem \verb|[build-id]| \\ \hline
-\verb|POST   /builds/[build-id]/cancel|                  & Přeruší probíhající integraci s identifikátorem \verb|[build-id]| \\ \hline
-\verb|POST   /builds/[build-id]/cancel|                  & Restartuje integraci s identifikátorem \verb|[build-id]| \\ \hline
-\verb|GET    /builds/[build-id]/stages|                  & Vrací seznam fází integrace s identifikátorem \verb|[build-id]| \\ \hline
+\verb|GET    /builds/{build-id}|                         & Vrací integraci s identifikátorem \verb|{build-id}| \\ \hline
+\verb|POST   /builds/{build-id}/cancel|                  & Přeruší probíhající integraci s identifikátorem \verb|{build-id}| \\ \hline
+\verb|POST   /builds/{build-id}/cancel|                  & Restartuje integraci s identifikátorem \verb|{build-id}| \\ \hline
+\verb|GET    /builds/{build-id}/stages|                  & Vrací seznam fází integrace s identifikátorem \verb|{build-id}| \\ \hline
 \verb|GET    /jobs|                                      & Vrací seznam úkolů \\ \hline
-\verb|GET    /jobs/[job-id]|                             & Vrací úkol s identifikátorem \verb|[job-id]| \\ \hline
-\verb|POST   /jobs/[job-id]/cancel|                      & Přeruší probíhající úkol s identifikátorem \verb|[job-id]| \\ \hline
-\verb|POST   /jobs/[job-id]/cancel|                      & Restartuje úkol s identifikátorem \verb|[job-id]| \\ \hline
-\verb|GET    /jobs/queue/[runner-token]|                 & Vrací úkol ke zpracování běhovým klientem identifikovaným \verb|[runner-token]| \\ \hline
-\verb|POST   /jobs/report/[job-secret]|                  & Přijímá data od běhového klienta o probíhajícím úkolu, obsahuje stav úkolu a log \\ \hline
-\verb|GET    /jobs/[job-id]/log|                         & Vrací log úkolu \\ \hline
+\verb|GET    /jobs/{job-id}|                             & Vrací úkol s identifikátorem \verb|{job-id}| \\ \hline
+\verb|POST   /jobs/{job-id}/cancel|                      & Přeruší probíhající úkol s identifikátorem \verb|{job-id}| \\ \hline
+\verb|POST   /jobs/{job-id}/cancel|                      & Restartuje úkol s identifikátorem \verb|{job-id}| \\ \hline
+\verb|GET    /jobs/queue/{runner-token}|                 & Vrací úkol ke zpracování běhovým klientem identifikovaným \verb|{runner-token}| \\ \hline
+\verb|POST   /jobs/report/{job-secret}|                  & Přijímá data od běhového klienta o probíhajícím úkolu, obsahuje stav úkolu a log \\ \hline
+\verb|GET    /jobs/{job-id}/log|                         & Vrací log úkolu \\ \hline
 \verb|GET    /projects|                                  & Vrací seznam projektů \\ \hline
 \verb|POST   /projects|                                  & Vytváří nový projekt \\ \hline
-\verb|GET    /projects/[project-id]|                     & Vrací projekt s identifikátorem \verb|[project-id]| \\ \hline
-\verb|PUT    /projects/[project-id]|                     & Editace projektu s identifikátorem \verb|[project-id]| \\ \hline
-\verb|DELETE /projects/[project-id]|                     & Smazání projektu s identifikátorem \verb|[project-id]| \\ \hline
-\verb|GET    /projects/[project-id]/builds|              & Vrací seznam integrací spojených s projektem identikovaným \verb|[project-id]| \\ \hline
-\verb|GET    /projects/[project-id]/stages|              & Vrací seznam fází spojených s projektem identikovaným \verb|[project-id]| \\ \hline
-\verb|GET    /projects/[project-id]/users|               & Vrací seznam uživatelů přiřazených do projektu identikovaným \verb|[project-id]| \\ \hline
-\verb|POST   /projects/[project-id]/users|               & Přidává uživatele do projektu identikovaným \verb|[project-id]| \\ \hline
-\verb|DELETE /projects/[project-id]/users/[user-id]|     & Odstraňuje uživatele z projektu identikovaným \verb|[project-id]| \\ \hline
+\verb|GET    /projects/{project-id}|                     & Vrací projekt s identifikátorem \verb|{project-id}| \\ \hline
+\verb|PUT    /projects/{project-id}|                     & Editace projektu s identifikátorem \verb|{project-id}| \\ \hline
+\verb|DELETE /projects/{project-id}|                     & Smazání projektu s identifikátorem \verb|{project-id}| \\ \hline
+\verb|GET    /projects/{project-id}/builds|              & Vrací seznam integrací spojených s projektem identikovaným \verb|{project-id}| \\ \hline
+\verb|GET    /projects/{project-id}/stages|              & Vrací seznam fází spojených s projektem identikovaným \verb|{project-id}| \\ \hline
+\verb|GET    /projects/{project-id}/users|               & Vrací seznam uživatelů přiřazených do projektu identikovaným \verb|{project-id}| \\ \hline
+\verb|POST   /projects/{project-id}/users|               & Přidává uživatele do projektu identikovaným \verb|{project-id}| \\ \hline
+\verb|DELETE /projects/{project-id}/users/{user-id}|     & Odstraňuje uživatele z projektu identikovaným \verb|{project-id}| \\ \hline
 \verb|GET    /stages|                                    & Vrací seznam fází \\ \hline
-\verb|GET    /stages/[stage-id]|                         & Vrací fázi s identifikátorem \verb|[stage-id]| \\ \hline
-\verb|POST   /stages/[stage-id]/cancel|                  & Přeruší probíhající fázi s identifikátorem \verb|[stage-id]| \\ \hline
-\verb|POST   /stages/[stage-id]/cancel|                  & Restartuje fázi s identifikátorem \verb|[stage-id]| \\ \hline
+\verb|GET    /stages/{stage-id}|                         & Vrací fázi s identifikátorem \verb|{stage-id}| \\ \hline
+\verb|POST   /stages/{stage-id}/cancel|                  & Přeruší probíhající fázi s identifikátorem \verb|{stage-id}| \\ \hline
+\verb|POST   /stages/{stage-id}/cancel|                  & Restartuje fázi s identifikátorem \verb|{stage-id}| \\ \hline
 \verb|GET    /runners|                                   & Vrací seznam běhových klientů \\ \hline
 \verb|POST   /runners|                                   & Vytváří nového běhového klienta \\ \hline
-\verb|GET    /runners/[runner-id]|                       & Vrací běhového klienta s identifikátorem \verb|[runner-id]| \\ \hline
-\verb|PUT    /runners/[runner-id]|                       & Edituje běhového klienta s identifikátorem \verb|[runner-id]| \\ \hline
-\verb|DELETE /runners/[runner-id]|                       & Maže běhového klienta s identifikátorem \verb|[runner-id]| \\ \hline
+\verb|GET    /runners/{runner-id}|                       & Vrací běhového klienta s identifikátorem \verb|{runner-id}| \\ \hline
+\verb|PUT    /runners/{runner-id}|                       & Edituje běhového klienta s identifikátorem \verb|{runner-id}| \\ \hline
+\verb|DELETE /runners/{runner-id}|                       & Maže běhového klienta s identifikátorem \verb|{runner-id}| \\ \hline
 \verb|GET    /users|                                     & Vrací seznam uživatelů \\ \hline
 \verb|POST   /users|                                     & Vytváří nového uživatele \\ \hline
-\verb|GET    /users/[user-id]|                           & Vrací uživatele s identifikátorem \verb|[user-id]| \\ \hline
-\verb|PUT    /users/[user-id]|                           & Edituje uživatele s identifikátorem \verb|[user-id]| \\ \hline
-\verb|DELETE /users/[user-id]|                           & Maže uživatele s identifikátorem \verb|[user-id]| \\ \hline
+\verb|GET    /users/{user-id}|                           & Vrací uživatele s identifikátorem \verb|{user-id}| \\ \hline
+\verb|PUT    /users/{user-id}|                           & Edituje uživatele s identifikátorem \verb|{user-id}| \\ \hline
+\verb|DELETE /users/{user-id}|                           & Maže uživatele s identifikátorem \verb|{user-id}| \\ \hline
 \verb|GET    /identity|                                  & Vrací aktuální identitu na základě autentizačního tokenu \\ \hline
 \end{tabular}
 \end{sidewaystable}

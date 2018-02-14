@@ -127,7 +127,7 @@ Ve výchozím stavu je cache sdílena mezi \textit{branch} a \textit{job}.
 Toto chování lze upravit nastavením klíče, který bude identifikovat danou cache.
 Při tvorbě klíče lze využít předdefinované CI proměnné. 
 Soubory a složky určené k~cachování uvedeme jako výčet v~konfiguraci projektu.
-Cesta k~souboru je uvedená jako relativní ke kořeni projektu, cachování souborů mimo projekt není touto cestou možné. % prapodivna veta 
+Uvedené cesty jsou uvedeny relativně ke kořeni projektu, cachování souborů mimo projekt není touto cestou možné. % prapodivna veta 
 Cache lze také omezit pouze na soubory a složky, které nejsou verzovány Gitem.
 
 \begin{listing}[ht]
@@ -158,31 +158,31 @@ Toto API implementuje samotný Amazon, tak i nějaké open-source projekty, kter
 
 % https://about.gitlab.com/applications
 GitLab umožňuje přístup ke zdrojům systému pomocí řady aplikací.
-Tyto aplikace využívají HTTP REST API GitLabu. 
+Tyto aplikace využívají HTTP API GitLabu. 
 
 \subsubsection{API}
 
-GitLab dovoluje přístup ke zdrojům systému včetně zdrojů spjatých s integrací pomocí HTTP REST API.
+GitLab dovoluje přístup ke zdrojům systému včetně zdrojů spjatých s integrací pomocí HTTP API.
 K autentizaci uživatele se používá tokenů, které jsou součástí HTTP hlaviček nebo HTTP query parametrů.
 K reprezentaci dat API požívá formátu JSON jak je vidět z ukázky \ref{code:gitlab-api-json-response}.
 
 \begin{table}[htbp]
 \centering
 \fontsize{9.5}{11.5}\selectfont
-\caption{GitLab API}
+\caption{GitLab HTTP API}
 \label{table:gitlab-api-spec}
 \begin{tabular}{|l|l|l|}
 \hline
 HTTP metoda + akce                                          & Popis \\ \hline
-\verb|GET  /projects/[id]/jobs|                             & Vrátí seznam úkolů projektu      \\ \hline
-\verb|GET  /projects/[id]/pipelines/[pipeline_id]/jobs|     & Vrátí seznam úkolů integrace      \\ \hline
-\verb|POST /projects/[id]/jobs/[job_id]/cancel|             & Zruší probíhající úkol      \\ \hline
-\verb|POST /projects/[id]/jobs/[job_id]/retry|              & Restartuje úkol      \\ \hline
-\verb|POST /projects/[id]/jobs/[job_id]/erase|              & Smaže úkol      \\ \hline
-\verb|POST /projects/[id]/pipeline|                         & Vytvoří novou integraci      \\ \hline
-\verb|GET  /projects/[id]/pipelines/[pipeline_id]|          & Vrátí integraci      \\ \hline
-\verb|POST /projects/[id]/pipelines/[pipeline_id]/cancel|   & Zruší probíhající integraci      \\ \hline
-\verb|POST /projects/[id]/pipelines/[pipeline_id]/retry|    & Restartuje probíhající integraci      \\ \hline
+\verb|GET  /projects/{id}/jobs|                             & Vrátí seznam úkolů projektu      \\ \hline
+\verb|GET  /projects/{id}/pipelines/{pipeline_id}/jobs|     & Vrátí seznam úkolů integrace      \\ \hline
+\verb|POST /projects/{id}/jobs/{job_id}/cancel|             & Zruší probíhající úkol      \\ \hline
+\verb|POST /projects/{id}/jobs/{job_id}/retry|              & Restartuje úkol      \\ \hline
+\verb|POST /projects/{id}/jobs/{job_id}/erase|              & Smaže úkol      \\ \hline
+\verb|POST /projects/{id}/pipeline|                         & Vytvoří novou integraci      \\ \hline
+\verb|GET  /projects/{id}/pipelines/{pipeline_id}|          & Vrátí integraci      \\ \hline
+\verb|POST /projects/{id}/pipelines/{pipeline_id}/cancel|   & Zruší probíhající integraci      \\ \hline
+\verb|POST /projects/{id}/pipelines/{pipeline_id}/retry|    & Restartuje probíhající integraci      \\ \hline
 \end{tabular}
 \end{table}
 
@@ -210,7 +210,7 @@ Seznam API zdrojů v tabulce \ref{table:gitlab-api-spec} je pouze výňatek, úp
 \subsubsection{CLI rozhraní}
 
 GitLab neposkytuje přímý terminálový přístup ke svým zdrojům.
-Místo toho lze využít neoficiálních aplikací, které vytváří terminálovou \uv{obálku} nad již zmíněným REST API.
+Místo toho lze využít neoficiálních aplikací, které vytváří terminálovou \uv{obálku} nad již zmíněným HTTP API.
 Příkladem takové aplikace je NARKOZ/gitlab.
 Autentizace je řešena pomocí GitLab tokenu, který se nastaví jako \verb|GITLAB_API_PRIVATE_TOKEN| proměnná shellu.
 

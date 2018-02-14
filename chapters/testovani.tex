@@ -32,7 +32,7 @@ Kontrola jednotného zápisu kódu (tzv. \uv{coding style}) byl zkontrolován op
 Testy jsou dostupné v repozitářích projektů v podsložce \verb|tests| a spouští se přes příkaz \verb|tox|.
 
 U testování webového rozhraní byl zvolen jiný způsob testování, protože obsahuje minimální množství testovatelného kódu.
-Webové rozhraní v podstatě pouze dotazuje REST API Piper CI jádra a interpretuje výsledky.
+Webové rozhraní v podstatě pouze dotazuje HTTP API Piper CI jádra a interpretuje výsledky.
 Pro tento účel byla vytvořena \uv{falešná} datová třída, poskytující testovací data.
 Testování není tedy prováděno automaticky, ale je třeba manuálně webové rozhraní projít pro odhalení případných chyb.
 

@@ -9,11 +9,11 @@ Z bezpečnostních hledisek by mělo být toto běhové prostředí:
 	\item Limitované na zdroje.
 \end{itemize}
 
-Nechceme například, aby byl záškodník schopen za pomoci integrace kompromitovat nesouvisející části systému nebo použíl proces integrace pro útok na externí systémy.
+Nechceme například, aby byl záškodník schopen za pomoci integrace kompromitovat nesouvisející části systému nebo použil proces integrace pro útok na externí systémy.
+Systém je také nutné chránit před neúmyslným poškozením uživateli CI systému.
 
-Dalším požadavkem je, že integrace se stejnými vstupními daty by měla vždy vracet stejné výsledky.
-Ač se zdá toto pravidlo jasné, tak jeho zaručení nemusí být úplně přímočaré.
-Pokud například všechny integrace provádíme ve stejném běhovém prostředí a během jedné integrace se poškodí systém, tak všechny další integrace budou selhávat.
+Dalším požadavkem je, aby integrace nad SCM repozitářem v určitém stavu dospěla do stejného výsledku.
+Pokud například budeme integraci spouštět vždy ve stejném adresáři, který nebude po každé integrace důkladně uklizen od dočasných souborů, tak se nám může stát, že se nám jednotlivé integrace mezi sebou ovlivňovat.
 
 Těchto požadavků lze dosáhnout vytvořením virtualizovaného prostředí, které nám zajistí izolaci integrace.
 Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, aplikací jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, emulace, QoS a dalších \cite{virt_intro}.
@@ -51,9 +51,10 @@ Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuál
 
 Paravirtualizace je technika, při které je hostovaný systém upraven tak, aby místo namísto přímé komunikace s hardwarem používal API hostitele.
 Výhodou tohoto přístupu byla snížená režie oproti plné softwarové virtualizaci.
-S příchodem hardwarové virtualizace, která dokáže být stejně rychlá jako paravirtualiazace se od této technologie postupně upouští \cite{paravirtualization_leave}.
-
+V dnešní době se paravirtualizace používá v kombinaci s hardwarově asistovanou virtualizací například v podobě síťových ovladačů.
 % http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html
+% http://www.linux-kvm.org/page/Virtio
+
 
 \subsection{Virtualizace na úrovni operačního systému}
 
@@ -76,7 +77,6 @@ Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem
 Jelikož kontejner sdílí stejný prostor jádra se svým hostitelem, tak není možné, aby byl kontejner založen na jiném OS než hostitel.
 Není tedy například možné provozovat Linuxové kontejnery na systému s OS Windows.
 Mezi technologie pro tvorbu kontejnerů patří: jmenné prostory a kontrolní skupiny (Linux), jails (BSD).
-
 
 \subsubsection{Nástroje operačního systému Linux}
 
