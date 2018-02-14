@@ -164,16 +164,16 @@ K reprezentaci dat API se používá JSON formátu.
 \begin{tabular}{|l|l|l|}
 \hline
 HTTP metoda + akce                                          & Popis \\ \hline
-\verb|GET  /repo/[id]/builds|                               & Vrátí seznam integrací repozitáře      \\ \hline
-\verb|GET  /build/[id]/jobs|                                & Vrátí seznam úkolů integrace      \\ \hline
-\verb|POST /job/[id]/cancel|                                & Zruší probíhající úkol      \\ \hline
-\verb|POST /job/[id]/restart|                               & Restartuje úkol      \\ \hline
-\verb|POST /repo/[id]/[branch]/requests|                    & Vytvoří novou integraci      \\ \hline
-\verb|GET  /build/[id]|                                     & Vrátí integraci      \\ \hline
-\verb|POST /build/[id]/cancel|                              & Zruší probíhající integraci      \\ \hline
-\verb|POST /build/[id]/restart|                             & Restartuje probíhající integraci      \\ \hline
-\verb|GET  /stage/[id]|                                     & Vrátí fázi      \\ \hline
-\verb|GET  /build/[id]/stages|                              & Vrátí seznam fází integrace      \\ \hline
+\verb|GET  /repo/{id}/builds|                               & Vrátí seznam integrací repozitáře      \\ \hline
+\verb|GET  /build/{id}/jobs|                                & Vrátí seznam úkolů integrace      \\ \hline
+\verb|POST /job/{id}/cancel|                                & Zruší probíhající úkol      \\ \hline
+\verb|POST /job/{id}/restart|                               & Restartuje úkol      \\ \hline
+\verb|POST /repo/{id}/{branch}/requests|                    & Vytvoří novou integraci      \\ \hline
+\verb|GET  /build/{id}|                                     & Vrátí integraci      \\ \hline
+\verb|POST /build/{id}/cancel|                              & Zruší probíhající integraci      \\ \hline
+\verb|POST /build/{id}/restart|                             & Restartuje probíhající integraci      \\ \hline
+\verb|GET  /stage/{id}|                                     & Vrátí fázi      \\ \hline
+\verb|GET  /build/{id}/stages|                              & Vrátí seznam fází integrace      \\ \hline
 \end{tabular}
 \end{table}
 
