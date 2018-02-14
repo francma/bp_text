@@ -1,6 +1,36 @@
 \section{Verzovací nástroje}
 
-Verzovací nástroje řeší problém slučování zdrojového kódu programů mezi více vývojáři ve společném repozitáři.
-Mezi takové nástroje patří například Git nebo SVN.
+Verzovací nástroj (VCS) zaznamenává historii změn souborů v repozitáři tak, aby bylo možné se kdykoliv vrátit ke specifické verzi souboru.
+Například i tato bakalářská práce je psána s podporou verzovacího nástroje.
 
-% github, verejne
+\subsection{Spolupráce VCS Git s CI}
+
+Příklad spolupráce mezi VCS a CI bude vysvětlen na verzovacím systému Git.
+Místo jednoho centrálního uložiště repozitáře Git používá distribuovaný model.
+To znamená, že repozitář je nejen uložen na hlavním serveru (\textit{origin}), ale také na klientských stanicích.
+Verze repozitáře jsou reprezentovány snímky (\textit{commits}), které tvoří posloupnost.
+Posloupnost snímků je dále možné větvit do více posloupností (\textit{branches}), které je možné opět zpátky slučovat.
+Větev s názvem \textit{master} je označena jako hlavní a její poslední verze většinou reprezentuje produkční projekt.
+
+% https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control
+
+\begin{listing}[ht]
+\caption{\label{vcs-and-ci}Git v kombinaci s CI}
+\begin{minted}[frame=single,linenos]{shell}
+# Stáhneme master větev hlavního server 
+git clone https://github.com/francma/piper-ci-core .
+# Vytvoříme novou větev, vycházející z master větve
+git checkout -b shell
+# Provedeme změny (...)
+# Vytvoříme nový snapshot a nahrajeme změny na hlavní server
+git commit -am 'Implementace shellu' && git push origin shell
+# Po úspěšném dokončení testů nahrajeme naše změny do hlavní větve
+git push origin master
+\end{minted}
+\end{listing}
+
+Pro pohodlnější správu Git repozitářů můžeme využít webového uživatelského rozhraní GitHub.
+Mimo grafické reprezentace snímků repozitáře (\textit{commits}) GitHub také podporuje tzv. \uv{pull request}. 
+Pull request nahrazuje poslední krok (\verb|git push|) z ukázky kódu \ref{vcs-and-ci} a přináší přívětivou uživatelskou obálku.
+
+\imagefigurefull{github-mr.png}{Ukázka GitHub pull requestu}{0.8}
