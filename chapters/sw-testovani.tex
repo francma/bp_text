@@ -2,6 +2,8 @@
 
 Téměř každý programátor při psaní programů píše také testy.
 Příkladem takového testu je i jednoduché vypsání výstupu funkce a následné ověření výsledku (ukázka kódu \ref{test-basic-code}).
+Po vyzkoušení několika vstupů a ověření korektního fungování programátor test smaže a začne se věnovat jiné části programu.
+Nicméně je velmi pravděpodobné, že v budoucnu se rozhodne tento kód revidovat a pro ověření jeho funkčnosti opět napíše jednorázový test.
 
 \begin{listing}[ht]
 \caption{\label{test-basic-code}Primitivní test}
@@ -14,24 +16,7 @@ print(mult(3, 2))
 \end{minted}
 \end{listing}
 
-Po vyzkoušení několika vstupů a ověření korektního fungování test smaže a začne se věnovat jiné části programu.
-V budoucnu se rozhodne tento kód revidovat (ukázka kódu \ref{test-optimized-code}) a znovu napíše testy, čímž dojde k plýtvání času.
-
-\begin{listing}[ht]
-\caption{\label{test-optimized-code}Optimalizace kódu}
-\begin{minted}[frame=single,linenos]{python}
-def mult(a, b):
-    if a == 0 or b == 0:
-        return 0
-
-    return a * b
-
-# Bude výsledek opět 6?
-print(mult(3, 2))
-\end{minted}
-\end{listing}
-
-Lepším přístupem je testy zachovávat a při vývoji je používat k průběžné kontrole (ukázka kódu \ref{test-test}).
+Stále opětovným psaním testů programátor zbytečně ztrácí zbytečně svůj čas a tak je lepší tyto testy zachovávat a při vývoji je používat k průběžné kontrole (ukázka kódu \ref{test-test}).
 Pokrytím kódu testy dojde k zefektivnění vývoje a umožní odhalit chyby včas než budou zavedené do zbytku systému.
 
 \begin{listing}[ht]
@@ -40,26 +25,49 @@ Pokrytím kódu testy dojde k zefektivnění vývoje a umožní odhalit chyby v�
 from project import mult
 
 assert mult(3, 2) == 6
+assert mult(3, 3) == 9
+assert mult(0, 3) == 0
 \end{minted}
 \end{listing}
 
-K ulehčení psaní testů můžeme využít některé z knihoven.
-
-\subsection{Typy testů}
+\subsection{Dělení testů dle typu}
 
 Testy dělíme na dva typy -- integrační a jednotkové.
-
 Úkolem jednotkového testu je otestovat právě jednu komponentu (třídu, funkci, modul, \ldots) v izolaci od ostatních komponent.
-Tohoto docílíme tak, že závislé komponenty nahradíme komponentami \uv{falešnými}, které simulují určité deterministické chovaní.
-Například se jedná o simulaci odeslání HTTP požadavku.
-Místo vytváření spojení a čekání na odpověď můžeme nahradit zodpovědnou komponentu tak, že vždy vrátí kladný návratový HTTP kód s určitou odpovědí.
+Tohoto docílíme tak, že závislé komponenty nahradíme komponentami \uv{falešnými} (tzv. \uv{mocks}, \uv{stubs} \cite{fowler_mocks}), které se chovají deterministicky dle našeho zadání (ukázka \ref{code:test-stub}).
+Použití \uv{falešných} komponent nám dovoluje snadno simulovat mezní stavy (například chyba připojení k databázi) nebo mohou sloužit jako dočasná náhrada za dosud neimplementované části systému.
+Dalším častým přínosem je urychlení vykonání testů (není nutné se připojovat k databázi).
+\cite{zemek_integracni_x_jednotkove}
 
-Testováním více komponent, bez pomoci komponent \uv{falešných}, vytvoříme test integrační.
-V našem uvedeném případě bychom použili reálný HTTP server.
+\begin{listing}[ht]
+\caption{\label{code:test-stub}Ukázka použití falešné třídy}
+\begin{minted}[frame=single,linenos]{python}
+class Database:
+    def get(self, idx):
+        return self.db.query('SELECT * FROM abc WHERE id = %i' % idx)
 
-Výhodou jednotkových testů oproti integračním je jejich vyšší rychlost (například ušetříme čas potřebný na navázání spojení k serveru).
-Další výhodou je i jednodušší simulace mezních stavů (například server vrátí konkrétní chybovou hlášku).
-Jednotkové testy nám také dovolují testovat komponenty v případě, že jejich závislosti v podobě komponent nejsou ještě dokončené.
-Naopak test integrační lépe testuje reálné prostředí.
+# Falešná třída pro testovací učely
+class FakeDatabase:
+    def get(self, idx):
+        return {'id': idx, 'property': 'test' + str(idx)}
 
-% https://cs-blog.petrzemek.net/2015-04-18-proc-rozlisovat-jednotkove-a-integracni-testy
+class Foo:
+    def __init__(self, database):
+        self.database
+
+    def bar(self, idx):
+        return database.get(idx)['property']
+
+foo = Foo(FakeDatabase)
+assert foo.bar(1) == 'test1'
+assert foo.bar(2) == 'test2'
+\end{minted}
+\end{listing}
+
+Opakem testů jednotkových jsou testy integrační, jejichž úkolem je otestovat komponenty včetně jejich provázání.
+Integračním testem se blížíme k reálnému fungování a tak by neměli být opomíjeny.
+
+Testování ale nemusí podléhat pouze samotná funkčnost programu.
+Například u interpretovaných programovacích jazyků je možné kontrolovat jejich syntakticky správný zápis.
+Další častým předmětem testování je kontrola stylu zápisu programu proti sadě pravidel (tzv. \uv{coding style})
+
