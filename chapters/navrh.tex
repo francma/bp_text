@@ -5,7 +5,7 @@ V následujícím textu je odkazováno na navrhovaný systém jeho názvem -- Pi
 
 Nejprve je nutné vybrat programovací jazyk v jakém bude systém napsán.
 Z jazyků Rust, Lua, Ruby a Python se Python jeví jako nejvhodnější volba, protože s ním má autor práce největší zkušenosti.
-Python velmi rozsáhlou standardní knihovnu a další knihovny jsou vytvářeny aktivní komunitou.
+Python má velmi rozsáhlou standardní knihovnu a další knihovny jsou vytvářeny aktivní komunitou.
 Konkrétně Python ve verzi 3.6 hlavně z důvodu podpory typových anotací, které zlepšují čitelnost kódu a při vhodném pojmenování tříd a proměnných dokáží do jisté míry nahradit dokumentační komentáře
 
 \begin{listing}[ht]
@@ -19,29 +19,29 @@ def foo(bar: Bar, count: int) -> List[str]:
 
 \section{Průběh integrace}
 
-Integrační proces je rozdělen na fáze (\textit{stage}), které jsou vykovány v zadaném pořadí sekvenčně za sebou.
-Fáze se skládá z jednoho nebo více na sobě nezávislých úkolů (\textit{job}), které je možné paralelizovat. 
+Integrační proces (\textit{build}) je rozdělen na fáze (\textit{stage}), které jsou vykovány v zadaném pořadí sekvenčně za sebou.
+Fáze se skládá z jednoho nebo více na sobě nezávislých úkolů (\textit{job}), které je možné v rámci fáze paralelizovat. 
 Úkol v sobě obsahuje jeden nebo více příkazů vykonávaných sekvenčně po sobě.
 
 Selhání jednoho z příkazů vede k ukončení vykonávání úkolu a jeho selhání.
 Jelikož jsou úkoly prováděny nezávisle na sobě, tak po selhání jednoho úkolu jsou ostatní úkolu v rámci fáze dokončeny.
 Pokud jeden z úkolů v rámci fáze selže, tak selže celá fáze a další fáze už nejsou prováděny.
 Fáze jsou prováděny sekvenčně v zadaném pořadí.
-Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze v úspěšně dokončeny.
+Integrační proces je pokládán za úspěšný poté, co jsou všechny jeho fáze úspěšně dokončeny nebo přeskočeny.
 
 Jednotlivé úkoly, fáze nebo celé integrace je možné restartovat nebo rušit.
 
 \subsection{Konfigurace}
 
-Konfigurace integrací projektu je brána z textového souboru umístěného přímo v SCM repozitáři projektu.
-Velkou výhodou tohoto přístupu je, že v kombinaci s verzovacím systémem se konfigurace integrace váže vždy k určitému stavu repozitáře.
+Konfigurace integrací projektu je brána z textového souboru umístěného přímo v VCS repozitáři projektu.
+Velkou výhodou tohoto přístupu je, že v kombinaci s verzovacím systémem se konfigurace integrace váže vždy k určitému stavu repozitáře a je tedy ji možné kdykoliv opakovat.
 
 \subsubsection{Formát souboru}
 
-Soubor může být deklarativním popisem dat (JSON, YAML, XML, \ldots) nebo jednoduchý procedurální skript (Lua, Python, \ldots).
+Soubor může být buďto deklarativním popisem dat (JSON, YAML, XML, \ldots) nebo jednoduchý procedurální skript (Lua, Python, \ldots).
 Jelikož cílem práce je systém minimalistický, tak se jeví jako vhodnější řešení jednodušší definice integrace pomocí strukturovaného popisu dat.
 Mezi uvažované formáty patří JSON, YAML a XML.
-JSON není vhodný, kvůli absenci komentářů.
+Formát JSON není vhodný kvůli absenci komentářů.
 Ač XML formát komentáře podporuje, tak je pro člověka hůře čitelný a méně komfortní na editaci viz. ukázky \ref{listing:xml} a \ref{listing:yaml}.
 
 \begin{listing}[ht]
@@ -104,6 +104,7 @@ jobs:
 U úkolů (\textit{jobs}) lze navíc definovat podmínku jejich spuštění (\textit{when}), typ běhového klienta (\textit{runner}), obraz běhového prostředí (\textit{image}) a proměnné prostředí (\textit{env}).
 Podmínka spuštění bude vykonána pomocí knihovny simpleeval, která oproti Python eval implementuje jen podmnožinu bezpečných operací.
 Proměnné prostředí jsou dostupné příkazům, tak i podmínce spuštění úkolu.
+Při záporně vyhodnocené podmínce se úkol přeskočí a integrace pokračuje dál.
 Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM (\textit{branch}, \textit{commit}, \ldots) a další.
 Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (\textit{after\_failure}).
 Vhodné jsou například pro výpis log souborů, které produkují vykonávané příkazy.
@@ -170,10 +171,10 @@ Zdroj je identifikován URI adresou.
 Architektura systému se řídí REST principy.
 Systém se dělí na dvě hlavní části -- na jádro (Piper CI core) a běhové klienty (Piper CI runner).
 Jádro zodpovídá za správu dat integrací, projektů a uživatelů a jejich poskytnutí dalším systémům skrze JSON HTTP API.
-Úkolem jádra je naslouchat změnám v SCM repozitářích spravovaných projektů a následně z nich vytvořit integraci.
+Úkolem jádra je naslouchat změnám v VCS repozitářích spravovaných projektů a následně z nich vytvořit integraci.
 Tato integrace je rozdělena na jednotlivé úkoly, které jsou přidělovány běhovým klientům.
 Běhový klient úkol příjme jako sadu příkazů, připraví běhové prostředí a spustí příkazy.
-Výstup z těchto příkazů předává jádru systému, které je dále zpracovává.
+Výstup z těchto příkazů předává jádru systému, které je dále zpracovává a poskytuje uživateli v podobě tzv. \uv{streaming logu}.
 
 \imagefigurelarge{architektura_piper.pdf}{Návrh struktury systému}
 

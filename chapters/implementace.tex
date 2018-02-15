@@ -126,9 +126,10 @@ exit $PIPER_GLOB_EXIT;
 
 \section{Webové rozhraní (Piper CI web)}
 
-Implementace tzv. \uv{streaming logu} je 
+Implementace tzv. \uv{streaming logu} je implementována v JavaScriptu pomocí tzv. \uv{short pollingu} (ukázka \ref{implementace-streaming-log}).
 
 \begin{listing}[ht]
+\caption{\label{implementace-streaming-log}Implementace streaming logu}
 \begin{minted}[frame=single,linenos]{javascript}
 var fn = function() {
     fetch('/logs/' + job.id + '?offset=' + offset).then(
@@ -147,8 +148,9 @@ var fn = function() {
     );
 };
 \end{minted}
-\caption{Dotaz na HTTP API}
 \end{listing}
+
+Výsledné webové rozhraní (ukázka \ref{pic:piper-web.png}) dovoluje zobrazovat veřejné informace systému (role \verb|system.GUEST|) a po zadání přihlašovacího tokenu umožňuje provádět i autorizované operace (restart úkolu, \ldots).
 
 \imagefigurelarge{piper-web.png}{Výsledné webové rozhraní}
 
