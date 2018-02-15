@@ -1,8 +1,8 @@
 \section{GitLab CI}
 
-GitLab CI je systém kontinuální integrace, který součástí součástí správce Git repozitářů a plánovače projektů GitLab.
+GitLab CI je systém kontinuální integrace, který je součástí správce Git repozitářů a plánovače projektů GitLab.
 Jeho použití je tedy omezena pouze pro uživatele tohoto systému.
-Projekt je vydáván pod několika edicemi -- komerční a komunitní open-source edicí. \cite{gitlab_ce}.
+Projekt je dostupný pod open-source licencí (komunitní edice) a komerční \cite{gitlab_ce}. 
 
 \subsection{Průběh integrace}
 
@@ -24,10 +24,8 @@ stages:
 \end{minted}
 \end{listing}
 
-Jednotlivé fáze se skládají z~několika úkolů.
-Úkoly v rámci fáze jsou spouštěny nezávisle na sobě a tím pádem je lze paralelizovat.
+Jednotlivé fáze se skládají z~několika úkolů, které jsou v rámci fáze spouštěny nezávisle na sobě a tím pádem je lze paralelizovat.
 Selhání jednoho z~úkolů vede k~neúspěchu celé fáze.
-Úkoly jsou vždy provedeny všechny, nezávisle na výsledku ostatních v~rámci fáze.
 
 \begin{listing}[ht]
 \caption{Definice úkolu v .gitlab-ci.yml}
@@ -44,7 +42,7 @@ Každý úkol je složen z~několika příkazů.
 Pokud jeden z~příkazů skončí chybovým návratovým kódem, pak je ukončeno provádění úkolu.
 
 Mezi speciální úkoly patří \verb|before_script| a \verb|after_script|.
-Tyto úkoly jsou provedeny vždy před nebo po každým uživatelsky definovaným úkolem.
+Tyto úkoly jsou provedeny vždy před nebo po každém uživatelsky definovaném úkolu.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -59,7 +57,7 @@ after_script:
 \caption{Definice before\_script a after\_script .gitlab-ci.yml}
 \end{listing}
 
-Jednotlivým úkolům lze přiřadit podmínečné spuštění pomocí notace \verb|when|.
+Jednotlivé úkolu lze podmíněně spouštět pomocí notace \verb|when|.
 
 \begin{itemize}
   \item \verb|on_success| -- vykonej pouze pokud předchozí fáze skončila úspěchem (výchozí) 
@@ -85,14 +83,14 @@ Volba běhového serveru je definována na úrovni konfigurace projektu a je ome
 \paragraph{Shell běhové prostředí}
 
 Příkazy provádí na stejném systému pod stejným uživatelem jako samotný běhový server.
-Z tohoto plyne mnoho bezpečnostních rizik a proto se použití tohoto běhového prostředí nedoporučuje v produkčním prostředí.
+Z toho plyne mnoho bezpečnostních rizik, a proto se použití tohoto běhového prostředí nedoporučuje v produkčním nasazení.
 
 \paragraph{Docker běhové prostředí}
 
 Příkazy se provádí uvnitř Docker kontejneru.
-Volba Docker obrazu definována klíčovým slovem \verb|image|.
-Sestavení lze obohatit o~tzv. služby, kterými můžeme každému buildu dát k~dispozici přístup k~další Docker instanci, která bude dostupná pod zadanou hostname.
-Služby lze opět konfigurovat na úrovni integrace, tak na úrovni úkolu.
+Volba Docker obrazu je definována klíčovým slovem \verb|image|.
+Integraci lze obohatit o~tzv. služby, kterými můžeme každému úkolu dát k~dispozici přístup k~další Docker instanci, která bude dostupná pod zadanou hostname.
+Služby lze opět konfigurovat jak na úrovni integrace, tak i na úrovni úkolu.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -112,7 +110,7 @@ test:
 
 Běhová prostředí stavějící na plné virtualizaci.
 Virtuální stroj musí podporovat Bash kompatibilní shell a být dostupný přes SSH spojení.
-Virtuální stroje jsou klonovány pro udržení čistého prostředí pro sestavení a snapshotovány pro urychlení dalších sestavení.
+Virtuální stroje jsou klonovány pro udržení čistého prostředíaaa a snapshotovány pro urychlení integrací.
 
 % https://docs.gitlab.com/runner/executors/README.html
 
@@ -121,7 +119,7 @@ Virtuální stroje jsou klonovány pro udržení čistého prostředí pro sesta
 % artefakty vs cache
 % cache by se nemela pouzivat k predani
 
-Cache je zavedená pro urychlení integrací.
+Pro urychlení integrace se používá cache.
 Například je takto možné sdílet závislosti projektu mezi různými integracemi.
 Ve výchozím stavu je cache sdílena mezi \textit{branch} a \textit{job}.
 Toto chování lze upravit nastavením klíče, který bude identifikovat danou cache.
@@ -157,14 +155,13 @@ Toto API implementuje samotný Amazon, tak i nějaké open-source projekty, kter
 \subsection{Uživatelské rozhraní}
 
 % https://about.gitlab.com/applications
-GitLab umožňuje přístup ke zdrojům systému pomocí řady aplikací.
-Tyto aplikace využívají HTTP API GitLabu. 
+GitLab umožňuje přístup k informacím systému pomocí řady aplikací, které využívají GitLab HTTP API.
 
 \subsubsection{API}
 
 GitLab dovoluje přístup ke zdrojům systému včetně zdrojů spjatých s integrací pomocí HTTP API.
 K autentizaci uživatele se používá tokenů, které jsou součástí HTTP hlaviček nebo HTTP query parametrů.
-K reprezentaci dat API požívá formátu JSON jak je vidět z ukázky \ref{code:gitlab-api-json-response}.
+K reprezentaci dat API používá formátu JSON (viz. ukázka \ref{code:gitlab-api-json-response}).
 
 \begin{table}[htbp]
 \centering
@@ -186,8 +183,8 @@ HTTP metoda + akce                                          & Popis \\ \hline
 \end{tabular}
 \end{table}
 
-Fáze integrace nemá přidělený svůj vlastní API koncový bod.
 Seznam API zdrojů v tabulce \ref{table:gitlab-api-spec} je pouze výňatek, úplný seznam zdrojů je k dostání v oficiální dokumentaci \cite{gitlab_api}. 
+Fáze integrace nemá přidělený svůj vlastní API koncový bod.
 
 \begin{listing}[ht]
 \caption{\label{code:gitlab-api-json-response}Odpověď GitLab API (detail integrace)}
@@ -210,9 +207,10 @@ Seznam API zdrojů v tabulce \ref{table:gitlab-api-spec} je pouze výňatek, úp
 \subsubsection{CLI rozhraní}
 
 GitLab neposkytuje přímý terminálový přístup ke svým zdrojům.
-Místo toho lze využít neoficiálních aplikací, které vytváří terminálovou \uv{obálku} nad již zmíněným HTTP API.
-Příkladem takové aplikace je NARKOZ/gitlab.
-Autentizace je řešena pomocí GitLab tokenu, který se nastaví jako \verb|GITLAB_API_PRIVATE_TOKEN| proměnná shellu.
+Místo toho lze využít neoficiálních aplikací, které vytváří cli \uv{obálku} nad již zmíněným HTTP API.
+Autentizace je řešena pomocí GitLab tokenu, který se nastaví jako \verb|GITLAB_API_PRIVATE_TOKEN| proměnná prostředí.
+
+% https://github.com/NARKOZ/gitlab
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{shell}
@@ -225,11 +223,11 @@ pipeline 1 2
 \caption{Odpověď GitLab API (detail integrace)}
 \end{listing}
 
-\subsubsection{Webové rozhraní}
+\subsubsection{Webové uživatelské rozhraní}
 
-GitLab implementuje i webové rozhraní, které je přímou součástí projektu.
-Najdeme zde informace o git repozitářích, tak i integracích.
-Součástí webového rozhraní je i tzv. \uv{streaming log}.
+Součástí GitLabu je i webové uživatelské rozhraní.
+Najdeme zde informace jak o Git repozitářích, tak i integracích.
+Součástí webového rozhraní je sledování stavu integrací v reálném čase.
 
 \imagefigurelarge{gitlab-webui.png}{Ukázka GitLab web UI}
 
@@ -237,7 +235,7 @@ Součástí webového rozhraní je i tzv. \uv{streaming log}.
 
 GitLab nabízí několik instalačních metod.
 První z nich jsou klasické Linuxové distribuční balíčky (apt, yum, \ldots).
-Další možností je využití přepravených obrazů pro kontejnerové technologie (Docker, \ldots).
+Další možností je využití připravených obrazů pro kontejnerové technologie (Docker, \ldots).
 GitLab nám také dává možnost provozovat systém na jejich vlastní infrastruktuře.
 
 % https://about.gitlab.com/installation/

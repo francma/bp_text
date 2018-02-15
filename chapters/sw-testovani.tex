@@ -1,9 +1,9 @@
 \section{Testování softwaru}
 
-Téměř každý programátor při psaní programů píše také testy.
-Příkladem takového testu je i jednoduché vypsání výstupu funkce a následné ověření výsledku (ukázka kódu \ref{test-basic-code}).
-Po vyzkoušení několika vstupů a ověření korektního fungování programátor test smaže a začne se věnovat jiné části programu.
-Nicméně je velmi pravděpodobné, že v budoucnu se rozhodne tento kód revidovat a pro ověření jeho funkčnosti opět napíše jednorázový test.
+Téměř každý programátor při psaní programů současně píše také testy.
+Příkladem takového testu je i jednoduché vypsání návratové hodnoty funkce a následné ověření výsledku (ukázka kódu \ref{test-basic-code}).
+Po vyzkoušení několika vstupů a ověření korektního fungování je tento test programátorem smazán.
+Nicméně je velmi pravděpodobné, že v budoucnu se další člen projektu rozhodne tento kód revidovat a pro ověření jeho funkčnosti opět napíše testy.
 
 \begin{listing}[ht]
 \caption{\label{test-basic-code}Primitivní test}
@@ -16,8 +16,8 @@ print(mult(3, 2))
 \end{minted}
 \end{listing}
 
-Stále opětovným psaním testů programátor zbytečně ztrácí zbytečně svůj čas a tak je lepší tyto testy zachovávat a při vývoji je používat k průběžné kontrole (ukázka kódu \ref{test-test}).
-Pokrytím kódu testy dojde k zefektivnění vývoje a umožní odhalit chyby včas než budou zavedené do zbytku systému.
+Opětovným psaním testů je zbytečně ztrácen čas, a proto je lepší tyto testy zachovávat a při vývoji je používat k průběžné kontrole (viz. ukázka kódu \ref{test-test}).
+Pokrytím kódu testy dojde k zefektivnění vývoje a možnosti odhalit chyby než budou zavedené do zbytku systému.
 
 \begin{listing}[ht]
 \caption{\label{test-test}Ukázka napsaného testu}
@@ -30,13 +30,14 @@ assert mult(0, 3) == 0
 \end{minted}
 \end{listing}
 
-\subsection{Dělení testů dle typu}
+\subsection{Rozdělení testů dle typu}
 
-Testy dělíme na dva typy -- integrační a jednotkové.
+Testů existuje několik typů.
+Nejprve se zaměříme na testy integrační a jednotkové.
 Úkolem jednotkového testu je otestovat právě jednu komponentu (třídu, funkci, modul, \ldots) v izolaci od ostatních komponent.
-Tohoto docílíme tak, že závislé komponenty nahradíme komponentami \uv{falešnými} (tzv. \uv{mocks}, \uv{stubs} \cite{fowler_mocks}), které se chovají deterministicky dle našeho zadání (ukázka \ref{code:test-stub}).
-Použití \uv{falešných} komponent nám dovoluje snadno simulovat mezní stavy (například chyba připojení k databázi) nebo mohou sloužit jako dočasná náhrada za dosud neimplementované části systému.
-Dalším častým přínosem je urychlení vykonání testů (není nutné se připojovat k databázi).
+Izolace docílíme tak, že závislé komponenty nahradíme komponentami \uv{falešnými} (tzv. \uv{mocks}, \uv{stubs} \cite{fowler_mocks}), které se chovají \uv{deterministicky} dle našeho zadání (ukázka \ref{code:test-stub}).
+Použití \uv{falešných} komponent nám umožňuje snadno simulovat mezní stavy (například chyba připojení k databázi), nebo mohou sloužit jako dočasná náhrada za dosud neimplementované části systému.
+Dalším přínosem je urychlení vykonání testů (není nutné se připojovat k databázi).
 \cite{zemek_integracni_x_jednotkove}
 
 \begin{listing}[ht]
@@ -64,10 +65,10 @@ assert foo.bar(2) == 'test2'
 \end{minted}
 \end{listing}
 
-Opakem testů jednotkových jsou testy integrační, jejichž úkolem je otestovat komponenty včetně jejich provázání.
-Integračním testem se blížíme k reálnému fungování a tak by neměli být opomíjeny.
+Doplňující jednotkových testů jsou testy integrační, jejichž úkolem je otestovat komponenty včetně jejich provázání.
+Integračními testy se blížíme k reálnému produkčnímu použití, tudíž by neměly být opomíjeny.
 
 Testování ale nemusí podléhat pouze samotná funkčnost programu.
-Například u interpretovaných programovacích jazyků je možné kontrolovat jejich syntakticky správný zápis.
-Další častým předmětem testování je kontrola stylu zápisu programu proti sadě pravidel (tzv. \uv{coding style})
+Příkladem může být statická analýza programu, výkonnostní, akceptační testy a další.
+Častým předmětem testování je i kontrola stylu zápisu programu proti sadě pravidel (tzv. \uv{coding style})
 

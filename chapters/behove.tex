@@ -4,87 +4,83 @@ Při opakovaném spouštění testů v rámci různých integrací se můžeme d
 Například nedůkladné vyčištění dočasných souborů pak může vést k falešně negativnímu nebo falešně pozitivnímu výsledku testování.
 
 Další problém může nastat v případě, že repozitář projektu je veřejně dostupný a dovoluje otevření tzv. \textit{pull requestu}.
-Útočník tohoto může využít k modifikaci testovacího procesu s cílem poškodit systém nebo ke krádeži důvěrných dat.
-Mimo útoku na náš systém může útočník také využít systémových prostředků k útoku na další systémy (například DDoS útok).
+Útočník toho může využít k modifikaci testovacího procesu s cílem poškodit systém.
+Mimo útoku na náš systém může útočník využít systémových prostředků například k útoku na další systémy (DDoS útok).
 Také se může stát, že k poškození systému dojde neúmyslně v důsledku fatální chyby při provádění testů.
-% https://github.com/MrMEEE/bumblebee-Old-and-abbandoned/issues/123
 
 Uvedené problémy můžeme vyřešit vytvořením virtualizovaného běhového prostředí.
 Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, pomocí jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, limitace prostředků a dalších \cite{virt_intro}.
-Problém s údržbou prostředí integrací vyřešíme tak, že každé integraci jednoduše vytvoříme prostředí nové.
+Problém s čištěním dočasných souborů, vytvořených během integrace vyřešíme tak, že každé integraci jednoduše vytvoříme prostředí nové.
 
 \subsection{Plná virtualizace}
 
-Výsledkem plné virtualizace je virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
-Takto provozovaná instance OS se nazývá host a systém, pod kterým host běží, hostitel.
+Plná virtualizace vytváří virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
+Virtualizovaná instance OS se nazývá host (\textit{guest}) a systém, pod kterým host běží, hostitel (\textit{host}).
 
-Prostředníkem mezi hostem a hostitelem je hypervizor.
-Hypervizor je software nebo firmware, který dovoluje virtualizovat systémové prostředky.
-Existují 2 typy hypervizorů.
-Hypervizor typu 1 běží přímo nad hardwarem zatímco hypervizor typu 2 běží nad hostitelským OS, který řeší služby potřebné k virtualizaci samotné jako například přístup ke vstupu/výstupu, správa paměti a další.
+Prostředníkem mezi hostem a hostitelem je hypervizor, což je software nebo firmware, který dovoluje virtualizovat systémové prostředky.
+Existují dva typy hypervizorů.
+Hypervizor typu 1 běží přímo nad hardwarem zatímco hypervizor typu 2 běží nad hostitelským OS, který řeší služby potřebné k virtualizaci samotné, jako například přístup ke I/O zařízením, správa paměti a další.
 \cite{hypervisor_def}
 
-Nevýhodou plné virtualizace nemožnost měnit množství přidělených prostředků (velikost RAM, množství CPU) virtuálnímu stroji za jeho běhu.
+Nevýhodou plné virtualizace je nemožnost měnit množství přidělených prostředků (velikost RAM, množství CPU) virtuálnímu stroji za jeho běhu.
 
-Mezi hypervizory například patří VMware, KVM a z/VM.
+Mezi hypervizory patří například VMware, KVM a z/VM.
 
 \subsubsection{Softwarová virtualizace (emulace)}
 
-Softwarová virtualizace spoléhá na úpravu strojových instrukcí za běhu hostovaného stroje.
+Softwarová virtualizace spoléhá na úpravu strojových instrukcí za běhu hostovaného systému.
 Jedná se například o překlad privilegovaných instrukcí na neprivilegované a úpravy přístupů do paměti.
-Z těchto důvodů je tento typ plné virtualizace velmi pomalý.
+Z těchto důvodů je tento typ plné virtualizace není příliš efektivní.
 
-\subsubsection{Hardwarové asistovaná virtualizace}
+\subsubsection{Hardwarově asistovaná virtualizace}
 
 Jedná se o virtualizaci, která je podpořena procesorem hostitelského systému.
-Použití hardwarově asistované virtualizace přináší oproti softwarové virtualizaci velký skok ve výkonu.
+Použití hardwarově asistované virtualizace přináší oproti softwarové virtualizaci značné snížení režie.
 Na CPU architektuře x86 se jedná o technologie VT-x (Intel) \cite{vt_x} a AMD-V (AMD) \cite{amd_v}.
-Princip spočívá v rozšíření instrukční sady CPU o další instrukce, které dovolují procesoru přepínat mezi více kontexty.
+Princip spočívá v rozšíření instrukční sady CPU o další instrukce, které procesoru dovolují přepínat mezi více kontexty.
 Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuálního prostředí.
 
 \subsection{Paravirtualizace}
 
 Paravirtualizace je technika, při které je hostovaný systém upraven tak, aby místo namísto přímé komunikace s hardwarem používal API hostitele.
-Výhodou tohoto přístupu byla snížená režie oproti plné softwarové virtualizaci.
-V dnešní době se paravirtualizace používá v kombinaci s hardwarově asistovanou virtualizací například v podobě síťových ovladačů.
+Výhodou tohoto přístupu je snížená režie oproti plné softwarové virtualizaci.
+V současné době se paravirtualizace používá v kombinaci s hardwarově asistovanou virtualizací, například přímé síťové komunikaci mezi hostem a hostitelem.
 % http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html
 % http://www.linux-kvm.org/page/Virtio
 
 
 \subsection{Virtualizace na úrovni operačního systému}
 
-Systémová paměť operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
-Prostor jádra je přímo využíván pro běh jádra operačního systému a jeho služeb.
-V~uživatelském prostoru běží procesy spuštěné uživatelem bez přístupu do prostoru jádra.
-Uživatelské procesy komunikují s~prostorem jádra pouze skrze systémová volání.
-\cite{kernel_space}
-
-% Na x86 procesorech se k~rozdělení paměti používá chráněný režim, ve kterém lze stránky virtuální paměti rozdělit podle privilegovanosti.
-
 Virtualizace na úrovni operačního systému je virtualizační technika, která dovoluje koexistenci několika oddělených uživatelských prostorů, které fungují nad stejným prostorem jádra.
 Izolovaný uživatelský prostor se často označuje jako tzv. \uv{kontejner}.
 
-Výhodou je menší režie oproti plné virtualizaci, protože už není nutné spouštět celou novou instanci operačního systému.
+Systémová paměť operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
+Prostor jádra je využíván pro běh jádra operačního systému a jeho služeb.
+V~uživatelském prostoru běží procesy spuštěné uživatelem, bez přístupu do prostoru jádra.
+Uživatelské procesy komunikují s~prostorem jádra pouze skrze systémová volání jádra.
+\cite{kernel_space}
+
+Výhodou virtualizace na úrovni OS je menší režie oproti plné virtualizaci, protože už není nutné spouštět celou novou instanci operačního systému.
 Oproti plné virtualizaci je naopak nutné zajistit, aby se jednotlivé uživatelské režimy nemohly neoprávněně ovlivňovat.
 Toto je netriviální úloha a proto je vhodné zavést některá bezpečností opatření.
-Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem (ne-root, ne-administrátor), takže případní \uv{únik} z~kontejneru nezpůsobí škodu.
+Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem (ne-root, ne-administrátor), takže případný \uv{únik} z~kontejneru nezpůsobí škodu.
 
 Jelikož kontejner sdílí stejný prostor jádra se svým hostitelem, tak není možné, aby byl kontejner založen na jiném OS než hostitel.
-Není tedy například možné provozovat Linuxové kontejnery na systému s OS Windows.
+Například není možné provozovat Linuxové kontejnery na systému s OS Windows.
 Mezi technologie pro tvorbu kontejnerů patří: jmenné prostory a kontrolní skupiny (Linux), jails (BSD).
 
 \subsubsection{Nástroje operačního systému Linux}
 
-Linux kernel sám o sobě nenabízí přímé kontejnerové řešení, ale pouze sadu nástrojů, pomocí kterých je kontejner vytvořen.
+Linux jádro samo o sobě nenabízí přímé kontejnerové řešení, ale pouze sadu nástrojů, pomocí kterých je kontejner vytvořen.
 Jedná se o jmenné prostory (\textit{namespaces}), kontrolní skupiny (\textit{cgroups}) a tzv \uv{capabilities}.
 Nad těmito nástroji je postaveno například kontejnerové řešení LXC nebo Docker.
 
-Velmi zjednodušeně se jedná o založení nového rootu adresářové struktury (Linux příkaz \verb|chroot|), následným spuštěním kontejneru pracující nad touto adresářovou strukturou a kontrolou přístupu ke zdrojům hostitelského systému.
+Velmi zjednodušeně se jedná o založení nového kořene adresářové struktury (Linux příkaz \verb|chroot|), následným spuštěním kontejneru pracující nad touto adresářovou strukturou a kontrolou přístupu kontejneru ke zdrojům hostitelského systému.
 Vzory této adresářové struktury se nazývají obrazy (\textit{images}).
 
 \subsubsection{Jmenné prostory (namespaces)}
 
-Nástroj Linux kernelu sloužící k~vytvoření izolovaných skupin procesů.
+Nástroj Linuxového jádra sloužící k~vytvoření izolovaných skupin procesů.
 Každý proces má svůj jmenný prostor, který mu vymezuje viditelnost pouze na vlastní prostředky a prostředky podřízených jmenných prostorů.
 Jmenné prostory tvoří hierarchickou stromovou strukturu.
 Při startu systému existuje nejméně jeden jmenný prostor.
@@ -98,25 +94,25 @@ Proces vidí procesy pouze ze svého a podřízených PID jmenných prostorů.
 \paragraph{NET}
 
 Síťové rozhraní náleží právě do jednoho jmenného prostoru a není sdíleno s~podřízenými jmennými prostory.
-Každé síťové rozhraní má svoje IP adresy, routovací tabulky, firewall a další síťové prostředky. 
+Každé síťové rozhraní má své IP adresy, routovací tabulky, firewall a další síťové prostředky. 
 \cite{namespaces}
 
 \paragraph{MNT}
 
 Kontrolujeme jaká připojená zařízení (\textit{mount point}) budou viditelné.
-Vytvořením nového MNT jmenného prostoru přeneseme všechna připojená zařízení rodiče.
+Vytvořením nového MNT jmenného prostoru zdědíme všechna připojená zařízení rodiče.
 Změny v~aktuálním jmenném prostory neovlivňují jeho rodiče.
 \cite{mnt_namespaces}
 
 \paragraph{IPC}
 
 Komunikace mezi procesy.
-Linux kernel ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi jmennými prostory.
+Linuxové jádro ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi jmennými prostory.
 \cite{namespaces}
 
 \paragraph{UTS}
 
-Dovoluje systému vystupovat pod více hostitelskými jmény (\textit{hostnames)}.
+Umožňuje systému vystupovat pod více hostitelskými jmény (\textit{hostnames)}.
 \cite{namespaces}
 
 \paragraph{user}
@@ -131,7 +127,7 @@ O~vytvoření jmenného prostoru se starají systémová volání \verb|fork|, \
 
 \subsubsection{Kontrolní skupiny (cgroups)}
 
-Nástroj Linux kernelu umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim.
+Kontrolní skupiny jsou nástroj Linuxového jádra umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim.
 Mezi typy prostředků patří například:
 
 \begin{itemize}
@@ -145,40 +141,37 @@ Mezi typy prostředků patří například:
 
 Historicky UNIXové systémy dělily procesy na privilegované a neprivilegované.
 Privilegované procesy pak nepodléhaly klasické kontrole oprávnění.
-Nicméně pokud proces potřebuje pouze některá oprávnění, tak není z bezpečnostního hlediska z něj udělat proces privilegovaný, ale pouze mu přidělit oprávnění, která vyžaduje.
+Nicméně pokud proces potřebuje pouze některá oprávnění, tak není vhodné z bezpečnostního hlediska z něj udělat proces privilegovaný, ale pouze mu přidělit oprávnění, která vyžaduje.
 Toto dělení oprávnění je zavedeno do systému pomocí tzv. \uv{capabilities}.
 
-Například příkaz \verb|ping|, využívající protokol ICMP, potřebuje přímí přístup k socketu a tím pádem by měl být spouštěn jako privilegovaný.
+Například příkaz \verb|ping|, využívající protokol ICMP, potřebuje přímý přístup k socketu a tím pádem by měl být spouštěn jako privilegovaný.
 S využitím \textit{capabilities} je možné tomuto procesu přidělit pouze oprávnění \verb|CAP_NET_RAW|.
-
-Tohoto můžeme využít ke kontrole oprávnění při vytváření kontejneru.
 
 % https://github.com/lxc/lxc/blob/master/config/templates/alpine.common.conf.in
 
-\subsubsection{Copy on write}
+\subsubsection{Copy on write (CoW)}
 
-Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
+Copy on write\cite{copy_on_write} Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
 Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
 Za cenu vyšší režie můžeme takto ušetřit mnoho paměti.
-\cite{copy_on_write}
 
-V kontextu kontejnerů tohoto lze využít k jejich velmi rychlému vytváření (vytvoření kopie obrazu) nebo k vytváření tzv. \uv{snapshotů}
+V kontextu kontejnerů lze CoW využít k jejich velmi rychlému vytváření (vytvoření kopie obrazu) nebo k vytváření tzv. \uv{snapshotů}
 \cite{fs_cow}
 
 \subsection{BSD jails}
 
-Kontejnerová technologie nacházející v operačních systémech typu BSD (FreeBSD, DragonflyBSD, \ldots).
-Na rozdíl od Linuxových kontejnerů, kde se konečný kontejner poskládal z jednotlivých nástrojů, nám BSD nabízí přímo sadu systémových volání (\verb|jail_*|).
+BSD jails je kontejnerová technologie nacházející se v operačních systémech typu BSD (FreeBSD, DragonflyBSD, \ldots).
+Na rozdíl od Linuxových kontejnerů, kde je konečný kontejner poskládán z jednotlivých nástrojů, nám BSD nabízí přímo sadu systémových volání (\verb|jail_*|).
 Kontejner nám zajišťuje izolaci:
 
 \begin{itemize}
 	\item Proces vidí procesy ze svého kontejneru.
-	\item Modifikace síťového nastavení zevnitř kontejneru není povolena (pevná IP adresa, routovací tabulky).
+	\item Modifikace síťového nastavení z kontejneru není povolena (pevná IP adresa, routovací tabulky).
 	\item Kontejner nemá přímý přístup k síťovému socketu (ICMP protokol nebude fungovat).
 	\item Kontejner je omezen pouze na adresářovou strukturu, ve které byl založen.
 \end{itemize}
 
-Kontejneru lze také omezovat systémové prostředky (RAM, disk, síť, \ldots)
+Kontejneru lze také omezovat systémové prostředky (RAM, disk, síť, \ldots).
 
 % https://www.freebsd.org/doc/handbook/jails.html
 

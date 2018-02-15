@@ -5,11 +5,11 @@ Oproti službám CI nám framework nabízí pouze sadu nástrojů a doporučení
 
 \subsection{Průběh integrace}
 
-Průběh integrace (\textit{build}) je definován souborem \verb|master.cfg|, který je napsaný v programovacím jazyce Pythonu.
-Oproti GitLab CI a Travis CI je konfigurační není soubor umístěn v repozitáři projektu, ale na Buildbot serveru.
+Průběh integrace (\textit{build}) je definován souborem \verb|master.cfg|, který je napsaný v programovacím jazyce Python.
+Oproti GitLab CI a Travis CI není konfigurační soubor umístěn v repozitáři projektu, ale na Buildbot serveru.
 
 V základu Buildbot pracuje s jednotlivými příkazy, které podle konfigurace můžeme skládat do úkolů a do fází.
-Tím, že konfigurace je napsaná jako Python skript, nám Buildbot dává téměř neomezené možnosti.
+Tím, že je konfigurace napsaná jako Python skript, nám Buildbot dává téměř neomezené možnosti.
 
 V konfiguračním souboru máme přístup k třídám Buildbotu, z kterých si složíme integraci.
 Základní třídou je \verb|BuildMasterConfig|, která v sobě ukládá veškeré nastavení integrace.
@@ -69,9 +69,9 @@ Systém se dělí na \textit{build masters} a \textit{workers}.
 Buildbot podporuje mimo Gitu i další SCM (SVN, Mercurial, \ldots) a díky modulům dokáže spolupracovat s velkým množstvím systému.
 Komunikaci uvnitř systému zajišťuje Twisted framework.
 
-\subsection{Přístup ke zdrojům systému}
+\subsection{Přístup k informacím systému}
 
-Buildbot jako dřívěji uvedená CI poskytuje přístup ke zdrojům systému přes REST API.
+Buildbot jako dřívěji uvedená CI poskytuje přístup k informacím systému přes RESTful API.
 
 \subsubsection{Webové rozhraní}
 
@@ -89,7 +89,7 @@ c['www'] = {
 
 % https://docs.buildbot.net/latest/manual/cfg-www.html
 
-\subsection{Postup nasazení}
+\subsection{Možnosti instalace}
 
 Buildbot lze nainstalovat přes Python baličkovací manažer pip.
 Další možností je využít připravených Docker obrazů.
