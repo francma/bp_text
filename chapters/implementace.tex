@@ -1,6 +1,8 @@
 \chapter{Implementace}
 
 Všechny části systému (core, web, runner) jsou implementovány jako Python balíčky, které je možné nainstalovat přes balíčkovací manažer pip.
+Implementace systému vychází z návrhu a proto tu budou zmíněny pouze zajímavé implementační detaily.
+Implementace výsledných systému je obsažena na přiloženém médiu.
 
 \section{Jádro (Piper CI core)}
 
@@ -12,7 +14,7 @@ Aby se během programování zamezilo duplikace kódu z důvodu dvou různých p
 Jedna fasáda odpovídá jedné entitě.
 S fasádami pak spolupracuje Flask aplikace, tak i shell aplikace.
 
-Flask aplikace je dále rozdělena na tzv. \uv{blueprinty}, kde každý reprezentuje jeden HTTP API koncový bod (ukázka kódu \ref{code:piper-core-blueprint}).
+Flask aplikace je dále rozdělena na tzv. \uv{blueprinty} (v MVC návrhovém vzoru prezenter), kde každý reprezentuje jeden HTTP API koncový bod (ukázka kódu \ref{code:piper-core-blueprint}).
 
 \begin{listing}[ht]
 \caption{\label{code:piper-core-blueprint}Implementace koncového bodu HTTP API}
@@ -124,7 +126,7 @@ exit $PIPER_GLOB_EXIT;
 
 \section{Webové rozhraní (Piper CI web)}
 
-
+Implementace tzv. \uv{streaming logu} je 
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{javascript}
