@@ -1,32 +1,25 @@
 \chapter{Závěr}
 
-Výsledkem této práce je minimalistický CI systém vhodný pro menší komunitní projekty.
+Cílem práce bylo navrhnout a implementovat minimalistický CI systém vhodný pro menší komunitní projekty.
+Vytvořený systém splňuje požadavek na modulární podporu běhových prostředí rozdělením systému do více částí, které spolu mezi sebou komunikují pomocí HTTP API.
+Systém aktuálně podporuje běhové prostředí založené na LXC/LXD kontejnerech.
+Implementací HTTP API bylo docíleno také snadné rozšiřitelnosti a integrace na další systémy.
 
-Práce po úvodu do problematiky kontinuální integrace vysvětluje technologie pro vytváření běhových prostředí, verzovacích nástrojů a testování, jelikož jsou to základní stavební kameny kontinuální integrace.
-Dále následuje analýza existujících řešení.
-Konkrétně Gitlab CI, Travis CI a Buildbot.
+Sledování stavu integrací a správu projektů je možné přes terminálové SSH i webové rozhraní, včetně tzv. \uv{streaming logu}.
+Integrace lze paralelizovat rozdělením na části (úkoly), které jsou v rámci své fáze spouštěny paralelně.
 
-Po analýze následuje vlastní návrh a následná implementace.
+Vývoj výsledného systému i psaní tohoto textu bylo podpořeno systémem kontinuální integrace Travis CI.
 
-Minimalismu je docíleno jednoduchostí systému a výběrem závislostí třetích stran.
-Konkrétně je pro provoz systému nutný pouze Python verze 3.6 a vyšší, Redis server a technologie pro vytvoření běhového prostředí.
+V textu práce se autor věnuje kontinuální integrací a technik s ní spojených (testování softwaru, verzovací systémy, běhová prostředí) a analýze existujících řešení.
 
-Modularitu a rozšiřitelnost systému je zaručeno rozdělením systému do dílčích systému s rozdělenou zodpovědností a přístupy ke zdrojům pomocí REST API.
-Systém je tedy možné rozšířit o libovolnou podporu běhového prostředí nebo naimplementovat vlastní uživatelské rozhraní.
-Součástí práce je implementace běhového prostředí využívající technologii LXD.
-REST API dovoluje také snadnou integraci na další systémy.
+Součástí příloh této práce je také uživatelská dokumentace.
 
-Paralelizace je dosaženo rozdělením integrace do úkolů, které jsou přiřazovany do fází.
-Úkoly v rámci fáze je pak možné provozovat paralelně.
-Výsledné řešení je odlišně od zadaného tzv. \uv{build matrixu}, protože v kombinaci s rozdělením na úkoly a fáze je výsledná deklarace integrace nepřehledná.
+\section{Přínosy práce}
 
-Součástí práce je i implementace webového rozhraní a terminálového rozhraní pomocí SSH.
-Pomocí terminálového i webového rozhraní je možné sledovat stav úloh i včetně tzv. \uv{streaming logů}.
+Výsledný systém oproti analyzovaným řešením přináší přihlašování uživatelů do systému pomocí asymetrických klíčů, které jsou z hlediska bezpečnosti lepší než klasické jméno a heslo.
+Systém také implementuje zatím málo rozšířené LXD běhové prostředí.
+Zdrojový kód práce je uvolněn pod open-source licencí a zveřejněn na GitHubu.
 
-Součástí textu práce je také postup nasazení a uživatelská dokumentace.
+\section{Možnosti dalšího rozvoje}
 
-V budoucnu bych rád tento projekt dále rozšiřoval.
-Například bych rád projekt rozšířil o podporu dalších běhových prostředí a podíval se na možnosti instlace projektu pomocí Snap balíčků.
-
-
-
+Autor práce by v budoucnu rád rozšířil podporovaná běhová prostředí o další technologie (například VirtualBox) a podíval se na možnosti instalace systému pomocí balíčkovacích systémů (aports, \ldots).
