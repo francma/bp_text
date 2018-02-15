@@ -105,7 +105,7 @@ U úkolů (\textit{jobs}) lze navíc definovat podmínku jejich spuštění (\te
 Podmínka spuštění bude vykonána pomocí knihovny simpleeval, která oproti Python eval implementuje jen podmnožinu bezpečných operací.
 Proměnné prostředí jsou dostupné příkazům, tak i podmínce spuštění úkolu.
 Při záporně vyhodnocené podmínce se úkol přeskočí a integrace pokračuje dál.
-Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z SCM (\textit{branch}, \textit{commit}, \ldots) a další.
+Mimo definovaných proměnných prostředí uživatelem přidává systém také proměnné s informacemi z VCS (\textit{branch}, \textit{commit}, \ldots) a další.
 Speciálním případem příkazů jsou příkazy, které se vykonají, pokud úkol selže (\textit{after\_failure}).
 Vhodné jsou například pro výpis log souborů, které produkují vykonávané příkazy.
 
@@ -194,14 +194,14 @@ Následný log výstup z úkolů zpracovávanými běhovými klienty je ukládá
 \subsection{Model}
 
 Model jádra systému je rozdělen do entit, které jsou mezi sebou spojené vazbami.
-Vše začíná u projektu, který je vazbou mezi CI a SCM.
+Vše začíná u projektu, který je vazbou mezi CI a VCS.
 Klient komunikuje se systémem s určitou identitou, reprezentovanou uživatelskou entitou, které jsou přidělována práva v projektech.
 K projektu jsou vázány data o integracích, které se dále dělí na fáze, úkoly a příkazy.
 Úkol vykonává právě jeden běhový klient.
 
 \imagefigurefull{entity_piper.pdf}{Entity v Piper CI}{0.75}
 
-Nad daty systému je třeba provádět také filtrace (například vrať mi všechny integrace tohoto projektu, které byli provedeny na SCM větvi \textit{master}).
+Nad daty systému je třeba provádět také filtrace (například vrať mi všechny integrace tohoto projektu, které byli provedeny na VCS větvi \textit{master}).
 Těmto požadavkům vyhovuje databázové uložiště, které vztahy mezi entitami implementuje pomocí cizích klíčů a disponuje nástroji pro filtraci dat.
 K abstrakci nad různými databázovými stroji je použita knihovna peewee.
 Abstrakcí je sice ztracena možnost optimalizace pro konkrétní databázový stroj, ale naopak získána možnost provozu systému nad různými databázovými stroji a komfortnější vývoj pro programátora systému.
@@ -234,7 +234,7 @@ Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \v
 Výsledek akce je reprezentován návratovým HTTP kódem (200 -- OK, 404 -- nenalezeno, \ldots).
 
 Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
-Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vratí projekty s daným originem.
+Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vrátí projekty se zadaným \textit{origin}.
 Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implementovat stránkování.
 
 Autentizace uživatele probíhá pomocí tokenu, který bude součástí HTTP hlaviček v požadavku klienta.
@@ -259,6 +259,7 @@ Autentizace uživatele do systému přes terminálové rozhraní je implementov�
 Uživatel vytvoří 2 klíče -- veřejný a privátní.
 Veřejný klíč následně dá k dispozici autentizačním autoritám.
 Pomocí privátního klíče lze data šifrovat a dešifrovat, zatímco veřejným klíčem lze data jen šifrovat.
+Ověření identity uživatele SSH protokolem probíhá následovně:
 
 \begin{enumerate}
     \item Klient a server se shodnou na společném šifrovacím klíči pomocí Diffie-Hellman algoritmu.
@@ -361,7 +362,7 @@ Například překlad pro Linuxové běhové prostředí se bude velmi lišit od 
 \end{minted}
 \end{listing}
 
-Výsledkem překladu je spustitelný skript, která mimo výstupu zadaných příkazů přidá do výstupu i speciální značky podle kterých systém rozpozná konec jednoho příkazu a začátek dalšího.
+Výsledkem překladu je spustitelný skript, která mimo výstupu zadaných příkazů přidá do výstupu i speciální značky, podle kterých systém rozpozná konec jednoho příkazu a začátek dalšího.
 Značky také obsahují informaci o návratovém kódu příkazu a časovou značku.
 
 Komunikace je navazována vždy směrem od běhového klienta k jádru systému, včetně žádosti klienta o přidělení úkolu.
@@ -369,8 +370,9 @@ Toto vede k metodě tzv. \uv{short-pollingu}, ve které klient opakuje stále st
 Plýtvání prostředků ze stále znovu navazování spojení směrem k serveru lze omezit zavedením HTTP2. 
 
 Výstup skriptu je pak postupně předáván jádru systému přes definované REST API.
-Součástí zadání úkolu je i tajný klíč (\textit|secret|), kterým se běhový klient prokazuje jádru systému a slouží také jako identifikátor daného úkolu.
-Běhový klient si bude ukládat výsledky skriptu v dočasné paměti a v definovaném časovém intervalu je bude předávat jádru.
+Součástí zadání úkolu je i tajný klíč (\textit{secret}), kterým se běhový klient prokazuje jádru systému. 
+Klíč slouží také jako identifikátor daného úkolu.
+Běhový klient si ukládá výsledky skriptu v dočasné paměti a v definovaném časovém intervalu (jednotky sekund) je předává jádru systému.
 
 \subsection{Komunikace s~běhovým prostředím}
 
@@ -412,8 +414,8 @@ Pro využití přímo v našem programu můžeme využít jednu z mnoha SDK knih
 
 \subsubsection{LXD}
 
-Jádro LXD je proces běžící na pozadí, který zpřístupňuje svoji funkcionalitu skrze REST API dostupné přes lokální unix socket nebo síť \cite{lxd}.
-Klientem může být naše vlastní implementace podle REST API specifikace nebo využijeme předpřipravené klienty \cite{lxd_rest}.
+Jádro LXD je proces běžící na pozadí, který zpřístupňuje svoji funkcionalitu skrze REST API dostupné přes lokální Unix socket nebo síť \cite{lxd}.
+Klientem může být naše vlastní implementace podle REST API specifikace nebo využijeme již připravené klienty \cite{lxd_rest}.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{shell}
@@ -439,9 +441,10 @@ Tím pádem se jako nejvýhodnější řešení se jeví metoda tzv \uv{short-po
 K~uskutečnění dotazu ze směru prohlížeče využijeme JavaScript a jeho třídu \verb|XMLHttpRequest| nebo Fetch API \cite{fetch_api}.
 Z pohledu strany serveru se jedná o~klasický HTTP požadavek.
 
-Stále znovuotevírání HTTP spojení ze strany klienta k serveru můžeme vyřešit nasazením HTTP2, které po jednom spojení dokáže odeslat více požadavků.
+Opakované navazování HTTP spojení ze strany klienta k serveru můžeme vyřešit nasazením HTTP2, které po jednom spojení dokáže odeslat více požadavků.
 
-Webové rozhraní bude muset přeložit značky v log výstupu příkazů (\verb|::piper|) za skutečné příkazy a výsledek pak přeložit do HTML.
+Úkolem webového rozhraní je také přeložení ANSI terminálových tzv. ANSI \uv{escape} sekvencí (například změna barvy výpisu) v log výstupu úkolu za HTML značky.
+% https://github.com/drudru/ansi_up
 
 Stejně jako jádro systému bude webové rozhraní implementováno ve frameworku Flask.
 
