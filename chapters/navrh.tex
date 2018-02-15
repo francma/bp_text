@@ -187,7 +187,7 @@ Příkladem takového uživatelského rozhraní je webové rozhraní.
 Jádro reprezentuje středobod celého systému.
 Jeho úkolem je naslouchat změnám ve spravovaných repozitářích (tzv. \uv{webhooky}) a následně řídit průběh integrace.
 Úkoly, které jsou připravené k zpracování, jsou zařazovány do fronty, kde čekají na vyzvednutí jedním z běhových klientů.
-Fronta je implementována pomocí Redis serveru a jeho \textit{list} struktury.
+Fronta bude implementována pomocí Redis serveru a jeho \textit{list} struktury.
 Tato struktura poskytuje základní operace pro implementaci fronty (\textit{push} a \textit{pop}) a dostatečný výkon pro časté přístupy.
 Následný log výstup z úkolů zpracovávanými běhovými klienty je ukládán v textových souborech.
 
@@ -233,7 +233,7 @@ Umístění na serveru & Entita \\ \hline
 Akce nad zdroji je definována použitou HTTP metodou -- \verb|GET| (získej) \verb|POST| (vytvoř) \verb|PUT| (aktualizuj) \verb|DELETE| (smaž).
 Výsledek akce je reprezentován návratovým HTTP kódem (200 -- OK, 404 -- nenalezeno, \ldots).
 
-Filtrace dat poskytovanými zdroji je implementována skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
+Filtrace dat poskytovanými zdroji je dosažena skládáním zdrojů do sebe, například \verb|/projects/1/builds| vrací integrace pro projekt s identifikátorem 1.
 Další filtrace zdrojů jsou dostupné přes HTTP query parametry, například \verb|/projects?origin=git@gitlab.com| vrátí projekty se zadaným \textit{origin}.
 Speciálním případem filtrace jsou HTTP query parametry \verb|limit| a \verb|offset|, pomocí kterých lze implementovat stránkování.
 
@@ -243,7 +243,7 @@ Pro získání svého tokenu se uživatel bude muset nejprve přihlásit do term
 % technicky zdatni uzivatele, duraz je na CLI rozhrani
 % hesla jsou nebezpecna
 
-HTTP API je implementováno pomocí Flask webového frameworku založeného na protokolu wsgi.
+HTTP API bude implementováno pomocí Flask webového frameworku založeného na protokolu wsgi.
 Flask je dostatečně lehký, aby splňoval požadavek na minimalismus systému a autor práce s ním má již předešlé zkušenosti.
 
 \subsection{Terminálové rozhraní}
@@ -255,7 +255,7 @@ Jsou to například \verb|get|, \verb|list|, \verb|count|, \verb|update|, \verb|
 Podpříkazy mohou mít i argumenty, například \verb|job get 1| vrací úkol s identifikátorem 1.
 Více argumentů je identifikováno svým jménem, například \verb|project create url="martinfranc.eu"|.
 
-Autentizace uživatele do systému přes terminálové rozhraní je implementována pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
+Autentizace uživatele do systému přes terminálové rozhraní je vyřešeno pomocí klient-server SSH protokolu, konkrétně autentizace založené na asymetrickém klíči.
 Uživatel vytvoří 2 klíče -- veřejný a privátní.
 Veřejný klíč následně dá k dispozici autentizačním autoritám.
 Pomocí privátního klíče lze data šifrovat a dešifrovat, zatímco veřejným klíčem lze data jen šifrovat.
@@ -282,7 +282,7 @@ command="[COMMAND]" ssh-rsa AAAA...
 \caption{Vlastní příkaz v authorized\_keys}
 \end{listing}
 
-Terminálové rozhraní je implementováno pomocí knihovny \verb|cmd|, která dovoluje i psaní interaktivní dokumentace vytvořené z dokumentačních komentářů funkcí (ukázka kódu \ref{code:shell-term}).
+Terminálové rozhraní bude implementováno pomocí knihovny \verb|cmd|, která dovoluje i psaní interaktivní dokumentace vytvořené z dokumentačních komentářů funkcí (ukázka kódu \ref{code:shell-term}).
 
 \begin{listing}[ht]
 \caption{\label{code:shell-term}Ukázka terminálového rozhraní}
