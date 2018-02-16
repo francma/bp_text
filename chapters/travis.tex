@@ -6,7 +6,7 @@ Travis CI je služba kontinuální integrace spjatá s Git VCS službou GitHub.
 
 Podobně jako u GitLab CI je konfigurace řešena souborem \verb|.travis.yml|, který je umístěn přímo v~kořenovém adresáři Git repozitáře projektu.
 
-Proces integrace (\textit{build}) je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
+Proces integrace (\textit{build}) je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy \cite{travis_build}.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
 Selhání fáze znamená zastavení provádění všech následujících fází.
 Selhání příkazu znamená selhání celého úkolu, ale ne zastavení provádění tohoto úkolu.
@@ -16,7 +16,7 @@ Pokud bychom chtěli, aby při po selhání příkazu úkol ukončil, pak je nut
 Každý úkol je spuštěn ve svém vlastním běhovém prostředí.
 
 \begin{listing}[ht]
-\caption{\label{code:travis-stages}Definice fází v .travis.yml}
+\caption{Definice fází v .travis.yml}
 \begin{minted}[frame=single,linenos]{yaml}
 stages:
   - test
@@ -26,8 +26,7 @@ stages:
 \end{listing}
 
 Úkol náleží právě do jedné fáze a jeho přiřazení se provede (viz ukázka \ref{code:travis-stages}).
-Fáze jsou v Travis CI novým konceptem, který je stále ve fázi veřejného beta testování.
-% https://blog.travis-ci.com/2017-05-11-introducing-build-stages
+Fáze jsou v Travis CI novým konceptem, který je stále ve fázi veřejného beta testování \cite{travis_stages}.
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{yaml}
@@ -39,8 +38,7 @@ jobs:
       script: pytest
 
 \end{minted}
-\label{code:travis-stages}
-\caption{Definice úkolů s fázemi v .travis.yml}
+\caption{\label{code:travis-stages}Definice úkolů s fázemi v .travis.yml}
 \end{listing}
 
 Další možností definice úkolů je přes tzv. build matrix (viz ukázka kódu \ref{code:travis-matrix}).
@@ -65,11 +63,8 @@ script:
 
 \subsection{Architektura}
 
-Systém je rozdělen na několik částí, které mezi sebou komunikující přes distribuovanou frontu RabbitMQ.
+Systém je rozdělen na několik částí \cite{travis_arch}, které mezi sebou komunikující přes distribuovanou frontu RabbitMQ.
 Datové uložiště je realizováno v SQL databázi PostreSQL.
-Pro potřeby cachování je využíván Redis.
-
-% https://github.com/travis-ci/travis-core
 
 \paragraph{Travis Core}
 
@@ -177,8 +172,7 @@ HTTP metoda + akce                                          & Popis \\ \hline
 
 \subsection{Terminálové rozhraní}
 
-% http://www.rubydoc.info/gems/travis/1.8.8
-CLI aplikace Travis CI, využívá HTTP API systému.
+CLI aplikace Travis CI, využívá HTTP API systému \cite{travis_cli}.
 Autentizace je prováděna pomocí tokenu nebo uživatelského jména a hesla.
 Terminálové rozhraní také dovoluje sledovat log výstup integrací v reálném čase. 
 
