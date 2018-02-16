@@ -9,7 +9,7 @@ Mimo útoku na náš systém může útočník využít systémových prostředk
 Také se může stát, že k poškození systému dojde neúmyslně v důsledku fatální chyby při provádění testů.
 
 Uvedené problémy můžeme vyřešit vytvořením virtualizovaného běhového prostředí.
-Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, pomocí jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, limitace prostředků a dalších \cite{virt_intro}.
+Virtualizace je metodika dělení fyzických prostředků počítače do více virtuálních běhových prostředí, pomocí jednoho nebo více konceptů a technologií, jako je hardwarové a softwarové izolace, částečná nebo úplná simulace hardwaru, limitace prostředků a dalších \cite{virtualization_intro}.
 Problém s čištěním dočasných souborů, vytvořených během integrace vyřešíme tak, že každé integraci jednoduše vytvoříme prostředí nové.
 
 \subsection{Plná virtualizace}
@@ -17,10 +17,9 @@ Problém s čištěním dočasných souborů, vytvořených během integrace vy�
 Plná virtualizace vytváří virtuální stroj, který simuluje hardware, na kterém je možné provozovat další instanci operačního systému.
 Virtualizovaná instance OS se nazývá host (\textit{guest}) a systém, pod kterým host běží, hostitel (\textit{host}).
 
-Prostředníkem mezi hostem a hostitelem je hypervizor, což je software nebo firmware, který dovoluje virtualizovat systémové prostředky.
+Prostředníkem mezi hostem a hostitelem je hypervizor, což je software nebo firmware, který dovoluje virtualizovat systémové prostředky \cite{hypervisor}.
 Existují dva typy hypervizorů.
 Hypervizor typu 1 běží přímo nad hardwarem zatímco hypervizor typu 2 běží nad hostitelským OS, který řeší služby potřebné k virtualizaci samotné, jako například přístup ke I/O zařízením, správa paměti a další.
-\cite{hypervisor_def}
 
 Nevýhodou plné virtualizace je nemožnost měnit množství přidělených prostředků (velikost RAM, množství CPU) virtuálnímu stroji za jeho běhu.
 
@@ -36,7 +35,7 @@ Z těchto důvodů je tento typ plné virtualizace není příliš efektivní.
 
 Jedná se o virtualizaci, která je podpořena procesorem hostitelského systému.
 Použití hardwarově asistované virtualizace přináší oproti softwarové virtualizaci značné snížení režie.
-Na CPU architektuře x86 se jedná o technologie VT-x (Intel) \cite{vt_x} a AMD-V (AMD) \cite{amd_v}.
+Na CPU architektuře x86 se jedná o technologie VT-x (Intel) a AMD-V (AMD).
 Princip spočívá v rozšíření instrukční sady CPU o další instrukce, které procesoru dovolují přepínat mezi více kontexty.
 Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuálního prostředí.
 
@@ -44,9 +43,7 @@ Tento přístup dovoluje provozovat nemodifikované instance OS uvnitř virtuál
 
 Paravirtualizace je technika, při které je hostovaný systém upraven tak, aby místo namísto přímé komunikace s hardwarem používal API hostitele.
 Výhodou tohoto přístupu je snížená režie oproti plné softwarové virtualizaci.
-V současné době se paravirtualizace používá v kombinaci s hardwarově asistovanou virtualizací, například přímé síťové komunikaci mezi hostem a hostitelem.
-% http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html
-% http://www.linux-kvm.org/page/Virtio
+V současné době se paravirtualizace používá v kombinaci s hardwarově asistovanou virtualizací, například přímé síťové komunikaci mezi hostem a hostitelem \cite{virtio}.
 
 
 \subsection{Virtualizace na úrovni operačního systému}
@@ -54,11 +51,10 @@ V současné době se paravirtualizace používá v kombinaci s hardwarově asis
 Virtualizace na úrovni operačního systému je virtualizační technika, která dovoluje koexistenci několika oddělených uživatelských prostorů, které fungují nad stejným prostorem jádra.
 Izolovaný uživatelský prostor se často označuje jako tzv. \uv{kontejner}.
 
-Systémová paměť operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor.
+Systémová paměť operačních systémů je dělena na dvě části: prostor jádra a uživatelský prostor \cite{memory_spaces}.
 Prostor jádra je využíván pro běh jádra operačního systému a jeho služeb.
 V~uživatelském prostoru běží procesy spuštěné uživatelem, bez přístupu do prostoru jádra.
 Uživatelské procesy komunikují s~prostorem jádra pouze skrze systémová volání jádra.
-\cite{kernel_space}
 
 Výhodou virtualizace na úrovni OS je menší režie oproti plné virtualizaci, protože už není nutné spouštět celou novou instanci operačního systému.
 Oproti plné virtualizaci je naopak nutné zajistit, aby se jednotlivé uživatelské režimy nemohly neoprávněně ovlivňovat.
@@ -67,7 +63,7 @@ Jedním z~opatření je vytvoření kontejneru pod neprivilegovaným uživatelem
 
 Jelikož kontejner sdílí stejný prostor jádra se svým hostitelem, tak není možné, aby byl kontejner založen na jiném OS než hostitel.
 Například není možné provozovat Linuxové kontejnery na systému s OS Windows.
-Mezi technologie pro tvorbu kontejnerů patří: jmenné prostory a kontrolní skupiny (Linux), jails (BSD).
+Mezi technologie pro tvorbu kontejnerů patří například jmenné prostory a kontrolní skupiny (Linux), jails (BSD).
 
 \subsubsection{Nástroje operačního systému Linux}
 
@@ -80,7 +76,7 @@ Vzory této adresářové struktury se nazývají obrazy (\textit{images}).
 
 \subsubsection{Jmenné prostory (namespaces)}
 
-Nástroj Linuxového jádra sloužící k~vytvoření izolovaných skupin procesů.
+Jmenné prostory \cite{namespaces} jsou nástroj Linuxového jádra sloužící k~vytvoření izolovaných skupin procesů.
 Každý proces má svůj jmenný prostor, který mu vymezuje viditelnost pouze na vlastní prostředky a prostředky podřízených jmenných prostorů.
 Jmenné prostory tvoří hierarchickou stromovou strukturu.
 Při startu systému existuje nejméně jeden jmenný prostor.
@@ -89,37 +85,31 @@ Existuje několik druhů jmenných prostorů.
 \paragraph{PID}
 
 Proces vidí procesy pouze ze svého a podřízených PID jmenných prostorů.
-\cite{pid_namespaces}
 
 \paragraph{NET}
 
 Síťové rozhraní náleží právě do jednoho jmenného prostoru a není sdíleno s~podřízenými jmennými prostory.
 Každé síťové rozhraní má své IP adresy, routovací tabulky, firewall a další síťové prostředky. 
-\cite{namespaces}
 
 \paragraph{MNT}
 
 Kontrolujeme jaká připojená zařízení (\textit{mount point}) budou viditelné.
 Vytvořením nového MNT jmenného prostoru zdědíme všechna připojená zařízení rodiče.
 Změny v~aktuálním jmenném prostory neovlivňují jeho rodiče.
-\cite{mnt_namespaces}
 
 \paragraph{IPC}
 
 Komunikace mezi procesy.
 Linuxové jádro ve výchozím stavu přiděluje sdílenou paměť na základě uživatelského ID, což by vedlo ke kolizím mezi jmennými prostory.
-\cite{namespaces}
 
 \paragraph{UTS}
 
 Umožňuje systému vystupovat pod více hostitelskými jmény (\textit{hostnames)}.
-\cite{namespaces}
 
 \paragraph{user}
 
 Umožňuje libovolně mapovat uživatelská ID z~kontejneru na ID uživatelů z~hostitele.
 Uživatel v~kontejneru se pak může tvářit jako root i když vně kontejneru se jedná pouze o~obyčejného uživatele (bez root práv).
-\cite{user_namespaces}
 
 % https://www.youtube.com/watch?v=sK5i-N34im8
 
@@ -127,7 +117,7 @@ O~vytvoření jmenného prostoru se starají systémová volání \verb|fork|, \
 
 \subsubsection{Kontrolní skupiny (cgroups)}
 
-Kontrolní skupiny jsou nástroj Linuxového jádra umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim.
+Kontrolní skupiny jsou nástroj Linuxového jádra umožňující přidělovat skupinám procesů limit na systémové prostředky a prioritizovat jednotlivé skupiny při přístupu k~nim \cite{cgroups}.
 Mezi typy prostředků patří například:
 
 \begin{itemize}
@@ -142,25 +132,22 @@ Mezi typy prostředků patří například:
 Historicky UNIXové systémy dělily procesy na privilegované a neprivilegované.
 Privilegované procesy pak nepodléhaly klasické kontrole oprávnění.
 Nicméně pokud proces potřebuje pouze některá oprávnění, tak není vhodné z bezpečnostního hlediska z něj udělat proces privilegovaný, ale pouze mu přidělit oprávnění, která vyžaduje.
-Toto dělení oprávnění je zavedeno do systému pomocí tzv. \uv{capabilities}.
+Toto dělení oprávnění je zavedeno do systému pomocí tzv. \uv{capabilities} \cite{capabilities}.
 
-Například příkaz \verb|ping|, využívající protokol ICMP, potřebuje přímý přístup k socketu a tím pádem by měl být spouštěn jako privilegovaný.
+Například příkaz \verb|ping|, využívající protokol ICMP, potřebuje přímý přístup k socketu a tím pádem by privilegovaný.
 S využitím \textit{capabilities} je možné tomuto procesu přidělit pouze oprávnění \verb|CAP_NET_RAW|.
-
-% https://github.com/lxc/lxc/blob/master/config/templates/alpine.common.conf.in
 
 \subsubsection{Copy on write (CoW)}
 
-Copy on write\cite{copy_on_write} Technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená.
+Copy on write je technika optimalizace správy dat, při které se při kopírování dat namísto vytvoření jejich kopie pouze označí jako sdílená \cite{cow}.
 Fyzickou kopii dat je třeba vytvořit až v~okamžiku jejich modifikace.
 Za cenu vyšší režie můžeme takto ušetřit mnoho paměti.
 
-V kontextu kontejnerů lze CoW využít k jejich velmi rychlému vytváření (vytvoření kopie obrazu) nebo k vytváření tzv. \uv{snapshotů}
-\cite{fs_cow}
+V kontextu kontejnerů lze CoW využít k jejich velmi rychlému vytváření (vytvoření kopie obrazu) nebo k vytváření tzv. \uv{snapshotů}.
 
 \subsection{BSD jails}
 
-BSD jails je kontejnerová technologie nacházející se v operačních systémech typu BSD (FreeBSD, DragonflyBSD, \ldots).
+BSD jails je kontejnerová technologie nacházející se v operačních systémech typu BSD \cite{jails}.
 Na rozdíl od Linuxových kontejnerů, kde je konečný kontejner poskládán z jednotlivých nástrojů, nám BSD nabízí přímo sadu systémových volání (\verb|jail_*|).
 Kontejner nám zajišťuje izolaci:
 
@@ -172,6 +159,3 @@ Kontejner nám zajišťuje izolaci:
 \end{itemize}
 
 Kontejneru lze také omezovat systémové prostředky (RAM, disk, síť, \ldots).
-
-% https://www.freebsd.org/doc/handbook/jails.html
-

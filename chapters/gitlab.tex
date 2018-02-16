@@ -2,13 +2,13 @@
 
 GitLab CI je systém kontinuální integrace, který je součástí správce Git repozitářů a plánovače projektů GitLab.
 Jeho použití je tedy omezena pouze pro uživatele tohoto systému.
-Projekt je dostupný pod open-source licencí (komunitní edice) a komerční \cite{gitlab_ce}. 
+Projekt je dostupný pod open-source licencí (komunitní edice \cite{gitlab_ce}) a komerční. 
 
 \subsection{Průběh integrace}
 
 % shadow tasky, promenne env a podminene spusteni
 
-Konfigurace integrace je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři Git repozitáře projektu.
+Konfigurace integrace je řešena pomocí souboru \verb|.gitlab-ci.yml|, který je umístěn přímo v~kořenovém adresáři Git repozitáře projektu \cite{gitlab_yml}.
 
 Proces integrace (\textit{pipeline}) je rozdělen na fáze (\textit{stages}), úkoly (\textit{jobs}) a příkazy.
 Fáze se vykonávají sekvenčně za sebou v~zadaném pořadí.
@@ -67,18 +67,14 @@ Jednotlivé úkolu lze podmíněně spouštět pomocí notace \verb|when|.
 
 \subsection{Architektura}
 
-Systém GitLabu je rozdělen do několika podsystémů, z nichž GitLab CI Runner je zodpovědný za vykonání úkolů integrace.
-Integrační proces je pak korigován GitLab systémem.
-\cite{gitlab_architecture}
+Systém GitLabu je rozdělen do několika podsystémů, z nichž GitLab CI Runner je zodpovědný za vykonání úkolů integrace \cite{gitlab_architecture}.
+Integrační proces je pak řízen GitLab koordinátorem.
 
 \subsubsection{GitLab CI runners}
 
-CI systém spolupracuje s~několika běhovými servery (\textit{Runners}), které se starají o~samotné vykonání integrace.
-Běhový server je schopen provozovat paralelně několik běhových prostředí různého typu.
+CI systém spolupracuje s~několika běhovými servery (\textit{Runners}), které se starají o~samotné vykonání integrace \cite{gitlab_runners}.
+Běhový server je schopen provozovat paralelně několik běhových prostředí různého typu \cite{gitlab_executors}.
 Volba běhového serveru je definována na úrovni konfigurace projektu a je omezena globálním nastavením GitLab CI.
-
-% https://docs.gitlab.com/ee/ci/runners/README.html
-% http://docs.gitlab.com/ce/api/ci/builds.html
 
 \paragraph{Shell běhové prostředí}
 
@@ -119,7 +115,7 @@ Virtuální stroje jsou klonovány pro udržení čistého prostředíaaa a snap
 % artefakty vs cache
 % cache by se nemela pouzivat k predani
 
-Pro urychlení integrace se používá cache.
+Pro urychlení integrace se používá cache .
 Například je takto možné sdílet závislosti projektu mezi různými integracemi.
 Ve výchozím stavu je cache sdílena mezi \textit{branch} a \textit{job}.
 Toto chování lze upravit nastavením klíče, který bude identifikovat danou cache.
@@ -155,13 +151,13 @@ Toto API implementuje samotný Amazon, tak i nějaké open-source projekty, kter
 \subsection{Uživatelské rozhraní}
 
 % https://about.gitlab.com/applications
-GitLab umožňuje přístup k informacím systému pomocí řady aplikací, které využívají GitLab HTTP API.
+GitLab umožňuje přístup k informacím systému pomocí řady aplikací, které využívají GitLab HTTP API \cite{gitlab_api}.
 
 \subsubsection{API}
 
 GitLab dovoluje přístup ke zdrojům systému včetně zdrojů spjatých s integrací pomocí HTTP API.
 K autentizaci uživatele se používá tokenů, které jsou součástí HTTP hlaviček nebo HTTP query parametrů.
-K reprezentaci dat API používá formátu JSON (viz. ukázka \ref{code:gitlab-api-json-response}).
+K reprezentaci dat API používá formátu JSON (ukázka kódu \ref{code:gitlab-api-json-response}).
 
 \begin{table}[htbp]
 \centering
@@ -207,10 +203,8 @@ Fáze integrace nemá přidělený svůj vlastní API koncový bod.
 \subsubsection{CLI rozhraní}
 
 GitLab neposkytuje přímý terminálový přístup ke svým zdrojům.
-Místo toho lze využít neoficiálních aplikací, které vytváří cli \uv{obálku} nad již zmíněným HTTP API.
+Místo toho lze využít neoficiálních aplikací \cite{gitlab_cli}, které vytváří cli \uv{obálku} nad již zmíněným HTTP API.
 Autentizace je řešena pomocí GitLab tokenu, který se nastaví jako \verb|GITLAB_API_PRIVATE_TOKEN| proměnná prostředí.
-
-% https://github.com/NARKOZ/gitlab
 
 \begin{listing}[ht]
 \begin{minted}[frame=single,linenos]{shell}
@@ -233,7 +227,7 @@ Součástí webového rozhraní je sledování stavu integrací v reálném čas
 
 \subsection{Možnosti instalace}
 
-GitLab nabízí několik instalačních metod.
+GitLab nabízí několik instalačních metod \cite{gitlab_install}.
 První z nich jsou klasické Linuxové distribuční balíčky (apt, yum, \ldots).
 Další možností je využití připravených obrazů pro kontejnerové technologie (Docker, \ldots).
 GitLab nám také dává možnost provozovat systém na jejich vlastní infrastruktuře.

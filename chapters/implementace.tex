@@ -1,8 +1,8 @@
 \chapter{Implementace}
 
-Všechny části systému (core, web, runner) jsou implementovány jako Python balíčky, které je možné nainstalovat přes balíčkovací manažer pip.
-Implementace systému vychází z návrhu a proto tu budou zmíněny pouze zajímavé implementační detaily.
-Implementace výsledných systému je obsažena na přiloženém médiu.
+Všechny části systému (core, web, runner) jsou distribuovány jako Python balíčky, které je možné nainstalovat přes balíčkovací manažer \textit{pip} \cite{python_pip}.
+Implementace systému vychází z návrhu, a proto tu budou zmíněny pouze zajímavé implementační detaily.
+Implementace výsledného systému je součástí přiloženého média.
 
 \section{Jádro (Piper CI core)}
 
@@ -10,11 +10,11 @@ Implementace výsledných systému je obsažena na přiloženém médiu.
 
 \imagefigurelarge{core.pdf}{Vnitřní architektura systému}
 
-Aby se během programování zamezilo duplikace kódu z důvodu dvou různých přístupů k datům systému, tak byla vytvořila sada tříd (fasády) zodpovědná za veškeré operace nad entitami.
+Aby se během programování zamezilo duplikace kódu z důvodu dvou různých přístupů k datům systému, tak byla vytvořena sada tříd (fasády) zodpovědná za veškeré operace nad entitami.
 Jedna fasáda odpovídá jedné entitě.
-S fasádami pak spolupracuje Flask aplikace, tak i CLI aplikace.
+S fasádami pak spolupracuje jak Flask aplikace, tak i CLI aplikace.
 
-Flask aplikace je dále rozdělena na tzv. \uv{blueprinty} (v MVC návrhovém vzoru prezenter), kde každý reprezentuje jeden HTTP API koncový bod (ukázka kódu \ref{code:piper-core-blueprint}).
+Flask aplikace je dále rozdělena na tzv. \uv{blueprinty}, kde každý reprezentuje jeden HTTP API koncový bod (ukázka kódu \ref{code:piper-core-blueprint}).
 
 \begin{listing}[ht]
 \caption{\label{code:piper-core-blueprint}Implementace koncového bodu HTTP API}
@@ -38,25 +38,25 @@ def builds_view_list(filters, order, limit, offset, user, project_id):
 \end{minted}
 \end{listing}
 
-Celá aplikace je pak zapouzdřena v tzv. \uv{kontejneru}, který se stará o provázání závislostí mezi jednotlivými třídami a jejich konfiguraci uživatelem (například předání parametrů pro připojení k databázi).
+Celá aplikace je pak zapouzdřena v tzv. \uv{kontejneru}, který se stará o provázání závislostí mezi jednotlivými třídami, jejich vytvoření a konfiguraci uživatelem (například předání parametrů pro připojení k databázi).
 
 \subsection{Dokumentace a validace API}
 
-Dokumentace je napsaná v OpenAPI schématu, které staví na JSON Schema.
-Tím pádem vytvořená dokumentace slouží také podklad pro validaci vstupních dat.
+Dokumentace je napsaná v OpenAPI schématu, které vychází z JSON schématu.
+Tím pádem vytvořená dokumentace slouží také jako podklad pro validaci vstupních dat.
 
 \subsection{Napojení na GitHub}
 
 Jedná se o zpracování tzv. \uv{webhooků}, což je HTTP požadavek z GitHub serveru směrem k jádru Piper CI.
-GitHub požadavek vytváří při změně v repozitáře (\textit{git push}).
-Nám stačí pak tento požadavek zpracovat, stáhnout \verb|piper.yml| soubor a vytvořit novou integraci.
+GitHub požadavek vytváří při změně v repozitáři (například \textit{git push}).
+Piper CI pak tento požadavek zpracovat, stáhnout \verb|piper.yml| soubor a vytvořit novou integraci.
 
-Jiné systémů se opírají o stejné principy a tak jejich implementace není problémem.
+Jiné systémy správy repozitářů také využívají \textit{webhooky} a tak rozšíření podpory Piper CI o tyto systémy je možná.
 
 \section{Běhový klient (Piper CI LXD runner)}
 
-Běhový klient je založený na LXD kontejnerech a dovoluje vnitřně spouštět několik souběžných úkolů pomocí knihovny multiprocessing.
-K zajištění úklidu kontejneru za každých okolností je využito Python konstrukce \verb|with| (ukázka kódu \ref{code:piper-runner-with}).
+Běhový klient je založený na LXD kontejnerech a dovoluje vnitřně umožňuje několik souběžných úkolů pomocí knihovny \textit{multiprocessing} \cite{python_multiprocessing}.
+K zajištění úklidu kontejneru za každých okolností je využito Python konstrukce \textit{with} (ukázka kódu \ref{code:piper-runner-with}).
 
 \begin{listing}[ht]
 \caption{\label{code:piper-runner-with}Využití konstrukce with pro smazání kontejneru}
@@ -78,10 +78,7 @@ with Script(config) as script:
 \end{minted}
 \end{listing}
 
-Běhový klient je schopen v rámci jedné své instance spouštět více úkolů paralelně.
-K paralelizaci je použita knihovna multiprocessing.
-
-Během implementace se objevil problém, kdy vytvořený kontejner neměl prvním pár sekund přístup k síti z důvodu přidělování údajů k síti přes DHCP.
+Během implementace se objevil problém, kdy vytvořený kontejner neměl prvních pár sekund přístup k síti z důvodu přidělování údajů přes DHCP.
 Problém je vyřešen pomocí aktivního čekání na přidělení výchozí routy (ukázka kódu \ref{code:piper-runner-job-wait}).
 
 \begin{listing}[ht]
@@ -150,7 +147,7 @@ var fn = function() {
 \end{minted}
 \end{listing}
 
-Výsledné webové rozhraní (ukázka \ref{pic:piper-web.png}) dovoluje zobrazovat veřejné informace systému (role \verb|system.GUEST|) a po zadání přihlašovacího tokenu umožňuje provádět i autorizované operace (restart úkolu, \ldots).
+Výsledné webové rozhraní (ukázka \ref{pic:piper-web.png}) umožňuje zobrazovat veřejné informace systému (role \verb|system.GUEST|) a po zadání přihlašovacího tokenu umožňuje provádět i autorizované operace (restart úkolu, \ldots).
 
 \imagefigurelarge{piper-web.png}{Výsledné webové rozhraní}
 

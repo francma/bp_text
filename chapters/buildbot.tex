@@ -1,11 +1,11 @@
 \section{Buildbot}
 
-Buildbot je framework kontinuální integrace, který nabízí velké množství flexibility v konfiguraci integračního procesu.
+Buildbot je framework kontinuální integrace, který nabízí velké množství flexibility v konfiguraci integračního procesu \cite{buildbot}.
 Oproti službám CI nám framework nabízí pouze sadu nástrojů a doporučení pomocí kterých zrealizujeme konečný integrační proces.
 
 \subsection{Průběh integrace}
 
-Průběh integrace (\textit{build}) je definován souborem \verb|master.cfg|, který je napsaný v programovacím jazyce Python.
+Průběh integrace (\textit{build}) je definován souborem \verb|master.cfg|, který je napsaný v programovacím jazyce Python \cite{buildbot_manual}.
 Oproti GitLab CI a Travis CI není konfigurační soubor umístěn v repozitáři projektu, ale na Buildbot serveru.
 
 V základu Buildbot pracuje s jednotlivými příkazy, které podle konfigurace můžeme skládat do úkolů a do fází.
@@ -86,8 +86,6 @@ c['www'] = {
 }
 \end{minted}
 \end{listing}
-
-% https://docs.buildbot.net/latest/manual/cfg-www.html
 
 \subsection{Možnosti instalace}
 

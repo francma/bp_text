@@ -16,7 +16,7 @@ print(mult(3, 2))
 \end{minted}
 \end{listing}
 
-Opětovným psaním testů je zbytečně ztrácen čas, a proto je lepší tyto testy zachovávat a při vývoji je používat k průběžné kontrole (viz. ukázka kódu \ref{test-test}).
+Opětovným psaním testů je zbytečně ztrácen čas, a proto je lepší tyto testy zachovávat a při vývoji je používat k průběžné kontrole (viz ukázka kódu \ref{test-test}).
 Pokrytím kódu testy dojde k zefektivnění vývoje a možnosti odhalit chyby než budou zavedené do zbytku systému.
 
 \begin{listing}[ht]
@@ -38,7 +38,6 @@ Nejprve se zaměříme na testy integrační a jednotkové.
 Izolace docílíme tak, že závislé komponenty nahradíme komponentami \uv{falešnými} (tzv. \uv{mocks}, \uv{stubs} \cite{fowler_mocks}), které se chovají \uv{deterministicky} dle našeho zadání (ukázka \ref{code:test-stub}).
 Použití \uv{falešných} komponent nám umožňuje snadno simulovat mezní stavy (například chyba připojení k databázi), nebo mohou sloužit jako dočasná náhrada za dosud neimplementované části systému.
 Dalším přínosem je urychlení vykonání testů (není nutné se připojovat k databázi).
-\cite{zemek_integracni_x_jednotkove}
 
 \begin{listing}[ht]
 \caption{\label{code:test-stub}Ukázka použití falešné třídy}

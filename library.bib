@@ -1,4 +1,6 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Úvod
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 @online{fowler_ci,
 	author = {Martin Fowler},
@@ -8,15 +10,9 @@
     year = {2006}
 }
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Testováni SW
-
-@online{zemek_integracni_x_jednotkove,
-	author = {Petr Zemek},
-    title = {{Proč rozlišovat jednotkové a integrační testy}},
-    url = {https://cs-blog.petrzemek.net/2015-04-18-proc-rozlisovat-jednotkove-a-integracni-testy},
-    urldate = {2018-01-22},
-    year = {2015}
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 @online{fowler_mocks,
 	author = {Martin Fowler},
@@ -26,9 +22,31 @@
     year = {2007}
 }
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Verzovací nástroje
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+@inbook{pro_git,
+	author = {Scott Chacon and Ben Straub},
+    title = {{Pro Git}},
+    year = {2014},
+    publisher = {Apress},
+    chapter = {About Version Control},
+}
 
-@online{virt_intro,
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Běhová prostředí
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@online{hypervisor,
+    author = {Bhanu P. Tholeti},
+    title = {{Learn about hypervisors, system virtualization, and how it works in a cloud environment}},
+    url = {https://www.ibm.com/developerworks/cloud/library/cl-hypervisorcompare/},
+    urldate = {2018-01-22},
+    year = {2011}
+}
+
+@online{virtualization_intro,
     author = {Amit Singh},
     title = {{An Introduction to Virtualization}},
     url = {http://www.kernelthread.com/publications/virtualization/},
@@ -36,345 +54,54 @@
     year = {2014}
 }
 
-@online{hypervisor_def,
-    author = {Bhanu P Tholeti},
-    title = {{Learn about hypervisors, system virtualization, and how it works in a cloud environment}},
-    url = {https://www.ibm.com/developerworks/cloud/library/cl-hypervisorcompare/},
-    urldate = {2018-01-22},
-    year = {2011}
-}
-
-@online{power_vm,
-    author = {IBM},
-    title = {{IBM PowerVM}},
-    url = {https://www-03.ibm.com/systems/power/software/virtualization/},
-    urldate = {2018-01-22},
-    year = {2017}
-}
-
-@online{vmware,
-    author = {VMware},
-    title = {{VMware}},
-    url = {https://www.vmware.com/},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-@online{esx_server,
-    author = {VMware},
-    title = {{ESXi}},
-    url = {https://www.vmware.com/products/esxi-and-esx.html},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{xen,
-    author = {XEN},
-    title = {{Xen Project}},
-    url = {https://xenproject.org/},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{kvm,
-    author = {KVM},
-    title = {{KVM}},
-    url = {https://www.linux-kvm.org/},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{z_vm,
-    author = {IBM},
-    title = {{zVM}},
-    url = {http://www.vm.ibm.com/},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{vt_x,
-    author = {Gabriel Torres},
-    title = {{Everything You Need to Know About the Intel Virtualization Technology}},
-    url = {http://www.hardwaresecrets.com/everything-you-need-to-know-about-the-intel-virtualization-technology/},
-    urldate = {2018-01-22},
-    year = {2012}
-}
-
-@online{amd_v,
-    author = {AMD},
-    title = {{Virtualization Solutions}},
-    url = {https://www.amd.com/en-us/solutions/servers/virtualization},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{kernel_space,
-    author = {Bellevue Linux},
-    title = {{Virtualization Solutions}},
+@online{memory_spaces,
+    title = {{Kernel Space Definition}},
     url = {http://www.linfo.org/kernel_space.html},
     urldate = {2018-01-22},
-    year = {2005}
-}
-
-@online{paravirtualization_leave,
-    author = {Guest OS Team},
-    title = {{Support for guest OS paravirtualization using VMware VMI to be retired from new products in 2010-2011}},
-    url = {http://blogs.vmware.com/guestosguide/2009/09/vmi-retirement.html},
-    urldate = {2018-01-22},
-    year = {2009}
-}
-
-@book{copy_on_write,
-	title = {{Understanding the Linux Kernel}},
-	author = {Daniel P. Bovet, Marco Cesari},
-	year = {2003},
-	publisher = {O'Reilly},
-	pages = {295-297}
-}
-
-@book{fs_cow,
-	title = {{Copy On Write Based File Systems Performance Analysis And Implementation}},
-	author = {Sakis Kasampalis},
-	year = {2010},
-	publisher = {Kongens Lyngby},
-	pages = {23-42}
-}
-
-@manual{fork_manual,
-	title = {{fork(2) - Linux manual page}},
-	year = {2001},
+    year = {2005},
 }
 
 @manual{namespaces,
-	title = {{NAMESPACES(7) - Linux manual page}},
+	title = {{namespaces(7) - Linux manual page}},
 	year = {2017},
 }
 
-@manual{pid_namespaces,
-	title = {{PID\_NAMESPACES(7) - Linux manual page}},
+@manual{capabilities,
+	title = {{capabilities(7) - Linux manual page}},
 	year = {2017},
 }
 
-@manual{mnt_namespaces,
-	title = {{MOUNT\_NAMESPACES(7) - Linux manual page}},
+@manual{cgroups,
+	title = {{cgroups(7) - Linux manual page}},
 	year = {2017},
 }
 
-@manual{user_namespaces,
-	title = {{USER\_NAMESPACES(7) - Linux manual page}},
+@inbook{cow,
+	title = {{Understanding the Linux Kernel}},
+	author = {Daniel P. Bovet and Marco Cesari},
+	year = {2005},
+	publisher = {O'Reilly},
+	pages = {11},
+	isbn = {0-596-00565-2}
+}
+
+@manual{jails,
+	title = {{Jails}},
 	year = {2017},
+	url = {https://www.freebsd.org/doc/handbook/jails.html}
 }
 
-@online{pied_piper,
-    author = {Richard Hendricks},
-    title = {{Pied Piper}},
-    url = {http://www.piedpiper.com/},
+@online{virtio,
+    title = {{Virtio}},
+    url = {https://www.linux-kvm.org/index.php?title=Virtio&oldid=173787},
     urldate = {2018-01-22},
-    year = {2017}
+    year = {2016},
+    publisher = {KVM},
 }
 
-@online{rest,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_klient_server,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_2},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_bezstavovy,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_3},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_mezipamet,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_4},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_uniformni,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_5},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_architektura,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_6},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_architektura,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_6},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_zdroje,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_2},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{rest_http,
-    author = {Roy Thomas Fielding},
-    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
-    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/evaluation.htm},
-    urldate = {2018-01-22},
-    year = {2000}
-}
-
-@online{graphql,
-    author = {Facebook Inc.},
-    title = {{GraphQL}},
-    url = {http://graphql.org/},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{rpc,
-    author = {Andrew D. Birrell, Bruce Jay Nelson},
-    title = {{Implementing Remote Procedure Calls}},
-    url = {https://www.cs.cmu.edu/~dga/15-712/F07/papers/birrell842.pdf},
-    urldate = {2018-01-22},
-    year = {1984}
-}
-
-@online{soap,
-    author = {W3C},
-    title = {{SOAP Version 1.2 Part 0: Primer (Second Edition)}},
-    url = {https://www.w3.org/TR/soap12-part0/},
-    urldate = {2018-01-22},
-    year = {2007}
-}
-
-@online{wsdl,
-    author = {W3C},
-    title = {{Web Services Description Language (WSDL) Version 2.0 Part 1: Core Language}},
-    url = {https://www.w3.org/TR/wsdl20/},
-    urldate = {2018-01-22},
-    year = {2007}
-}
-
-@online{php_wsdl,
-    author = {The PHP Group},
-    title = {{SoapClient::\_\_construct}},
-    url = {https://secure.php.net/manual/en/soapclient.construct.php},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{fetch_api,
-    author = {Mozilla},
-    title = {{Fetch API}},
-    url = {https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API},
-    urldate = {2018-01-22},
-    year = {2018}
-}
-
-@online{websocket,
-    author = {I. Fette, A. Melnikov},
-    title = {{The WebSocket Protocol}},
-    url = {https://tools.ietf.org/html/rfc6455},
-    urldate = {2018-01-22},
-    year = {2011},
-    publisher = {Internet Engineering Task Force (IETF)}
-}
-
-@online{sse,
-    author = {W3C},
-    title = {{Server-Sent Events}},
-    url = {https://www.w3.org/TR/eventsource/},
-    urldate = {2018-01-22},
-    year = {2015},
-    publisher = {Internet Engineering Task Force (IETF)}
-}
-
-@online{sse_event_source,
-    author = {Mozilla},
-    title = {{EventSource}},
-    url = {https://developer.mozilla.org/en-US/docs/Web/API/EventSource},
-    urldate = {2018-01-22},
-    year = {2017},
-    publisher = {Internet Engineering Task Force (IETF)}
-}
-
-@online{virtualbox_serial,
-    author = {Oracle},
-    title = {{Serial ports}},
-    url = {https://www.virtualbox.org/manual/ch03.html#serialports},
-    urldate = {2018-01-22},
-}
-
-@online{ssh_rfc,
-    author = {T. Ylonen, C. Lonvick, Ed.},
-    title = {{The Secure Shell (SSH) Protocol Architecture}},
-    url = {https://tools.ietf.org/html/rfc4251},
-    urldate = {2018-01-22},
-    year = {2006},
-    publisher = {Internet Engineering Task Force (IETF)},
-}
-
-@online{ssh_auth_rfc,
-    author = {T. Ylonen, C. Lonvick, Ed.},
-    title = {{The Secure Shell (SSH) Protocol Architecture}},
-    url = {https://tools.ietf.org/html/rfc4252},
-    urldate = {2018-01-22},
-    year = {2006},
-    publisher = {Internet Engineering Task Force (IETF)},
-}
-
-@online{docker_sdk,
-	author = {aaa},
-	title = {{Develop with Docker Engine SDKs and API}},
-	url = {https://docs.docker.com/develop/sdk/},
-	urldate = {2018-01-22},
-    year = {2018},
-}
-
-@online{lxd,
-	author = {Canonical Ltd.},
-	title = {{What's LXD?}},
-	url = {https://linuxcontainers.org/lxd/},
-	urldate = {2018-01-22},
-    year = {2018},
-}
-
-@online{lxd_rest,
-	author = {Canonical Ltd.},
-	title = {{The LXD API}},
-	url = {https://linuxcontainers.org/lxd/rest-api/},
-	urldate = {2018-01-22},
-    year = {2018},
-}
-
-@online{redis,
-	author = {Redis Labs},
-	title = {{Redis}},
-	url = {https://redis.io/},
-	urldate = {2018-01-22},
-    year = {2018},
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GitLab
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 @online{gitlab_ce,
 	title = {{GitLab Community Edition}},
@@ -390,14 +117,238 @@
     year = {2018},
 }
 
-@online{gitlab_api,
+@manual{gitlab_yml,
+	title = {{Configuration of your jobs with .gitlab-ci.yml}},
+	url = {https://docs.gitlab.com/ce/ci/yaml/README.html},
+	urldate = {2018-01-22},
+    year = {2018},
+}
+
+@manual{gitlab_api,
 	title = {{GitLab API}},
 	url = {https://docs.gitlab.com/ce/api/},
 	urldate = {2018-01-22},
     year = {2018},
 }
 
-https://docs.python.org/3.7/library/cmd.html
+@manual{gitlab_runners,
+	title = {{Configuring GitLab Runners}},
+	url = {https://docs.gitlab.com/ee/ci/runners/README.html},
+	urldate = {2018-01-22},
+    year = {2018},
+}
+
+@manual{gitlab_executors,
+	title = {{Configuring GitLab Runners}},
+	url = {https://docs.gitlab.com/runner/executors/README.html},
+	urldate = {2018-01-22},
+    year = {2018},
+}
+
+@online{gitlab_install,
+	title = {{GitLab Installation}},
+	url = {https://about.gitlab.com/installation/},
+	urldate = {2018-01-22},
+}
+
+@misc{gitlab_cli,
+	author = {Nihad Abbasov},
+	title = {Ruby wrapper and CLI for GitLab REST API},
+	url = {https://github.com/NARKOZ/gitlab},
+	commit = {48f289673d5e04cfd5735f8072255f6afeedb784}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Travis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Buildbot
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@online{buildbot,
+	title = {{Buildbot}},
+	url = {https://buildbot.net/},
+	urldate = {2018-01-22},
+}
+
+@manual{buildbot_manual,
+	title = {{Buildbot Manual}},
+	url = {https://docs.buildbot.net/latest/manual/index.html},
+	urldate = {2018-01-22},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Návrh
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@manual{python_stdlib,
+	title = {{The Python Standard Library}},
+	url = {https://docs.python.org/3/library/index.html},
+	urldate = {2018-01-22},
+}
+
+@report{python_pep484,
+	title = {{Type Hints -- PEP 484}},
+	date = {2015},
+	author = {Guido van Rossum and Jukka Lehtosalo and Łukasz Langa}
+}
+
+@misc{simple_eval,
+	author = {Daniel "danthedeckie"},
+	title = {Ruby wrapper and CLI for GitLab REST API},
+	url = {https://github.com/danthedeckie/simpleeval},
+	commit = {48f289673d5e04cfd5735f8072255f6afeedb784}
+}
+
+@manual{openapi,
+	title = {{OpenAPI Specification Version 3.0.0}},
+	url = {https://swagger.io/specification/},
+	urldate = {2018-01-22},
+}
+
+@online{rest,
+    author = {Roy Thomas Fielding},
+    title = {{Architectural Styles and the Design of Network-based Software Architectures}},
+    url = {https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm},
+    urldate = {2018-01-22},
+    year = {2000}
+}
+
+@manual{redis,
+	title = {{Data types}},
+	url = {https://redis.io/topics/data-types#lists},
+	urldate = {2018-01-22},
+}
+
+@manual{peewee,
+	title = {{peewee}},
+	url = {http://docs.peewee-orm.com/en/3.0a/},
+	urldate = {2018-01-22},
+}
+
+@manual{flask,
+	title = {{Welcome to Flask}},
+	url = {http://flask.pocoo.org/docs/0.12/},
+	urldate = {2018-01-22},
+}
+
+@report{ssh_rfc,
+    author = {T. Ylonen and C. Lonvick, Ed.},
+    title = {{The Secure Shell (SSH) Protocol Architecture}},
+    url = {https://tools.ietf.org/html/rfc4251},
+    urldate = {2018-01-22},
+    year = {2006},
+    publisher = {Internet Engineering Task Force (IETF)},
+}
+
+@report{ssh_auth_rfc,
+    author = {T. Ylonen and C. Lonvick, Ed.},
+    title = {{The Secure Shell (SSH) Protocol Architecture}},
+    url = {https://tools.ietf.org/html/rfc4252},
+    urldate = {2018-01-22},
+    year = {2006},
+    publisher = {Internet Engineering Task Force (IETF)},
+}
+
+@manual{python_cmd,
+	title = {{cmd -- Support for line-oriented command interpreters}},
+	url = {https://docs.python.org/3.6/library/cmd.html},
+	urldate = {2018-01-22},
+}
+
+@report{http2_rfc,
+    author = {M. Belshe and  R. Peon},
+    title = {{Hypertext Transfer Protocol Version 2 (HTTP/2)}},
+    url = {https://tools.ietf.org/html/rfc7540},
+    urldate = {2018-01-22},
+    year = {2015},
+    publisher = {Internet Engineering Task Force (IETF)},
+}
+
+@manual{virtualbox_serial,
+    author = {Oracle},
+    title = {{Serial ports}},
+    url = {https://www.virtualbox.org/manual/ch03.html#serialports},
+    urldate = {2018-01-22},
+}
+
+@manual{lxd_rest,
+	title = {{The LXD API}},
+	url = {https://github.com/lxc/lxd/blob/master/doc/rest-api.md},
+	urldate = {2018-01-22},
+}
+
+@report{websocket,
+    author = {I. Fette and A. Melnikov},
+    title = {{The WebSocket Protocol}},
+    url = {https://tools.ietf.org/html/rfc6455},
+    urldate = {2018-01-22},
+    year = {2011},
+    publisher = {Internet Engineering Task Force (IETF)}
+}
+
+@manual{fetch_api,
+    title = {{Fetch API}},
+    url = {https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API},
+    urldate = {2018-01-22},
+}
+
+@misc{ansi_up,
+	author = {Dru Nelson},
+	title = {A javascript library that converts text with ANSI terminal codes into colorful HTML},
+	url = {https://github.com/drudru/ansi_up},
+	commit = {11e8d2d19acf1de39201fd8f3de73b380507d84f}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Implementace
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@manual{python_pip,
+    title = {{pip}},
+    url = {https://pip.pypa.io/en/stable/},
+    urldate = {2018-01-22},
+}
+
+@manual{python_multiprocessing,
+    title = {{multiprocessing -- Process-based parallelism}},
+    url = {https://docs.python.org/3.6/library/multiprocessing.html},
+    urldate = {2018-01-22},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Testování
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@manual{pytest,
+    title = {{Full pytest documentation}},
+    url = {https://docs.pytest.org/en/latest/contents.html},
+    urldate = {2018-01-22},
+}
+
+@manual{python_tox,
+    title = {{Welcome to the tox automation project}},
+    url = {https://tox.readthedocs.io/en/latest/},
+    urldate = {2018-01-22},
+}
+
+@manual{python_mypy,
+    title = {{Welcome to Mypy documentation!}},
+    url = {https://mypy.readthedocs.io/en/stable/},
+    urldate = {2018-01-22},
+}
+
+@manual{docker_sdk,
+	title = {{Develop with Docker Engine SDKs and API}},
+	url = {https://docs.docker.com/develop/sdk/},
+	urldate = {2018-01-22},
+}
+
+
 
 `
 

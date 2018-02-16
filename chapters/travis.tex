@@ -25,7 +25,7 @@ stages:
 \end{minted}
 \end{listing}
 
-Úkol náleží právě do jedné fáze a jeho přiřazení se provede (viz. ukázka \ref{code:travis-stages}).
+Úkol náleží právě do jedné fáze a jeho přiřazení se provede (viz ukázka \ref{code:travis-stages}).
 Fáze jsou v Travis CI novým konceptem, který je stále ve fázi veřejného beta testování.
 % https://blog.travis-ci.com/2017-05-11-introducing-build-stages
 
@@ -43,7 +43,7 @@ jobs:
 \caption{Definice úkolů s fázemi v .travis.yml}
 \end{listing}
 
-Další možností definice úkolů je přes tzv. build matrix (viz. ukázka kódu \ref{code:travis-matrix}).
+Další možností definice úkolů je přes tzv. build matrix (viz ukázka kódu \ref{code:travis-matrix}).
 Výsledkem této konfigurace bude vytvoření 6 úkolů podle kartézského součinu zadaných parametrů.
 Oba zmíněné přístupy konfigurace lze kombinovat.
 
@@ -128,7 +128,7 @@ OS X & Ano & Virtuální stroj & \verb|os: osx|  \\ \hline
 \end{table}
 
 Běhové prostředí je pak přizpůsobeno pro konkrétní projekt podle programovacího jazyka konfiguračním klíčem \verb|language|.
-Upřesnění verze se pak docílí definicí build matrixu (viz. ukázka \ref{code:travis-matrix}).
+Upřesnění verze se pak docílí definicí build matrixu (viz ukázka \ref{code:travis-matrix}).
 Problém nastává pokud Travis nepodporuje námi vyžadovaný jazyk.
 Příkladem je \TeX{}live balíček pouze ve verzi 2013 proti aktuální 2017.
 
