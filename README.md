@@ -7,6 +7,7 @@ Spusťte `make run` k sestavení nebo si stáhněte poslední verzi z [releases]
 
 ## Požadavky
 
+* make
 * python
 * texlive-core
 * texlive-latexextra
