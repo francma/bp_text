@@ -2,25 +2,20 @@ dist: trusty
 sudo: required
 language: generic
 
+before_script:
+  - sudo add-apt-repository --yes ppa:ubuntu-lxc/stable
+  - sudo apt-get -qq update
+  - sudo apt-get install --yes lxc
+  - sudo lxc-create -n arch -t download -- --dist archlinux --release current --arch amd64
+  - echo "lxc.mount.entry = $PWD travis none bind,create=dir 0 0" | sudo tee --append /var/lib/lxc/arch/config
+  - sudo lxc-start -dn arch
+  - sudo lxc-wait -n arch -s RUNNING
+
 script:
-  - "curl -s https://raw.githubusercontent.com/mikkeloscar/arch-travis/master/arch-travis.sh | bash"
-
-arch:
-  packages:
-    - python
-    - texlive-core
-    - texlive-latexextra
-    - texlive-genericextra
-    - biber
-    - ttf-linux-libertine
-    - texlive-bibtexextra
-    - ttf-dejavu
-    - pygmentize
-    - jre9-openjdk
-
-  script:
-    - for file in /etc/profile.d/*.sh; do source "${file}"; done && make
-    - mv main.pdf $(date +"BT_Franc_Martin_%Y-%m-%d_%H:%M_$TRAVIS_COMMIT.pdf")
+  - sudo lxc-attach -n arch -- pacman -Syu --noconfirm
+  - sudo lxc-attach -n arch -- pacman -S --noconfirm python texlive-core texlive-latexextra texlive-genericextra biber ttf-linux-libertine texlive-bibtexextra ttf-dejavu pygmentize jre9-openjdk make
+  - sudo lxc-attach -n arch -- bash -c 'for file in /etc/profile.d/*.sh; do source "${file}"; done && cd /travis && make'
+  - sudo lxc-attach -n arch -- bash -c 'cd /travis && mv main.pdf $(date +"BT_Franc_Martin_%Y-%m-%d_%H:%M_$TRAVIS_COMMIT.pdf")'
 
 before_deploy:
   - export RELEASE_FILE=$(ls BT_Franc_Martin_*.pdf)
